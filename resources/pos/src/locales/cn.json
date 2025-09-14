@@ -56,6 +56,7 @@
     "globally.input.name.label": "名称",
     "globally.input.hpp.label": "HPP",
     "globally.total.hpp.label": "HPP 总计",
+    "globally.total.assets.label": "总资产",
     "globally.react-table.column.created-date.label": "创建时间",
     "globally.input.name.placeholder.label": "输入名称",
     "globally.input.email.label": "电子邮件",

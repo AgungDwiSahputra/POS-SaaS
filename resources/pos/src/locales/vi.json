@@ -56,6 +56,7 @@
     "globally.input.name.label": "Tên",
     "globally.input.hpp.label": "HPP",
     "globally.total.hpp.label": "Tổng HPP",
+    "globally.total.assets.label": "Tổng tài sản",
     "globally.react-table.column.created-date.label": "Được tạo ra",
     "globally.input.name.placeholder.label": "Nhập tên",
     "globally.input.email.label": "E-mail",

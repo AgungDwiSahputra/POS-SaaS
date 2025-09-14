@@ -81,6 +81,9 @@ const StockReport = (props) => {
             total_hpp:
                 (stockReport.attributes.product.hpp || 0) *
                 (stockReport.attributes.quantity || 0),
+            total_assets:
+                (stockReport.attributes.product.hpp || 0) *
+                (stockReport.attributes.quantity || 0),
             id: stockReport.attributes.product_id,
             currency: currencySymbol,
         }));
@@ -174,6 +177,17 @@ const StockReport = (props) => {
                     row.total_hpp
                 ),
             sortField: "total_hpp",
+            sortable: false,
+        },
+        {
+            name: getFormattedMessage("globally.total.assets.label", "Total Assets"),
+            selector: (row) =>
+                currencySymbolHandling(
+                    allConfigData,
+                    row.currency,
+                    row.total_assets
+                ),
+            sortField: "total_assets",
             sortable: false,
         },
         {

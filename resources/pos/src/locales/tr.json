@@ -56,6 +56,7 @@
     "globally.input.name.label": "İsim",
     "globally.input.hpp.label": "HPP",
     "globally.total.hpp.label": "Toplam HPP",
+    "globally.total.assets.label": "Toplam Varlıklar",
     "globally.input.name.placeholder.label": "İsim giriniz",
     "globally.react-table.column.created-date.label": "Oluşturma Tarihi",
     "globally.input.email.label": "E-posta",

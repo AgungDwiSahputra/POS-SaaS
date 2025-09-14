@@ -56,6 +56,7 @@
     "globally.input.name.label": "Name",
     "globally.input.hpp.label": "HPP",
     "globally.total.hpp.label": "Gesamt-HPP",
+    "globally.total.assets.label": "Gesamtvermögen",
     "globally.input.name.placeholder.label": "Name eingeben",
     "globally.react-table.column.created-date.label": "Erstellt am",
     "globally.input.email.label": "Email",

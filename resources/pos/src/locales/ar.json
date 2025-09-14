@@ -57,6 +57,7 @@
     "globally.input.name.label": "اسم",
     "globally.input.hpp.label": "HPP",
     "globally.total.hpp.label": "إجمالي HPP",
+    "globally.total.assets.label": "إجمالي الأصول",
     "globally.input.name.placeholder.label": "أدخل الاسم",
     "globally.react-table.column.created-date.label": "تم إنشاؤها على",
     "globally.input.email.label": "بريد الالكتروني",
