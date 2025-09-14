@@ -18,6 +18,7 @@ const PosSetting = () => {
         enable_pos_click_audio: false,
         click_audio: "",
         show_pos_stock_product: false,
+        transfer_line_revalue_hpp: false,
     });
 
     const [errors, setErrors] = useState({
@@ -37,6 +38,7 @@ const PosSetting = () => {
                 enable_pos_click_audio: posSettings.attributes.enable_pos_click_audio === 'true',
                 click_audio: posSettings.attributes.click_audio || "",
                 show_pos_stock_product: posSettings.attributes.show_pos_stock_product === 'true',
+                transfer_line_revalue_hpp: posSettings.attributes.transfer_line_revalue_hpp === 'true',
             });
         }
     }, [posSettings]);
@@ -95,6 +97,7 @@ const PosSetting = () => {
         }
         formData.append("enable_pos_click_audio", data.enable_pos_click_audio);
         formData.append("show_pos_stock_product", data.show_pos_stock_product);
+        formData.append("transfer_line_revalue_hpp", data.transfer_line_revalue_hpp);
         return formData;
     };
 
@@ -199,7 +202,7 @@ const PosSetting = () => {
                             <span className="text-danger d-block fw-400 fs-small">
                                 {errors["click_audio"] ? errors["click_audio"] : null}
                             </span>
-                        </div>
+                </div>
 
                         <div className="col-md-6 col-lg-6 mb-4">
                             <div className="d-flex align-items-center mt-2">
@@ -216,6 +219,24 @@ const PosSetting = () => {
                                     />
                                 </label>
                             </div>
+                        </div>
+
+                        <div className="col-md-6 col-lg-6 mb-4">
+                            <div className="d-flex align-items-center mt-2">
+                                <label className="form-check form-switch form-switch-sm">
+                                    <label className="form-label">
+                                        {getFormattedMessage("pos.transfer.revalue.hpp.toggle")}
+                                    </label>
+                                    <input
+                                        type="checkbox"
+                                        checked={posSettingValue.transfer_line_revalue_hpp}
+                                        name="transfer_line_revalue_hpp"
+                                        onChange={(event) => handleInputChange(event)}
+                                        className="me-3 form-check-input cursor-pointer"
+                                    />
+                                </label>
+                            </div>
+                            <small className="text-muted">{getFormattedMessage("pos.transfer.revalue.hpp.help")}</small>
                         </div>
                     </div>
 

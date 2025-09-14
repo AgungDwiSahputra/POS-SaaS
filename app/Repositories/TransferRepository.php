@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\ManageStock;
+use App\Models\Product;
 use App\Models\Transfer;
 use App\Models\TransferItem;
 use Exception;
@@ -78,6 +79,59 @@ class TransferRepository extends BaseRepository
             $transfer = Transfer::create($TransferInputArray);
             $transfer = $this->storeTransferItems($transfer, $input);
 
+            // HPP: alokasikan biaya shipping (jika ada) ke HPP global produk secara proporsional qty transfer
+            $shipping = (float) ($input['shipping'] ?? 0);
+            if ($transfer->status == Transfer::COMPLETED && $shipping > 0) {
+                $items = $transfer->transferItems;
+                $totalQtyMoved = max(0.0, (float) $items->sum('quantity'));
+                if ($totalQtyMoved > 0) {
+                    // Hitung per produk
+                    $perProductQty = [];
+                    foreach ($items as $it) {
+                        $perProductQty[$it->product_id] = ($perProductQty[$it->product_id] ?? 0) + (float) $it->quantity;
+                    }
+                    foreach ($perProductQty as $pid => $qtyMoved) {
+                        /** @var Product $prod */
+                        $prod = Product::find($pid);
+                        if (! $prod) { continue; }
+                        $oldQtyTotal = (float) ManageStock::where('product_id', $pid)->sum('quantity');
+                        if ($oldQtyTotal <= 0) { continue; }
+                        $oldHpp = (float) ($prod->hpp ?? 0);
+                        $alloc = $shipping * ($qtyMoved / $totalQtyMoved);
+                        $newHpp = (($oldQtyTotal * $oldHpp) + $alloc) / $oldQtyTotal;
+                        $prod->update(['hpp' => (int) round($newHpp)]);
+                    }
+                }
+            }
+
+            // HPP: Revaluasi dengan harga transfer line bila toggle aktif
+            if ($transfer->status == Transfer::COMPLETED && (int) (getSettingValue('transfer_line_revalue_hpp') ?? 0) === 1) {
+                $items = $transfer->transferItems;
+                if ($items && $items->count() > 0) {
+                    // Kelompokkan qty dan biaya line per produk
+                    $qtyByProduct = [];
+                    $amountByProduct = [];
+                    foreach ($items as $it) {
+                        $pid = $it->product_id;
+                        $qtyByProduct[$pid] = ($qtyByProduct[$pid] ?? 0) + (float) $it->quantity;
+                        $amountByProduct[$pid] = ($amountByProduct[$pid] ?? 0) + (float) $it->sub_total;
+                    }
+                    foreach ($qtyByProduct as $pid => $movedQty) {
+                        /** @var Product $prod */
+                        $prod = Product::find($pid);
+                        if (! $prod) { continue; }
+                        $totalQty = (float) ManageStock::where('product_id', $pid)->sum('quantity');
+                        if ($totalQty <= 0) { continue; }
+                        $oldHpp = (float) ($prod->hpp ?? 0);
+                        $lineAmount = (float) ($amountByProduct[$pid] ?? 0);
+                        // Delta biaya terhadap HPP lama atas qty yang dipindah
+                        $delta = $lineAmount - ($oldHpp * $movedQty);
+                        $newHpp = (($totalQty * $oldHpp) + $delta) / $totalQty;
+                        $prod->update(['hpp' => (int) round($newHpp)]);
+                    }
+                }
+            }
+
             DB::commit();
 
             return $transfer;
@@ -99,9 +153,12 @@ class TransferRepository extends BaseRepository
                 if ($transferItem['quantity'] > $product->quantity) {
                     throw new UnprocessableEntityHttpException('Quantity should not be greater than available quantity.');
                 } else {
-                    manageStock($input['to_warehouse_id'], $transferItem['product_id'], $transferItem['quantity']);
-                    $exceptQuantity = $product->quantity - $transferItem['quantity'];
-                    $product->update(['quantity' => $exceptQuantity]);
+                    if ((int) ($transfer->status ?? 0) == Transfer::COMPLETED) {
+                        // Tambah ke gudang tujuan
+                        manageStock($input['to_warehouse_id'], $transferItem['product_id'], $transferItem['quantity']);
+                        // Kurangi dari gudang asal (gunakan helper untuk konsistensi & guard terhadap negatif)
+                        manageStock($input['from_warehouse_id'], $transferItem['product_id'], -$transferItem['quantity']);
+                    }
                 }
             } else {
                 throw new UnprocessableEntityHttpException('Product stock is not available in selected warehouse.');
@@ -149,7 +206,11 @@ class TransferRepository extends BaseRepository
 
         //discount calculation
         $perItemDiscountAmount = 0;
-        $transferItem['net_unit_price'] = $transferItem['product_price'];
+        // Gunakan harga dasar dari input yang diedit user jika tersedia
+        $basePrice = $transferItem['product_price']
+            ?? ($transferItem['net_unit_cost'] ?? ($transferItem['product_cost'] ?? 0));
+        $transferItem['product_price'] = $basePrice; // pastikan terset untuk penyimpanan
+        $transferItem['net_unit_price'] = $basePrice;
         if ($transferItem['discount_type'] == Transfer::PERCENTAGE) {
             if ($transferItem['discount_value'] <= 100 && $transferItem['discount_value'] >= 0) {
                 $transferItem['discount_amount'] = ($transferItem['discount_value'] * $transferItem['product_price'] / 100) * $transferItem['quantity'];
@@ -196,6 +257,20 @@ class TransferRepository extends BaseRepository
             DB::beginTransaction();
 
             $transfer = Transfer::findOrFail($id);
+            $oldShipping = (float) ($transfer->shipping ?? 0);
+            $oldStatus = (int) ($transfer->status ?? 0);
+
+            // Siapkan agregat lama utk revaluasi line price bila toggle aktif
+            $oldQtyByProduct = [];
+            $oldAmountByProduct = [];
+            if ((int) (getSettingValue('transfer_line_revalue_hpp') ?? 0) === 1) {
+                $oldItems = TransferItem::whereTransferId($id)->get();
+                foreach ($oldItems as $it) {
+                    $pid = $it->product_id;
+                    $oldQtyByProduct[$pid] = ($oldQtyByProduct[$pid] ?? 0) + (float) $it->quantity;
+                    $oldAmountByProduct[$pid] = ($oldAmountByProduct[$pid] ?? 0) + (float) $it->sub_total;
+                }
+            }
 
             $transferItemOldIds = TransferItem::whereTransferId($id)->pluck('id')->toArray();
             $transferItemNewIds = [];
@@ -210,7 +285,17 @@ class TransferRepository extends BaseRepository
                 ]);
 
                 if (! is_null($transferItem['transfer_item_id'])) {
-                    $this->updateItem($transferItemArray, $transfer->from_warehouse_id, $transfer->to_warehouse_id);
+                    // Update stok hanya jika status lama Completed
+                    if ($oldStatus == Transfer::COMPLETED) {
+                        $this->updateItem($transferItemArray, $transfer->from_warehouse_id, $transfer->to_warehouse_id);
+                    } else {
+                        // Hitung ulang nilai item tanpa menyentuh stok
+                        $this->calculationTransferItems($transferItemArray);
+                        // net_unit_cost bukan kolom tabel; pastikan tidak ikut ter-update
+                        TransferItem::whereId($transferItemArray['transfer_item_id'])->update(
+                            Arr::except($transferItemArray, ['transfer_item_id', 'net_unit_cost'])
+                        );
+                    }
                 }
 
                 if (is_null($transferItem['transfer_item_id'])) {
@@ -220,10 +305,12 @@ class TransferRepository extends BaseRepository
                         if ($transferItem['quantity'] > $product->quantity) {
                             throw new UnprocessableEntityHttpException('Quantity should not be greater than available quantity.');
                         } else {
-                            manageStock($transfer->to_warehouse_id, $transferItem['product_id'],
-                                $transferItem['quantity']);
-                            $exceptQuantity = $product->quantity - $transferItem['quantity'];
-                            $product->update(['quantity' => $exceptQuantity]);
+                            if ($oldStatus == Transfer::COMPLETED) {
+                                // Tambah ke gudang tujuan
+                                manageStock($transfer->to_warehouse_id, $transferItem['product_id'], $transferItem['quantity']);
+                                // Kurangi dari gudang asal
+                                manageStock($transfer->from_warehouse_id, $transferItem['product_id'], -$transferItem['quantity']);
+                            }
                         }
                     } else {
                         throw new UnprocessableEntityHttpException('Product stock is not available in selected warehouse.');
@@ -246,22 +333,112 @@ class TransferRepository extends BaseRepository
 
                     $toquantity = 0;
 
-                    if ($toManageStock) {
+                    if ($oldStatus == Transfer::COMPLETED && $toManageStock) {
                         $toquantity = $toquantity - $oldTransferItem->quantity;
                         manageStock($toManageStock->warehouse_id, $oldTransferItem->product_id, $toquantity);
                     }
 
                     $fromQuantity = 0;
 
-                    $fromQuantity = $fromQuantity + $oldTransferItem->quantity;
-
-                    manageStock($oldTransfer->from_warehouse_id, $oldTransferItem->product_id, $fromQuantity);
+                    if ($oldStatus == Transfer::COMPLETED) {
+                        $fromQuantity = $fromQuantity + $oldTransferItem->quantity;
+                        manageStock($oldTransfer->from_warehouse_id, $oldTransferItem->product_id, $fromQuantity);
+                    }
                 }
 
                 TransferItem::whereIn('id', array_values($removeItemIds))->delete();
             }
 
             $transfer = $this->updateTransferCalculation($input, $id);
+
+            // HPP & Stok: penyesuaian pasca status berubah
+            $newStatus = (int) ($transfer->status ?? 0);
+
+            // Jika berubah dari non-completed -> completed: apply pergerakan penuh
+            if ($oldStatus != Transfer::COMPLETED && $newStatus == Transfer::COMPLETED) {
+                foreach ($transfer->transferItems as $it) {
+                    manageStock($transfer->to_warehouse_id, $it->product_id, $it->quantity);
+                    manageStock($transfer->from_warehouse_id, $it->product_id, -$it->quantity);
+                }
+            }
+            // Jika berubah dari completed -> non-completed: revert pergerakan penuh
+            if ($oldStatus == Transfer::COMPLETED && $newStatus != Transfer::COMPLETED) {
+                foreach ($transfer->transferItems as $it) {
+                    manageStock($transfer->to_warehouse_id, $it->product_id, -$it->quantity);
+                    manageStock($transfer->from_warehouse_id, $it->product_id, $it->quantity);
+                }
+            }
+
+            // HPP: jika shipping berubah, sesuaikan; juga tangani perubahan status
+            $newShipping = (float) ($input['shipping'] ?? 0);
+            $deltaShipping = 0.0;
+            if ($oldStatus == Transfer::COMPLETED && $newStatus == Transfer::COMPLETED) {
+                $deltaShipping = $newShipping - $oldShipping;
+            } elseif ($oldStatus != Transfer::COMPLETED && $newStatus == Transfer::COMPLETED) {
+                $deltaShipping = $newShipping; // baru diterapkan
+            } elseif ($oldStatus == Transfer::COMPLETED && $newStatus != Transfer::COMPLETED) {
+                $deltaShipping = -$oldShipping; // dilepas
+            }
+            if ($deltaShipping != 0.0) {
+                $itemsNow = $transfer->transferItems; // sudah termutakhirkan
+                $totalQtyMovedNow = max(0.0, (float) $itemsNow->sum('quantity'));
+                if ($totalQtyMovedNow > 0) {
+                    $perProductQtyNow = [];
+                    foreach ($itemsNow as $it) {
+                        $perProductQtyNow[$it->product_id] = ($perProductQtyNow[$it->product_id] ?? 0) + (float) $it->quantity;
+                    }
+                    foreach ($perProductQtyNow as $pid => $qtyMoved) {
+                        /** @var Product $prod */
+                        $prod = Product::find($pid);
+                        if (! $prod) { continue; }
+                        $oldQtyTotal = (float) ManageStock::where('product_id', $pid)->sum('quantity');
+                        if ($oldQtyTotal <= 0) { continue; }
+                        $oldHpp = (float) ($prod->hpp ?? 0);
+                        $allocDelta = $deltaShipping * ($qtyMoved / $totalQtyMovedNow);
+                        $newHpp = (($oldQtyTotal * $oldHpp) + $allocDelta) / $oldQtyTotal;
+                        $prod->update(['hpp' => (int) round($newHpp)]);
+                    }
+                }
+            }
+
+            // HPP: revaluasi dengan line price (delta lama -> baru) bila toggle aktif
+            if ((int) (getSettingValue('transfer_line_revalue_hpp') ?? 0) === 1) {
+                $newItems = $transfer->transferItems; // terkini
+                $newQtyByProduct = [];
+                $newAmountByProduct = [];
+                foreach ($newItems as $it) {
+                    $pid = $it->product_id;
+                    $newQtyByProduct[$pid] = ($newQtyByProduct[$pid] ?? 0) + (float) $it->quantity;
+                    $newAmountByProduct[$pid] = ($newAmountByProduct[$pid] ?? 0) + (float) $it->sub_total;
+                }
+
+                $allPids = array_unique(array_merge(array_keys($oldQtyByProduct), array_keys($newQtyByProduct)));
+                foreach ($allPids as $pid) {
+                    /** @var Product $prod */
+                    $prod = Product::find($pid);
+                    if (! $prod) { continue; }
+                    $totalQty = (float) ManageStock::where('product_id', $pid)->sum('quantity');
+                    if ($totalQty <= 0) { continue; }
+                    $hpp = (float) ($prod->hpp ?? 0);
+                    $oldQty = (float) ($oldQtyByProduct[$pid] ?? 0);
+                    $newQty = (float) ($newQtyByProduct[$pid] ?? 0);
+                    $oldAmt = (float) ($oldAmountByProduct[$pid] ?? 0);
+                    $newAmt = (float) ($newAmountByProduct[$pid] ?? 0);
+                    // delta effect terhadap total biaya persediaan (tanpa mengubah qty total)
+                    if ($oldStatus == Transfer::COMPLETED && $newStatus == Transfer::COMPLETED) {
+                        $deltaEffect = ($newAmt - $oldAmt) - ($hpp * ($newQty - $oldQty));
+                    } elseif ($oldStatus != Transfer::COMPLETED && $newStatus == Transfer::COMPLETED) {
+                        $deltaEffect = $newAmt - ($hpp * $newQty); // baru diterapkan
+                    } elseif ($oldStatus == Transfer::COMPLETED && $newStatus != Transfer::COMPLETED) {
+                        $deltaEffect = -($oldAmt - ($hpp * $oldQty)); // dilepas
+                    } else {
+                        $deltaEffect = 0.0;
+                    }
+                    if ($deltaEffect == 0.0) { continue; }
+                    $newHpp = (($totalQty * $hpp) + $deltaEffect) / $totalQty;
+                    $prod->update(['hpp' => (int) round($newHpp)]);
+                }
+            }
 
             DB::commit();
 

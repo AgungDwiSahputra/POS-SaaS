@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\ManageStock;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
+use App\Models\Product;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -74,6 +75,13 @@ class PurchaseRepository extends BaseRepository
                 }
             }
 
+            // Siapkan stok awal per produk (sebelum penambahan) untuk perhitungan HPP rata-rata tertimbang
+            $initialQtyByProduct = [];
+            $uniqueProductIds = collect($input['purchase_items'])->pluck('product_id')->unique();
+            foreach ($uniqueProductIds as $pid) {
+                $initialQtyByProduct[$pid] = ManageStock::where('product_id', $pid)->sum('quantity');
+            }
+
             $purchaseInputArray = Arr::only($input, [
                 'supplier_id',
                 'warehouse_id',
@@ -97,9 +105,36 @@ class PurchaseRepository extends BaseRepository
 
             $purchase = $this->storePurchaseItems($purchase, $input);
 
+            // Kumpulkan total qty & biaya pembelian per produk pada transaksi ini
+            $purchasedQty = [];
+            $purchasedCost = [];
+            foreach ($purchase->purchaseItems as $pItem) {
+                $pid = $pItem->product_id;
+                $purchasedQty[$pid] = ($purchasedQty[$pid] ?? 0) + $pItem->quantity;
+                $purchasedCost[$pid] = ($purchasedCost[$pid] ?? 0) + $pItem->sub_total; // sub_total sudah net of tax sesuai jenis pajak
+            }
+
             // manage stock
             foreach ($input['purchase_items'] as $purchaseItem) {
                 manageStock($input['warehouse_id'], $purchaseItem['product_id'], $purchaseItem['quantity']);
+            }
+
+            // Update HPP rata-rata tertimbang per produk
+            foreach ($uniqueProductIds as $pid) {
+                $oldQty = (float) ($initialQtyByProduct[$pid] ?? 0);
+                $addedQty = (float) ($purchasedQty[$pid] ?? 0);
+                $totalQty = $oldQty + $addedQty;
+                if ($totalQty <= 0) {
+                    continue; // tidak ada stok, lewati
+                }
+
+                /** @var Product $prod */
+                $prod = Product::find($pid);
+                $oldHpp = (float) ($prod->hpp ?? 0);
+                $oldTotalCost = $oldQty * $oldHpp;
+                $addedTotalCost = (float) ($purchasedCost[$pid] ?? 0);
+                $newHpp = ($oldTotalCost + $addedTotalCost) / $totalQty;
+                $prod->update(['hpp' => (int) round($newHpp)]);
             }
 
             DB::commit();
@@ -208,6 +243,34 @@ class PurchaseRepository extends BaseRepository
                 }
             }
             $purchase = Purchase::findOrFail($id);
+
+            // Pre-calc data untuk HPP: kondisi sebelum perubahan
+            $oldItems = PurchaseItem::wherePurchaseId($id)->get();
+            $oldTotalsQty = [];
+            $oldTotalsCost = [];
+            foreach ($oldItems as $oi) {
+                $pid = $oi->product_id;
+                $oldTotalsQty[$pid] = ($oldTotalsQty[$pid] ?? 0) + $oi->quantity;
+                $oldTotalsCost[$pid] = ($oldTotalsCost[$pid] ?? 0) + $oi->sub_total;
+            }
+
+            // Totals baru berdasarkan input (gunakan kalkulasi yang sama)
+            $newTotalsQty = [];
+            $newTotalsCost = [];
+            foreach ($input['purchase_items'] as $pi) {
+                $calc = $this->calculationPurchaseItems($pi);
+                $pid = $calc['product_id'];
+                $newTotalsQty[$pid] = ($newTotalsQty[$pid] ?? 0) + $calc['quantity'];
+                $newTotalsCost[$pid] = ($newTotalsCost[$pid] ?? 0) + $calc['sub_total'];
+            }
+
+            $affectedProductIds = collect(array_unique(array_merge(array_keys($oldTotalsQty), array_keys($newTotalsQty))))->values();
+            $initialStockByProduct = [];
+            $initialHppByProduct = [];
+            foreach ($affectedProductIds as $pid) {
+                $initialStockByProduct[$pid] = (float) ManageStock::where('product_id', $pid)->sum('quantity');
+                $initialHppByProduct[$pid] = (float) optional(\App\Models\Product::find($pid))->hpp ?? 0.0;
+            }
             $purchaseItemIds = PurchaseItem::wherePurchaseId($id)->pluck('id')->toArray();
             $purchaseItmOldIds = [];
             foreach ($input['purchase_items'] as $key => $purchaseItem) {
@@ -272,6 +335,21 @@ class PurchaseRepository extends BaseRepository
                 PurchaseItem::whereIn('id', array_values($removeItemIds))->delete();
             }
             $purchase = $this->updatePurchaseCalculation($input, $id);
+            // Update HPP (moving average) dengan delta pembelian per produk
+            foreach ($affectedProductIds as $pid) {
+                $oldQtyStock = (float) ($initialStockByProduct[$pid] ?? 0);
+                $oldHpp = (float) ($initialHppByProduct[$pid] ?? 0);
+                $deltaQty = (float) (($newTotalsQty[$pid] ?? 0) - ($oldTotalsQty[$pid] ?? 0));
+                $deltaCost = (float) (($newTotalsCost[$pid] ?? 0) - ($oldTotalsCost[$pid] ?? 0));
+
+                $den = $oldQtyStock + $deltaQty;
+                if ($den <= 0) {
+                    continue;
+                }
+
+                $newHpp = (($oldQtyStock * $oldHpp) + $deltaCost) / $den;
+                \App\Models\Product::where('id', $pid)->update(['hpp' => (int) round($newHpp)]);
+            }
             DB::commit();
 
             return $purchase;

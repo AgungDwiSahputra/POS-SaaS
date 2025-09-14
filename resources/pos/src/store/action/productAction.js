@@ -204,7 +204,11 @@ export const fetchAllMainProducts = (filter = {}, isLoading = true) => async (di
     if (isLoading) {
         dispatch(setLoading(true));
     }
+    // dukung filter warehouse_id agar API mengembalikan stok per gudang
     let url = apiBaseURL.MAIN_PRODUCTS;
+    if (filter && filter.warehouse_id) {
+        url += `?warehouse_id=${filter.warehouse_id}`;
+    }
     if (
         !_.isEmpty(filter) &&
         (filter.page ||

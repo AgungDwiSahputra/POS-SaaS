@@ -143,11 +143,14 @@ class SettingAPIController extends AppBaseController
             'enable_pos_click_audio',
             'click_audio',
             'show_pos_stock_product',
+            // toggle revaluasi HPP dari harga line transfer
+            'transfer_line_revalue_hpp',
         ];
 
         $settings = Setting::whereIn('key', $getArray)->pluck('value', 'key')->toArray();
         $settings['enable_pos_click_audio'] = $settings['enable_pos_click_audio'] ?? false;
         $settings['show_pos_stock_product'] = $settings['show_pos_stock_product'] ?? false;
+        $settings['transfer_line_revalue_hpp'] = $settings['transfer_line_revalue_hpp'] ?? false;
         if (!isset($settings['click_audio'])) {
             $settings['click_audio'] = asset('images/click_audio.mp3');
             Setting::updateOrCreate(['key' => 'click_audio'], ['value' => $settings['click_audio']]);

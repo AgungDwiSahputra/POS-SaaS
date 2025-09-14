@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Product;
+use App\Models\ManageStock;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Exception;
@@ -80,10 +81,29 @@ class ProductRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
+            // Hitung HPP berdasarkan product_cost, order_tax, dan tax_type
+            $productCost = (float) ($input['product_cost'] ?? 0);
+            $orderTax = isset($input['order_tax']) && $input['order_tax'] !== '' ? (float) $input['order_tax'] : 0.0;
+            $taxType = $input['tax_type'] ?? null;
+
+            $netUnitCost = $productCost; // default
+            $perItemTaxAmount = 0.0;
+
+            if ($orderTax >= 0 && $orderTax <= 100 && $orderTax > 0) {
+                if ($taxType == Purchase::EXCLUSIVE) {
+                    $perItemTaxAmount = ($netUnitCost * $orderTax) / 100.0;
+                } elseif ($taxType == Purchase::INCLUSIVE) {
+                    $perItemTaxAmount = ($netUnitCost * $orderTax) / (100.0 + $orderTax);
+                    $netUnitCost -= $perItemTaxAmount; // jadikan net of tax
+                }
+            }
+
+            // HPP per unit = net_unit_cost + pajak per item (konsisten dgn perhitungan subtotal)
+            $input['hpp'] = $netUnitCost + $perItemTaxAmount;
+
             $product = $this->create($input);
             $reference_code = 'PR_' . $product->id;
             $this->generateBarcode($input, $reference_code);
-            $product['barcode_image_url'] = Storage::url('product_barcode/barcode-' . $reference_code . '.png');
 
             // create purchase
 
@@ -167,8 +187,21 @@ class ProductRepository extends BaseRepository
                 ]);
 
                 // manage stock
+                // stok awal sebelum penambahan untuk perhitungan HPP rata-rata
+                $oldQty = (float) ManageStock::where('product_id', $product->id)->sum('quantity');
 
                 manageStock($purchaseStock['warehouse_id'], $product->id, $purchaseStock['quantity']);
+
+                // Hitung HPP rata-rata tertimbang setelah pembelian awal
+                $addedQty = (float) $purchaseStock['quantity'];
+                $totalQty = $oldQty + $addedQty;
+                if ($totalQty > 0) {
+                    $oldHpp = (float) ($product->hpp ?? 0);
+                    $oldTotalCost = $oldQty * $oldHpp;
+                    $addedTotalCost = (float) $purchaseStock['sub_total'];
+                    $newHpp = ($oldTotalCost + $addedTotalCost) / $totalQty;
+                    $product->update(['hpp' => (int) round($newHpp)]);
+                }
             }
         }
             DB::commit();
@@ -193,7 +226,6 @@ class ProductRepository extends BaseRepository
             $product->clearMediaCollection(Product::PRODUCT_BARCODE_PATH);
             $reference_code = 'PR_' . $product->id;
             $this->generateBarcode($input, $reference_code);
-            $product['barcode_image_url'] = Storage::url('product_barcode/barcode-' . $reference_code . '.png');
 
             DB::commit();
 
