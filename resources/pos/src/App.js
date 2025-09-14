@@ -91,33 +91,25 @@ function App() {
         }
     }, [language, languageData]);
 
-    // updated language hendling
+    // updated language handling with fallback to base locale files
     useEffect(() => {
+        const baseMessages =
+            (updateLanguag && updateLanguag !== "" ? updateLanguag : null) ||
+            allLocales["en"] ||
+            {};
+
         if (Object.values(userEditedMessage).length !== 0) {
-            setMessages(userEditedMessage);
-        } else {
-            if (updateLanguage?.iso_code === updatedLanguage) {
-                const updateLanguages = updateLanguage?.lang_json_array;
-                setMessages(updateLanguages);
-            } else {
-                if (
-                    updateLanguag === undefined ||
-                    updateLanguag === null ||
-                    updateLanguag === ""
-                ) {
-                    const defaultUpdateLanguage = allLocales["en"];
-                    setMessages(defaultUpdateLanguage);
-                } else {
-                    if (updateLanguag === undefined || updateLanguag === null) {
-                        const defaultUpdateLanguage = allLocales["en"];
-                        setMessages(defaultUpdateLanguage);
-                    } else {
-                        setMessages(updateLanguag);
-                    }
-                }
-            }
+            setMessages({ ...baseMessages, ...userEditedMessage });
+            return;
         }
-    }, [allLocales, updateLanguage?.lang_json_array]);
+
+        if (updateLanguage?.iso_code === updatedLanguage && updateLanguage?.lang_json_array) {
+            setMessages({ ...baseMessages, ...updateLanguage.lang_json_array });
+            return;
+        }
+
+        setMessages(baseMessages);
+    }, [allLocales, updateLanguage?.lang_json_array, userEditedMessage, updateLanguag]);
 
     useEffect(() => {
         selectCSS();
