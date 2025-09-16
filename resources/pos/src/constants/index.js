@@ -19,6 +19,7 @@ export const apiBaseURL = {
     USERS: "/users",
     EXPENSES_CATEGORIES: "/expense-categories",
     EXPENSES: "/expenses",
+    CASH_ADVANCES: "/cash-advances",
     MAIN_PRODUCTS: "/main-products",
     PRODUCTS: "/products",
     IMPORT_PRODUCT: "/import-products",
@@ -201,6 +202,14 @@ export const expenseActionType = {
     ADD_EXPENSE: "ADD_EXPENSE",
     EDIT_EXPENSE: "EDIT_EXPENSE",
     DELETE_EXPENSE: "DELETE_EXPENSE",
+};
+
+export const cashAdvanceActionType = {
+    FETCH_CASH_ADVANCES: "FETCH_CASH_ADVANCES",
+    FETCH_CASH_ADVANCE: "FETCH_CASH_ADVANCE",
+    ADD_CASH_ADVANCE: "ADD_CASH_ADVANCE",
+    EDIT_CASH_ADVANCE: "EDIT_CASH_ADVANCE",
+    DELETE_CASH_ADVANCE: "DELETE_CASH_ADVANCE",
 };
 
 export const settingActionType = {
@@ -691,6 +700,7 @@ export const Permissions = {
     MANAGE_USER: "manage_users",
     MANAGE_EXPENSES_CATEGORIES: "manage_expense_categories",
     MANAGE_EXPENSES: "manage_expenses",
+    MANAGE_CASH_ADVANCES: "manage_cash_advances",
     MANAGE_SETTING: "manage_setting",
     MANAGE_PURCHASE: "manage_purchase",
     MANAGE_PURCHASE_RETURN: "manage_purchase_return",
@@ -760,6 +770,10 @@ export const Permissions = {
     VIEW_EXPENSES: "view_expenses",
     EDIT_EXPENSES: "edit_expenses",
     DELETE_EXPENSES: "delete_expenses",
+    CREATE_CASH_ADVANCES: "create_cash_advances",
+    VIEW_CASH_ADVANCES: "view_cash_advances",
+    EDIT_CASH_ADVANCES: "edit_cash_advances",
+    DELETE_CASH_ADVANCES: "delete_cash_advances",
     CREATE_PURCHASES: "create_purchase",
     VIEW_PURCHASES: "view_purchase",
     EDIT_PURCHASES: "edit_purchase",

@@ -26,6 +26,9 @@ import ExpenseCategory from "./components/expense-category/ExpenseCategory";
 import Expenses from "./components/expense/Expenses";
 import CreateExpense from "./components/expense/CreateExpense";
 import EditExpense from "./components/expense/EditExpense";
+import CashAdvances from "./components/cash-advance/CashAdvances";
+import CreateCashAdvance from "./components/cash-advance/CreateCashAdvance";
+import EditCashAdvance from "./components/cash-advance/EditCashAdvance";
 import Purchases from "./components/purchase/Purchases";
 import CreatePurchase from "./components/purchase/CreatePurchase";
 import EditPurchase from "./components/purchase/EditPurchase";
@@ -328,6 +331,21 @@ export const route = [
         path: "expenses/edit/:id",
         ele: <EditExpense />,
         permission: Permissions.EDIT_EXPENSES,
+    },
+    {
+        path: "cash-advances",
+        ele: <CashAdvances />,
+        permission: Permissions.MANAGE_CASH_ADVANCES,
+    },
+    {
+        path: "cash-advances/create",
+        ele: <CreateCashAdvance />,
+        permission: Permissions.CREATE_CASH_ADVANCES,
+    },
+    {
+        path: "cash-advances/edit/:id",
+        ele: <EditCashAdvance />,
+        permission: Permissions.EDIT_CASH_ADVANCES,
     },
     {
         path: "purchases",

@@ -249,6 +249,7 @@ export const userMenu = [
         subPath: {
             expensesSubPath: "/user/expenses",
             expenseCategoriesSubPath: "/user/expense-categories",
+            cashAdvancesSubPath: "/user/cash-advances",
         },
         subMenu: [
             {
@@ -266,6 +267,14 @@ export const userMenu = [
                 class: "d-flex",
                 permission: Permissions.MANAGE_EXPENSES_CATEGORIES,
                 to: "/user/expense-categories",
+            },
+            {
+                title: "cash-advance.title",
+                name: "cash advances",
+                fontIcon: <FontAwesomeIcon icon={faMoneyBill} />,
+                class: "d-flex",
+                permission: Permissions.MANAGE_CASH_ADVANCES,
+                to: "/user/cash-advances",
             },
         ],
     },

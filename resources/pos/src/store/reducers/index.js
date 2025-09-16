@@ -14,6 +14,7 @@ import customerReducer from "./customerReducer";
 import userReducers from "./userReducers";
 import expenseCategoryReducer from "./expenseCategoryReducer";
 import expenseReducer from "./expenseReducer";
+import cashAdvanceReducer from "./cashAdvanceReducer";
 import productReducers from "./productReducers";
 import settingReducers from "./settingReducers";
 import purchaseProductReducer from "./purchaseProductReducer";
@@ -136,6 +137,7 @@ export default combineReducers({
     customers: customerReducer,
     expenseCategories: expenseCategoryReducer,
     expenses: expenseReducer,
+    cashAdvances: cashAdvanceReducer,
     products: productReducers,
     sales: saleReducer,
     productSales: productSaleUnitReducers,

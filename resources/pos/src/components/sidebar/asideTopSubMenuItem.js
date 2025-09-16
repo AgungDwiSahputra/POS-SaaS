@@ -145,6 +145,25 @@ const AsideTopSubMenuItem = (props) => {
                                     </Link>
                                 </Dropdown.Item>
                             )}
+                            {config?.includes(
+                                Permissions.MANAGE_CASH_ADVANCES
+                            ) && (
+                                <Dropdown.Item className="py-0 fs-6">
+                                    <Link
+                                        to={"/user/cash-advances/create"}
+                                        className="nav-link px-4"
+                                    >
+                                        <span className="dropdown-icon me-4 text-green-600">
+                                            <FontAwesomeIcon icon={faPlusSquare} />
+                                        </span>
+                                        <span>
+                                            {getFormattedMessage(
+                                                "cash-advance.title"
+                                            )}
+                                        </span>
+                                    </Link>
+                                </Dropdown.Item>
+                            )}
                         </Dropdown.Menu>
                     </Dropdown>
                 ) : (

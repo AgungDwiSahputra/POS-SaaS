@@ -408,6 +408,9 @@ const AsideMenu = (props) => {
                                                     ?.expenseCategoriesSubPath ||
                                             location.pathname ===
                                                 mainItems?.subPath
+                                                    ?.cashAdvancesSubPath ||
+                                            location.pathname ===
+                                                mainItems?.subPath
                                                     ?.emailTemplateSubPath ||
                                             location.pathname ===
                                                 mainItems?.subPath

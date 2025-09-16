@@ -28,7 +28,8 @@ const Prefixes = ( props ) => {
         purchasesReturn: '',
         sales: '',
         salesReturn: '',
-        expense: ''
+        expense: '',
+        cashAdvance: ''
     } )
 
     const [ errors, setErrors ] = useState( {
@@ -36,7 +37,8 @@ const Prefixes = ( props ) => {
         purchasesReturn: '',
         sales: '',
         salesReturn: '',
-        expense: ''
+        expense: '',
+        cashAdvance: ''
     } )
 
     const [ disable, setDisable ] = React.useState( true );
@@ -55,7 +57,8 @@ const Prefixes = ( props ) => {
                 purchasesReturn: settings.attributes && settings.attributes.purchase_return_code ? settings.attributes.purchase_return_code : '',
                 sales: settings.attributes && settings.attributes.sale_code ? settings.attributes.sale_code : '',
                 salesReturn: settings.attributes && settings.attributes.sale_return_code ? settings.attributes.sale_return_code : '',
-                expense: settings.attributes && settings.attributes.expense_code ? settings.attributes.expense_code : ''
+                expense: settings.attributes && settings.attributes.expense_code ? settings.attributes.expense_code : '',
+                cashAdvance: settings.attributes && settings.attributes.cash_advance_code ? settings.attributes.cash_advance_code : ''
             } )
         }
     }, [ settings ] );
@@ -74,6 +77,7 @@ const Prefixes = ( props ) => {
         formData.append( 'sale_code', data.sales );
         formData.append( 'sale_return_code', data.salesReturn );
         formData.append( 'expense_code', data.expense );
+        formData.append( 'cash_advance_code', data.cashAdvance );
         return formData;
     };
 
@@ -90,6 +94,8 @@ const Prefixes = ( props ) => {
             errorss[ 'salesReturn' ] = getFormattedMessage( "settings.prefixes-settings.input.salse-return.validate.label" );
         } else if ( !prefixesValue[ 'expense' ] ) {
             errorss[ 'expense' ] = getFormattedMessage( "settings.prefixes-settings.input.expense.validate.label" );
+        } else if ( !prefixesValue[ 'cashAdvance' ] ) {
+            errorss[ 'cashAdvance' ] = getFormattedMessage( "settings.prefixes-settings.input.cash-advance.validate.label" );
         } else {
             isValid = true;
         }
@@ -180,6 +186,19 @@ const Prefixes = ( props ) => {
                                             onChange={( e ) => onChangeInput( e )} value={prefixesValue.expense} />
                                         <span className='text-danger d-block fw-400 fs-small mt-2'>
                                             {errors[ 'expense' ] ? errors[ 'expense' ] : null}
+                                        </span>
+                                    </div>
+                                    <div className='col-lg-6 mb-3'>
+                                        <label className='form-label'>
+                                            {getFormattedMessage( "cash-advance.title" )}:
+                                        </label>
+                                        <span className='required' />
+                                        <input type='text' className='form-control'
+                                            placeholder={placeholderText( "settings.prefixes-settings.input.cash-advance.placeholder.label" )}
+                                            name='cashAdvance'
+                                            onChange={(e) => onChangeInput(e)} value={prefixesValue.cashAdvance} />
+                                        <span className='text-danger d-block fw-400 fs-small mt-2'>
+                                            {errors['cashAdvance'] ? errors['cashAdvance'] : null}
                                         </span>
                                     </div>
                                     <div>

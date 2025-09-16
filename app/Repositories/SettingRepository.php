@@ -95,6 +95,7 @@ class SettingRepository extends BaseRepository
                 'sale_code',
                 'sale_return_code',
                 'expense_code',
+                'cash_advance_code',
                 'show_logo_in_receipt',
             ]);
 
