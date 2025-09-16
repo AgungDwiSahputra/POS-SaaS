@@ -290,7 +290,7 @@ class TransferRepository extends BaseRepository
                         $this->updateItem($transferItemArray, $transfer->from_warehouse_id, $transfer->to_warehouse_id);
                     } else {
                         // Hitung ulang nilai item tanpa menyentuh stok
-                        $this->calculationTransferItems($transferItemArray);
+                        $transferItemArray = $this->calculationTransferItems($transferItemArray);
                         // net_unit_cost bukan kolom tabel; pastikan tidak ikut ter-update
                         TransferItem::whereId($transferItemArray['transfer_item_id'])->update(
                             Arr::except($transferItemArray, ['transfer_item_id', 'net_unit_cost'])

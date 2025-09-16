@@ -71,6 +71,9 @@ const TransferForm = ( props ) => {
 
     useEffect(() => {
         if (singleTransfer && !transferValueUpdated) {
+            const statusOption = transferStatusFilterOptions
+                ?.map((option) => ({ value: option.id, label: option.name }))
+                ?.find((option) => option.value === singleTransfer.status);
             setTransferValue({
                 date: moment(singleTransfer.date).toDate(),
                 from_warehouse_id: singleTransfer.from_warehouse_id,
@@ -83,10 +86,11 @@ const TransferForm = ( props ) => {
                 shipping: singleTransfer.shipping.toFixed(2),
                 grand_total: singleTransfer.grand_total,
                 notes: singleTransfer.notes,
-                status_id: singleTransfer.status_id || {
-                    label: getFormattedMessage("status.filter.complated.label"),
-                    value: 1
-                }
+                status_id:
+                    statusOption || {
+                        label: transferStatusFilterOptions[0]?.name,
+                        value: transferStatusFilterOptions[0]?.id ?? 1,
+                    }
             });
             setTransferValueUpdated(true);
         }
@@ -224,7 +228,11 @@ const TransferForm = ( props ) => {
             grand_total: calculateCartTotalAmount( updateProducts, transferValue ),
             received_amount: 0,
             paid_amount: 0,
-            status: prepareData.status_id.value ? prepareData.status_id.value : prepareData.status_id,
+            status: Number(
+                prepareData?.status_id?.value !== undefined
+                    ? prepareData.status_id.value
+                    : prepareData.status_id
+            ),
         }
         return formValue
     };
