@@ -147,7 +147,10 @@ const ProductModal = ( props ) => {
                 const newProduct = product;
                 newProduct.product_cost = Number( netUnitCost );
                 newProduct.fix_net_unit = Number( netUnitCost );
-                newProduct.net_unit_cost = amountBeforeTax( product );
+                newProduct.product_price = Number( netUnitCost );
+                const calculatedNetUnit = amountBeforeTax( product );
+                newProduct.net_unit_cost = calculatedNetUnit;
+                newProduct.net_unit_price = calculatedNetUnit;
                 newProduct.tax_type = taxType.value.toString();
                 newProduct.tax_value = Number( taxValue );
                 newProduct.tax_amount = taxAmountMultiply( product );
