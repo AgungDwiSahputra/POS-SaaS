@@ -69,6 +69,10 @@ class SaleAPIController extends AppBaseController
             $sales->where('customer_id', $request->get('customer_id'));
         }
 
+        if ($request->get('user_id')) {
+            $sales->where('user_id', $request->get('user_id'));
+        }
+
         if ($request->get('status') && $request->get('status') != 'null') {
             $sales->Where('status', $request->get('status'));
         }

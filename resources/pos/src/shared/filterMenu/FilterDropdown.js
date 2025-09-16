@@ -52,6 +52,16 @@ const FilterDropdown = (props) => {
         productCategoryFilterTitle,
         fetchAllBrands,
         fetchAllProductCategories,
+        isCashierFilter,
+        cashierOptions = [],
+        cashierValue,
+        setCashierData,
+        cashierLabel,
+        isCustomerFilter,
+        customerOptions = [],
+        customerValue,
+        setCustomerData,
+        customerLabel,
     } = props;
 
     const dispatch = useDispatch();
@@ -69,6 +79,8 @@ const FilterDropdown = (props) => {
     const [transferStatus, setTransferStatus] = useState();
     const [paymentStatus, setPaymentStatus] = useState();
     const [paymentType, setPaymentType] = useState();
+    const [cashier, setCashier] = useState();
+    const [customer, setCustomer] = useState();
 
     const formattedPaymentMethods = [
         { value: 0, label: getFormattedMessage("unit.filter.all.label") },
@@ -95,6 +107,18 @@ const FilterDropdown = (props) => {
             fetchAllBaseUnits();
         }
     }, [fetchAllBaseUnits, fetchAllBrands, fetchAllProductCategories]);
+
+    useEffect(() => {
+        if (cashierValue) {
+            setCashier(cashierValue);
+        }
+    }, [cashierValue]);
+
+    useEffect(() => {
+        if (customerValue) {
+            setCustomer(customerValue);
+        }
+    }, [customerValue]);
 
     const transferStatusFilterOptions = getFormattedOptions(
         transferStatusOptions
@@ -177,6 +201,22 @@ const FilterDropdown = (props) => {
         setTransferStatus({ label: "All", value: "0" });
         setPaymentStatus({ label: "All", value: "0" });
         setPaymentType({ label: "All", value: "0" });
+        if (isCashierFilter) {
+            const defaultCashier = {
+                label: getFormattedMessage("unit.filter.all.label"),
+                value: "0",
+            };
+            setCashier(defaultCashier);
+            setCashierData && setCashierData(defaultCashier);
+        }
+        if (isCustomerFilter) {
+            const defaultCustomer = {
+                label: getFormattedMessage("unit.filter.all.label"),
+                value: "0",
+            };
+            setCustomer(defaultCustomer);
+            setCustomerData && setCustomerData(defaultCustomer);
+        }
         onResetClick();
     };
 
@@ -299,6 +339,66 @@ const FilterDropdown = (props) => {
                             )}
                         />
                     </Dropdown.Header>
+                    ) : null}
+                {isCashierFilter ? (
+                    <ReactSelect
+                        title={
+                            cashierLabel ||
+                            getFormattedMessage("sale-report.input.cashier.label")
+                        }
+                        data={[
+                            {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            },
+                            ...cashierOptions,
+                        ]}
+                        defaultValue={
+                            cashierValue || {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            }
+                        }
+                        value={cashier || cashierValue}
+                        onChange={(obj) => {
+                            setCashier(obj);
+                            setCashierData && setCashierData(obj);
+                        }}
+                    />
+                ) : null}
+                {isCustomerFilter ? (
+                    <ReactSelect
+                        title={
+                            customerLabel ||
+                            getFormattedMessage("sale-report.input.customer.label")
+                        }
+                        data={[
+                            {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            },
+                            ...customerOptions,
+                        ]}
+                        defaultValue={
+                            customerValue || {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            }
+                        }
+                        value={customer || customerValue}
+                        onChange={(obj) => {
+                            setCustomer(obj);
+                            setCustomerData && setCustomerData(obj);
+                        }}
+                    />
                 ) : null}
                 {isPaymentStatus ? (
                     <Dropdown.Header

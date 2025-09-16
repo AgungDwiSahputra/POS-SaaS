@@ -112,6 +112,12 @@ export default (
         }
         url = url + "customer_id=" + filters.customer_id;
     }
+    if (filters.user_id) {
+        if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
+            url += "&";
+        }
+        url = url + "user_id=" + filters.user_id;
+    }
     if (filters.product_category_id) {
         if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
             url += "&";

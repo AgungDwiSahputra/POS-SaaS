@@ -7,7 +7,18 @@ export const totalSaleReportExcel = (dates, setIsWarehouseValue, filter = {}, is
     if (isLoading) {
         dispatch(setLoading(true))
     }
-    await apiConfig.get(`total-sale-report-excel?start_date=${dates.start_date ? dates.start_date : null }&end_date=${dates.end_date ? dates.end_date : null}`)
+    const params = new URLSearchParams();
+    if (dates?.start_date) {
+        params.append('start_date', dates.start_date);
+    }
+    if (dates?.end_date) {
+        params.append('end_date', dates.end_date);
+    }
+    if (filter?.user_id) {
+        params.append('user_id', filter.user_id);
+    }
+
+    await apiConfig.get(`total-sale-report-excel?${params.toString()}`)
         .then((response) => {
             window.open(response.data.data.total_sale_excel_url, '_blank');
             setIsWarehouseValue(false);

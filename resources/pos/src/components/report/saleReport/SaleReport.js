@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { connect } from "react-redux";
 import MasterLayout from "../../MasterLayout";
 import TabTitle from "../../../shared/tab-title/TabTitle";
@@ -13,6 +13,11 @@ import { fetchSales } from "../../../store/action/salesAction";
 import { totalSaleReportExcel } from "../../../store/action/totalSaleReportExcel";
 import TopProgressBar from "../../../shared/components/loaders/TopProgressBar";
 import moment from "moment";
+import { Button } from "react-bootstrap-v5";
+import { fetchUsers } from "../../../store/action/userAction";
+import { fetchAllCustomer } from "../../../store/action/customerAction";
+import { useReactToPrint } from "react-to-print";
+import SaleReportReceipt from "./SaleReportReceipt";
 
 const SaleReport = (props) => {
     const {
@@ -24,18 +29,89 @@ const SaleReport = (props) => {
         dates,
         totalSaleReportExcel,
         allConfigData,
+        fetchUsers,
+        fetchAllCustomer,
+        users,
+        customers,
     } = props;
     const [isWarehouseValue, setIsWarehouseValue] = useState(false);
+    const [selectedCashier, setSelectedCashier] = useState({
+        value: "0",
+        label: getFormattedMessage("unit.filter.all.label"),
+    });
+    const [selectedCustomer, setSelectedCustomer] = useState({
+        value: "0",
+        label: getFormattedMessage("unit.filter.all.label"),
+    });
+    const receiptRef = useRef();
     const currencySymbol =
         frontSetting &&
         frontSetting.value &&
         frontSetting.value.currency_symbol;
 
+    const handlePrint = useReactToPrint({
+        content: () => receiptRef.current,
+    });
+
+    useEffect(() => {
+        fetchUsers({}, true, "?page[size]=0&returnAll=true");
+    }, [fetchUsers]);
+
+    useEffect(() => {
+        fetchAllCustomer();
+    }, [fetchAllCustomer]);
+
+    const cashierOptions = useMemo(() => {
+        if (!users) {
+            return [];
+        }
+
+        return users.map((user) => ({
+            value: user.id,
+            label: `${user.attributes?.first_name || ""} ${
+                user.attributes?.last_name || ""
+            }`.trim() || user.attributes?.email,
+        }));
+    }, [users]);
+
+    const activeCashierId =
+        selectedCashier && selectedCashier.value !== "0"
+            ? selectedCashier.value
+            : null;
+
+    const customerOptions = useMemo(() => {
+        if (!customers) {
+            return [];
+        }
+
+        return customers.map((customer) => ({
+            value: customer.id,
+            label: customer.attributes?.name || customer.attributes?.email,
+        }));
+    }, [customers]);
+
+    const activeCustomerId =
+        selectedCustomer && selectedCustomer.value !== "0"
+            ? selectedCustomer.value
+            : null;
+
+    const extraFilters = useMemo(() => {
+        const filters = {};
+        if (activeCashierId) {
+            filters.user_id = activeCashierId;
+        }
+        if (activeCustomerId) {
+            filters.customer_id = activeCustomerId;
+        }
+
+        return filters;
+    }, [activeCashierId, activeCustomerId]);
+
     useEffect(() => {
         if (isWarehouseValue === true) {
-            totalSaleReportExcel(dates, setIsWarehouseValue);
+            totalSaleReportExcel(dates, setIsWarehouseValue, extraFilters);
         }
-    }, [isWarehouseValue]);
+    }, [isWarehouseValue, extraFilters, dates, totalSaleReportExcel]);
 
     const itemsValue =
         currencySymbol &&
@@ -46,6 +122,7 @@ const SaleReport = (props) => {
             reference_code: sale.attributes.reference_code,
             customer_name: sale.attributes.customer_name,
             warehouse_name: sale.attributes.warehouse_name,
+            user_name: sale.attributes.user_name,
             status: sale.attributes.status,
             payment_status: sale.attributes.payment_status,
             grand_total: sale.attributes.grand_total,
@@ -128,6 +205,12 @@ const SaleReport = (props) => {
             },
         },
         {
+            name: getFormattedMessage("sale-report.column.cashier"),
+            selector: (row) => row.user_name,
+            sortField: "user_name",
+            sortable: false,
+        },
+        {
             name: getFormattedMessage("globally.detail.grand.total"),
             selector: (row) =>
                 currencySymbolHandling(
@@ -197,10 +280,52 @@ const SaleReport = (props) => {
         setIsWarehouseValue(true);
     };
 
+    const handleCashierFilter = (option) => {
+        if (!option || option.value === "0") {
+            setSelectedCashier({
+                value: "0",
+                label: getFormattedMessage("unit.filter.all.label"),
+            });
+        } else {
+            setSelectedCashier(option);
+        }
+    };
+
+    const handleCustomerFilter = (option) => {
+        if (!option || option.value === "0") {
+            setSelectedCustomer({
+                value: "0",
+                label: getFormattedMessage("unit.filter.all.label"),
+            });
+        } else {
+            setSelectedCustomer(option);
+        }
+    };
+
+    const dateRangeLabel = useMemo(() => {
+        if (dates?.start_date && dates?.end_date) {
+            return `${moment(dates.start_date).format("DD/MM/YYYY")} - ${moment(
+                dates.end_date
+            ).format("DD/MM/YYYY")}`;
+        }
+
+        return getFormattedMessage("sale-report.receipt.date-range.default");
+    }, [dates]);
+
     return (
         <MasterLayout>
             <TopProgressBar />
             <TabTitle title={placeholderText("sale.reports.title")} />
+            <div className="d-flex justify-content-end mb-3">
+                <Button
+                    variant="primary"
+                    className="btn btn-primary"
+                    onClick={handlePrint}
+                    disabled={!sales || sales.length === 0}
+                >
+                    {getFormattedMessage("sale-report.print-receipt.button")}
+                </Button>
+            </div>
             <ReactDataTable
                 columns={columns}
                 items={itemsValue}
@@ -213,7 +338,35 @@ const SaleReport = (props) => {
                 isStatus
                 isPaymentStatus
                 onExcelClick={onExcelClick}
+                extraFilters={extraFilters}
+                isCashierFilter={true}
+                cashierOptions={cashierOptions}
+                cashierValue={selectedCashier}
+                onCashierChange={handleCashierFilter}
+                cashierLabel={getFormattedMessage("sale-report.input.cashier.label")}
+                isCustomerFilter={true}
+                customerOptions={customerOptions}
+                customerValue={selectedCustomer}
+                onCustomerChange={handleCustomerFilter}
+                customerLabel={getFormattedMessage("sale-report.input.customer.label")}
             />
+            <div style={{ display: "none" }}>
+                <SaleReportReceipt
+                    ref={receiptRef}
+                    sales={sales}
+                    currency={currencySymbol}
+                    cashierName={
+                        activeCashierId
+                            ? selectedCashier?.label
+                            : getFormattedMessage("unit.filter.all.label")
+                    }
+                    customerName={
+                        activeCustomerId ? selectedCustomer?.label : null
+                    }
+                    dateRange={dateRangeLabel}
+                    allConfigData={allConfigData}
+                />
+            </div>
         </MasterLayout>
     );
 };
@@ -225,6 +378,8 @@ const mapStateToProps = (state) => {
         totalRecord,
         dates,
         allConfigData,
+        users,
+        customers,
     } = state;
     return {
         sales,
@@ -233,10 +388,14 @@ const mapStateToProps = (state) => {
         totalRecord,
         dates,
         allConfigData,
+        users,
+        customers,
     };
 };
 
 export default connect(mapStateToProps, {
     fetchSales,
     totalSaleReportExcel,
+    fetchUsers,
+    fetchAllCustomer,
 })(SaleReport);

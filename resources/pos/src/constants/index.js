@@ -618,6 +618,7 @@ export const Filters = {
         base_unit: "",
         brand_id: "",
         product_category_id: "",
+        user_id: "",
     },
 };
 

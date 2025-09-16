@@ -61,7 +61,18 @@ const ReactDataTable = (props) => {
         productCategoryFilterTitle,
         callAPIAfterImport,
         pagination=true,
-        selectableRows=false
+        selectableRows=false,
+        extraFilters = {},
+        isCashierFilter = false,
+        cashierOptions = [],
+        cashierValue,
+        onCashierChange,
+        cashierLabel,
+        isCustomerFilter = false,
+        customerOptions = [],
+        customerValue,
+        onCustomerChange,
+        customerLabel,
     } = props;
     const [perPage, setPerPages] = useState(defaultLimit);
     const [pageSize, setPageSize] = useState(Filters.OBJ.pageSize);
@@ -123,6 +134,11 @@ const ReactDataTable = (props) => {
         brand,
         productCategory,
     ]);
+
+    useEffect(() => {
+        onChangeDidMount(currentPage);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(extraFilters)]);
 
     const handleSearch = (searchText) => {
         handlePageChange(1);
@@ -208,6 +224,16 @@ const ReactDataTable = (props) => {
                             productCategoryFilterTitle={
                                 productCategoryFilterTitle
                             }
+                            isCashierFilter={isCashierFilter}
+                            cashierOptions={cashierOptions}
+                            cashierValue={cashierValue}
+                            setCashierData={onCashierChange}
+                            cashierLabel={cashierLabel}
+                            isCustomerFilter={isCustomerFilter}
+                            customerOptions={customerOptions}
+                            customerValue={customerValue}
+                            setCustomerData={onCustomerChange}
+                            customerLabel={customerLabel}
                         />
                     ) : null}
                     {AddButton}
@@ -332,6 +358,9 @@ const ReactDataTable = (props) => {
             brand_id: brand ? brand.value : null,
             product_category_id: productCategory ? productCategory.value : null,
         };
+        Object.entries(extraFilters || {}).forEach(([key, value]) => {
+            filters[key] = value;
+        });
         onChange(filters);
     };
 
