@@ -139,7 +139,7 @@ return [
         'cannot_change_status_used_payment_method' => 'لا يمكن تغيير حالة طريقة الدفع لأنها مستخدمة في :module.',
     ],
 
-    'success' => [
+'success' => [
         'cache_clear_successfully' => 'تم مسح ذاكرة التخزين المؤقت بنجاح',
         'product_category_delete' => 'تم حذف فئة المنتج بنجاح.',
         'status_updated' => 'تم تحديث الحالة بنجاح.',
@@ -176,6 +176,13 @@ return [
         'pos_settings_updated' => 'تم تحديث إعدادات نقاط البيع بنجاح.',
         'dual_screen_settings_updated' => 'تم تحديث إعدادات الشاشة المزدوجة بنجاح.',
         'payment_method_status_updated' => 'تم تحديث حالة طريقة الدفع بنجاح.',
+    ],
+
+    'cash_advance' => [
+        'status' => [
+            'pending' => 'Outstanding',
+            'paid' => 'Paid Off',
+        ],
     ],
 
     'heading_discount' => 'الخصم',

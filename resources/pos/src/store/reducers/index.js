@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
 import loginReducers from "./authReducer";
 import brandsReducers from "./brandsReducers";
-import totalRecordReduce from "./totalRecordReduce";
+import totalRecordReducer from "./totalRecordReduce";
 import toastReducer from "./toastReducer";
 import currencyReducer from "./currencyReducer";
 import productCategoryReducers from "./productCategoryReducers";
@@ -15,6 +15,8 @@ import userReducers from "./userReducers";
 import expenseCategoryReducer from "./expenseCategoryReducer";
 import expenseReducer from "./expenseReducer";
 import cashAdvanceReducer from "./cashAdvanceReducer";
+import cashAdvanceSummaryReducer from "./cashAdvanceSummaryReducer";
+import cashAdvanceReportReducer from "./cashAdvanceReportReducer";
 import productReducers from "./productReducers";
 import settingReducers from "./settingReducers";
 import purchaseProductReducer from "./purchaseProductReducer";
@@ -123,7 +125,7 @@ import totalProductRecordReducer from "./totalProductRecordReducer";
 export default combineReducers({
     loginUser: loginReducers,
     brands: brandsReducers,
-    totalRecord: totalRecordReduce,
+    totalRecord: totalRecordReducer,
     toasts: toastReducer,
     currencies: currencyReducer,
     roles: roleReducer,
@@ -138,6 +140,8 @@ export default combineReducers({
     expenseCategories: expenseCategoryReducer,
     expenses: expenseReducer,
     cashAdvances: cashAdvanceReducer,
+    cashAdvanceSummary: cashAdvanceSummaryReducer,
+    cashAdvanceReport: cashAdvanceReportReducer,
     products: productReducers,
     sales: saleReducer,
     productSales: productSaleUnitReducers,

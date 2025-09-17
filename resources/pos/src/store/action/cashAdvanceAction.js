@@ -12,6 +12,28 @@ import { getFormattedMessage } from "../../shared/sharedMethod";
 import { setSavingButton } from "./saveButtonAction";
 import { callFetchDataApi } from "./updateBrand";
 
+const resolveApiErrorMessage = (error) =>
+    error?.response?.data?.message || error?.message || null;
+
+const notifyAndStopLoading = (dispatch, error, shouldStopLoading = false) => {
+    if (shouldStopLoading) {
+        dispatch(setLoading(false));
+    }
+
+    const message = resolveApiErrorMessage(error);
+
+    if (!message || message === getFormattedMessage("toast.error.title")) {
+        return;
+    }
+
+    dispatch(
+        addToast({
+            text: message,
+            type: toastType.ERROR,
+        })
+    );
+};
+
 export const fetchCashAdvances =
     (filter = {}, isLoading = true) =>
     async (dispatch) => {
@@ -36,6 +58,10 @@ export const fetchCashAdvances =
                     type: cashAdvanceActionType.FETCH_CASH_ADVANCES,
                     payload: response.data.data,
                 });
+                dispatch({
+                    type: cashAdvanceActionType.SET_CASH_ADVANCE_SUMMARY,
+                    payload: response.data.summary ?? {},
+                });
                 dispatch(
                     setTotalRecord(
                         response.data.meta.total !== undefined &&
@@ -48,13 +74,8 @@ export const fetchCashAdvances =
                     dispatch(setLoading(false));
                 }
             })
-            .catch(({ response }) => {
-                dispatch(
-                    addToast({
-                        text: response?.data?.message,
-                        type: toastType.ERROR,
-                    })
-                );
+            .catch((error) => {
+                notifyAndStopLoading(dispatch, error, isLoading);
             });
     };
 
@@ -67,9 +88,18 @@ export const fetchCashAdvance = (cashAdvanceId, singleCashAdvance) => async (dis
                 payload: response.data.data,
             });
         })
-        .catch(({ response }) => {
+        .catch((error) => {
+            const message = resolveApiErrorMessage(error);
+
+            if (!message || message === getFormattedMessage("toast.error.title")) {
+                return;
+            }
+
             dispatch(
-                addToast({ text: response?.data?.message, type: toastType.ERROR })
+                addToast({
+                    text: message,
+                    type: toastType.ERROR,
+                })
             );
         });
 };
@@ -92,10 +122,20 @@ export const addCashAdvance = (cashAdvance, navigate) => async (dispatch) => {
             dispatch(addInToTotalRecord(1));
             dispatch(setSavingButton(false));
         })
-        .catch(({ response }) => {
+        .catch((error) => {
             dispatch(setSavingButton(false));
+
+            const message = resolveApiErrorMessage(error);
+
+            if (!message || message === getFormattedMessage("toast.error.title")) {
+                return;
+            }
+
             dispatch(
-                addToast({ text: response?.data?.message, type: toastType.ERROR })
+                addToast({
+                    text: message,
+                    type: toastType.ERROR,
+                })
             );
         });
 };
@@ -120,11 +160,18 @@ export const editCashAdvance =
                 navigate("/user/cash-advances");
                 dispatch(setSavingButton(false));
             })
-            .catch(({ response }) => {
+            .catch((error) => {
                 dispatch(setSavingButton(false));
+
+                const message = resolveApiErrorMessage(error);
+
+                if (!message || message === getFormattedMessage("toast.error.title")) {
+                    return;
+                }
+
                 dispatch(
                     addToast({
-                        text: response?.data?.message,
+                        text: message,
                         type: toastType.ERROR,
                     })
                 );
@@ -147,9 +194,18 @@ export const deleteCashAdvance = (cashAdvanceId) => async (dispatch) => {
                 })
             );
         })
-        .catch(({ response }) => {
+        .catch((error) => {
+            const message = resolveApiErrorMessage(error);
+
+            if (!message || message === getFormattedMessage("toast.error.title")) {
+                return;
+            }
+
             dispatch(
-                addToast({ text: response?.data?.message, type: toastType.ERROR })
+                addToast({
+                    text: message,
+                    type: toastType.ERROR,
+                })
             );
         });
 };

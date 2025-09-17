@@ -138,7 +138,7 @@ return [
         'you_can_not_enable_more_than_4_taxes' => "No puede habilitar más de 4 impuestos.",
     ],
 
-    'success' => [
+'success' => [
         'cache_clear_successfully' => 'Caché borrada exitosamente',
         'product_category_delete' => 'Categoría de producto eliminada exitosamente.',
         'status_updated' => 'Estado actualizado exitosamente.',
@@ -174,6 +174,13 @@ return [
         'tax_status_changed' => "Estado del impuesto cambiado con éxito.",
         'pos_settings_updated' => 'Configuración de POS actualizada con éxito.',
         'dual_screen_settings_updated' => 'La configuración de pantalla dual se actualizó correctamente.',
+    ],
+
+    'cash_advance' => [
+        'status' => [
+            'pending' => 'Outstanding',
+            'paid' => 'Paid Off',
+        ],
     ],
 
     'heading_discount' => 'DESCUENTO',

@@ -24,48 +24,56 @@ if (! function_exists('getPageSize')) {
     }
 }
 
-function getAppName(): string
-{
-    static $appName;
+if (! function_exists('getAppName')) {
+    function getAppName(): string
+    {
+        static $appName;
 
-    if (empty($appName)) {
-        $appName = getSadminSettingValue('app_name');
+        if (empty($appName)) {
+            $appName = getSadminSettingValue('app_name');
+        }
+
+        return $appName ?? 'POS';
     }
-
-    return $appName ?? 'POS';
 }
 
-function getAppLogoUrl(): string
-{
-    static $appLogo;
+if (! function_exists('getAppLogoUrl')) {
+    function getAppLogoUrl(): string
+    {
+        static $appLogo;
 
-    if (empty($appLogo)) {
-        $appLogo = SadminSetting::where('key', 'app_logo')->first();
+        if (empty($appLogo)) {
+            $appLogo = SadminSetting::where('key', 'app_logo')->first();
+        }
+
+        return $appLogo->value ?? asset('images/logo.png');
     }
-
-    return $appLogo->value ?? asset('images/logo.png');
 }
 
-function getAppFaviconUrl(): string
-{
-    static $appFavicon;
+if (! function_exists('getAppFaviconUrl')) {
+    function getAppFaviconUrl(): string
+    {
+        static $appFavicon;
 
-    if (empty($appFavicon)) {
-        $appFavicon = SadminSetting::where('key', 'app_favicon')->first();
+        if (empty($appFavicon)) {
+            $appFavicon = SadminSetting::where('key', 'app_favicon')->first();
+        }
+
+        return $appFavicon->value ?? asset('images/infyom.png');
     }
-
-    return $appFavicon->value ?? asset('images/infyom.png');
 }
 
-function getStoreLogo(): string
-{
-    static $appStoreLogo;
+if (! function_exists('getStoreLogo')) {
+    function getStoreLogo(): string
+    {
+        static $appStoreLogo;
 
-    if (empty($appStoreLogo)) {
-        $appStoreLogo = getSettingValue('store_logo') ?? getAppLogoUrl();
+        if (empty($appStoreLogo)) {
+            $appStoreLogo = getSettingValue('store_logo') ?? getAppLogoUrl();
+        }
+
+        return $appStoreLogo ?? getAppLogoUrl();
     }
-
-    return $appStoreLogo ?? getAppLogoUrl();
 }
 
 if (! function_exists('getSettingValue')) {
@@ -90,29 +98,35 @@ if (! function_exists('getSettingValue')) {
     }
 }
 
-function canDelete(array $models, string $columnName, int $id): bool
-{
-    foreach ($models as $model) {
-        $result = $model::where($columnName, $id)->exists();
+if (! function_exists('canDelete')) {
+    function canDelete(array $models, string $columnName, int $id): bool
+    {
+        foreach ($models as $model) {
+            $result = $model::where($columnName, $id)->exists();
 
-        if ($result) {
-            return true;
+            if ($result) {
+                return true;
+            }
         }
+
+        return false;
     }
-
-    return false;
 }
 
-function getCurrencyCode()
-{
-    $currencyId = Setting::where('key', '=', 'currency')->first()->value;
+if (! function_exists('getCurrencyCode')) {
+    function getCurrencyCode()
+    {
+        $currencyId = Setting::where('key', '=', 'currency')->first()->value;
 
-    return Currency::whereId($currencyId)->first()->symbol;
+        return Currency::whereId($currencyId)->first()->symbol;
+    }
 }
 
-function getLoginUserLanguage(): string
-{
-    return \Illuminate\Support\Facades\Auth::user()->language ?? 'en';
+if (! function_exists('getLoginUserLanguage')) {
+    function getLoginUserLanguage(): string
+    {
+        return \Illuminate\Support\Facades\Auth::user()->language ?? 'en';
+    }
 }
 
 if (! function_exists('manageStock')) {
@@ -158,20 +172,22 @@ if (! function_exists('keyExist')) {
     }
 }
 
-function getSupplierGrandTotalFilterIds($search)
-{
-    $supplierData = Supplier::with('purchases')->get();
-    $ids = [];
-    foreach ($supplierData as $key => $supplier) {
-        $value = $supplier->purchases->sum('grand_total');
-        if ($search != '') {
-            if ($value == $search) {
-                $ids[] = $supplier->id;
+if (! function_exists('getSupplierGrandTotalFilterIds')) {
+    function getSupplierGrandTotalFilterIds($search)
+    {
+        $supplierData = Supplier::with('purchases')->get();
+        $ids = [];
+        foreach ($supplierData as $key => $supplier) {
+            $value = $supplier->purchases->sum('grand_total');
+            if ($search != '') {
+                if ($value == $search) {
+                    $ids[] = $supplier->id;
+                }
             }
         }
-    }
 
-    return $ids;
+        return $ids;
+    }
 }
 
 if (! function_exists('replaceArrayValue')) {
@@ -249,35 +265,38 @@ if (! function_exists('getSadminSettingValue')) {
         return $sadminSettingValues[$key];
     }
 }
-function getPayPalSupportedCurrencies()
-{
-    return [
-        'AUD',
-        'BRL',
-        'CAD',
-        'CNY',
-        'CZK',
-        'DKK',
-        'EUR',
-        'HKD',
-        'HUF',
-        'ILS',
-        'JPY',
-        'MYR',
-        'MXN',
-        'TWD',
-        'NZD',
-        'NOK',
-        'PHP',
-        'PLN',
-        'GBP',
-        'RUB',
-        'SGD',
-        'SEK',
-        'CHF',
-        'THB',
-        'USD',
-    ];
+
+if (! function_exists('getPayPalSupportedCurrencies')) {
+    function getPayPalSupportedCurrencies()
+    {
+        return [
+            'AUD',
+            'BRL',
+            'CAD',
+            'CNY',
+            'CZK',
+            'DKK',
+            'EUR',
+            'HKD',
+            'HUF',
+            'ILS',
+            'JPY',
+            'MYR',
+            'MXN',
+            'TWD',
+            'NZD',
+            'NOK',
+            'PHP',
+            'PLN',
+            'GBP',
+            'RUB',
+            'SGD',
+            'SEK',
+            'CHF',
+            'THB',
+            'USD',
+        ];
+    }
 }
 
 if (!function_exists('getPlanFeature')) {

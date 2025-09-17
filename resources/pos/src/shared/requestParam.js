@@ -112,6 +112,18 @@ export default (
         }
         url = url + "customer_id=" + filters.customer_id;
     }
+    if (filters.recorded_by) {
+        if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
+            url += "&";
+        }
+        url = url + "recorded_by=" + filters.recorded_by;
+    }
+    if (filters.cash_status !== undefined && filters.cash_status !== null && filters.cash_status !== "all") {
+        if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
+            url += "&";
+        }
+        url = url + "status=" + filters.cash_status;
+    }
     if (filters.user_id) {
         if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
             url += "&";

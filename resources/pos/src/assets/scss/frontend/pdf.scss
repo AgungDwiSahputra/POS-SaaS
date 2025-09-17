@@ -1,4 +1,4 @@
-@import "../components/variables";
+@use "../components/variables" as *;
 
 .print-data {
     margin: 0 !important;
@@ -20,4 +20,3 @@
         }
     }
 }
-

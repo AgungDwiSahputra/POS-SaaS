@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasJsonResourcefulData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * App\Models\CashAdvance
@@ -28,6 +29,10 @@ class CashAdvance extends BaseModel
 
     public const JSON_API_TYPE = 'cash_advances';
 
+    public const STATUS_PENDING = 0;
+
+    public const STATUS_PAID = 1;
+
     protected $fillable = [
         'date',
         'warehouse_id',
@@ -35,6 +40,8 @@ class CashAdvance extends BaseModel
         'issued_to_phone',
         'issued_to_email',
         'amount',
+        'paid_amount',
+        'status',
         'reference_code',
         'notes',
         'recorded_by',
@@ -48,10 +55,15 @@ class CashAdvance extends BaseModel
         'issued_to_email' => 'nullable|email|max:191',
         'amount' => 'required|numeric',
         'notes' => 'nullable|string',
+        'paid_amount' => 'nullable|numeric',
+        'status' => 'nullable|integer',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'amount' => 'double',
+        'paid_amount' => 'double',
+        'status' => 'integer',
     ];
 
     public function prepareLinks(): array
@@ -77,10 +89,17 @@ class CashAdvance extends BaseModel
             'issued_to_phone' => $this->issued_to_phone,
             'issued_to_email' => $this->issued_to_email,
             'amount' => $this->amount,
+            'paid_amount' => $this->paid_amount,
+            'outstanding_amount' => max(0, ($this->amount - $this->paid_amount)),
+            'status' => $this->status,
+            'status_label' => $this->status === self::STATUS_PAID
+                ? __('messages.cash_advance.status.paid')
+                : __('messages.cash_advance.status.pending'),
             'reference_code' => $this->reference_code,
             'notes' => $this->notes,
             'recorded_by' => $this->recorded_by,
             'recorded_by_name' => $recordedByName,
+            'payments_count' => $this->payments_count ?? $this->payments()->count(),
             'created_at' => $this->created_at,
         ];
     }
@@ -95,11 +114,17 @@ class CashAdvance extends BaseModel
         return $this->belongsTo(User::class, 'recorded_by', 'id')->withoutGlobalScope('tenant');
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(CashAdvancePayment::class, 'cash_advance_id');
+    }
+
     /**
      * @var string[]
      */
     public static $availableRelations = [
         'warehouse_id' => 'warehouse',
         'recorded_by' => 'recordedBy',
+        'payments' => 'payments',
     ];
 }

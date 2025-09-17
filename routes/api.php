@@ -251,6 +251,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         //cash advance route
         Route::middleware('permission:manage_cash_advances|manage_reports')->group(function () {
             Route::resource('cash-advances', CashAdvanceAPIController::class);
+            Route::get('cash-advances/{cash_advance}/payments', [CashAdvanceAPIController::class, 'payments']);
+            Route::post('cash-advances/{cash_advance}/payments', [CashAdvanceAPIController::class, 'storePayment']);
+            Route::get('cash-advance-report', [CashAdvanceAPIController::class, 'report']);
         });
 
         //setting route

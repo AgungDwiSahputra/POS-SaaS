@@ -20,6 +20,7 @@ export const apiBaseURL = {
     EXPENSES_CATEGORIES: "/expense-categories",
     EXPENSES: "/expenses",
     CASH_ADVANCES: "/cash-advances",
+    CASH_ADVANCE_REPORT: "/cash-advance-report",
     MAIN_PRODUCTS: "/main-products",
     PRODUCTS: "/products",
     IMPORT_PRODUCT: "/import-products",
@@ -210,6 +211,11 @@ export const cashAdvanceActionType = {
     ADD_CASH_ADVANCE: "ADD_CASH_ADVANCE",
     EDIT_CASH_ADVANCE: "EDIT_CASH_ADVANCE",
     DELETE_CASH_ADVANCE: "DELETE_CASH_ADVANCE",
+    SET_CASH_ADVANCE_SUMMARY: "SET_CASH_ADVANCE_SUMMARY",
+};
+
+export const cashAdvanceReportActionType = {
+    FETCH_CASH_ADVANCE_REPORT: "FETCH_CASH_ADVANCE_REPORT",
 };
 
 export const settingActionType = {
@@ -959,6 +965,12 @@ export const transferCreatStatusOptions = [
     { id: 1, name: "status.filter.complated.label" },
     { id: 2, name: "status.filter.sent.label" },
     { id: 3, name: "status.filter.pending.label" },
+];
+
+export const cashAdvanceStatusOptions = [
+    { id: "all", name: "unit.filter.all.label" },
+    { id: 0, name: "cash-advance.status.outstanding" },
+    { id: 1, name: "cash-advance.status.paid" },
 ];
 
 export const smsStatusOptions = [

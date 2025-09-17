@@ -1,8 +1,10 @@
+@use "sass:meta";
+
 // Get Mode
 //
 
 @function getMode() {
-    @if (variable-exists(mode)) {
+    @if (meta.variable-exists(mode)) {
         @return $mode;
     } @else {
         @return default;
