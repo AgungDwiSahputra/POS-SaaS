@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateTransferRequest;
 use App\Http\Resources\TransferCollection;
 use App\Http\Resources\TransferResource;
 use App\Models\ManageStock;
+use App\Models\Product;
 use App\Models\Transfer;
 use App\Models\TransferItem;
 use App\Repositories\TransferRepository;
@@ -95,6 +96,60 @@ class TransferAPIController extends AppBaseController
 
             $transfer = $this->transferRepository->with('transferItems')->where('id', $id)->firstOrFail();
 
+            // Revert HPP effect from line price revaluation (if toggle on and transfer completed)
+            if ($transfer->status == \App\Models\Transfer::COMPLETED && (int) (getSettingValue('transfer_line_revalue_hpp') ?? 0) === 1) {
+                $items = $transfer->transferItems;
+                if ($items && $items->count() > 0) {
+                    $qtyByProduct = [];
+                    $amountByProduct = [];
+                    foreach ($items as $it) {
+                        $pid = $it->product_id;
+                        $qtyByProduct[$pid] = ($qtyByProduct[$pid] ?? 0) + (float) $it->quantity;
+                        $amountByProduct[$pid] = ($amountByProduct[$pid] ?? 0) + (float) $it->sub_total;
+                    }
+                    foreach ($qtyByProduct as $pid => $movedQty) {
+                        /** @var Product $prod */
+                        $prod = Product::find($pid);
+                        if (! $prod) { continue; }
+                        $totalQty = (float) ManageStock::where('product_id', $pid)->sum('quantity');
+                        if ($totalQty <= 0) { continue; }
+                        $hpp = (float) ($prod->hpp ?? 0);
+                        $lineAmt = (float) ($amountByProduct[$pid] ?? 0);
+                        // remove prior effect: negative of (lineAmt - hpp * movedQty)
+                        $deltaEffect = - ($lineAmt - ($hpp * $movedQty));
+                        $newHpp = (($totalQty * $hpp) + $deltaEffect) / $totalQty;
+                        $prod->update(['hpp' => (int) round($newHpp)]);
+                    }
+                }
+            }
+
+            // Revert HPP effect from shipping allocation (if any and transfer completed)
+            $shipping = (float) ($transfer->shipping ?? 0);
+            if ($transfer->status == \App\Models\Transfer::COMPLETED && $shipping > 0) {
+                $items = $transfer->transferItems;
+                $totalQtyMoved = max(0.0, (float) $items->sum('quantity'));
+                if ($totalQtyMoved > 0) {
+                    $perProductQty = [];
+                    foreach ($items as $it) {
+                        $perProductQty[$it->product_id] = ($perProductQty[$it->product_id] ?? 0) + (float) $it->quantity;
+                    }
+                    foreach ($perProductQty as $pid => $qtyMoved) {
+                        /** @var Product $prod */
+                        $prod = Product::find($pid);
+                        if (! $prod) { continue; }
+                        $oldQtyTotal = (float) ManageStock::where('product_id', $pid)->sum('quantity');
+                        if ($oldQtyTotal <= 0) { continue; }
+                        $oldHpp = (float) ($prod->hpp ?? 0);
+                        $alloc = $shipping * ($qtyMoved / $totalQtyMoved);
+                        // remove shipping effect
+                        $newHpp = max(0, (($oldQtyTotal * $oldHpp) - $alloc) / $oldQtyTotal);
+                        $prod->update(['hpp' => (int) round($newHpp)]);
+                    }
+                }
+            }
+
+            // Revert stock movement only if it was previously applied (completed)
+            if ($transfer->status == \App\Models\Transfer::COMPLETED) {
             foreach ($transfer->transferItems as $transferItem) {
                 $oldTransferItem = TransferItem::whereId($transferItem->id)->first();
                 $oldTransfer = Transfer::whereId($oldTransferItem->transfer_id)->first();
@@ -113,6 +168,7 @@ class TransferAPIController extends AppBaseController
                 $fromQuantity = $fromQuantity + $oldTransferItem->quantity;
 
                 manageStock($oldTransfer->from_warehouse_id, $oldTransferItem->product_id, $fromQuantity);
+            }
             }
 
             $this->transferRepository->delete($id);

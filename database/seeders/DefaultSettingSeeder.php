@@ -129,6 +129,7 @@ class DefaultSettingSeeder extends Seeder
             'sale_code' => 'SA',
             'sale_return_code' => 'SR',
             'expense_code' => 'EX',
+            'cash_advance_code' => 'CA',
             // Receipt Settings
             'show_note' => '1',
             'show_phone' => '1',

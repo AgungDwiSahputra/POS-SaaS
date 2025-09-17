@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use App\Models\Role as RoleModel;
 
 class DefaultPermissionsSeeder extends Seeder
 {
@@ -70,6 +71,10 @@ class DefaultPermissionsSeeder extends Seeder
                 'display_name' => 'Manage Expenses'
             ],
             [
+                'name' => 'manage_cash_advances',
+                'display_name' => 'Manage Cash Advances'
+            ],
+            [
                 'name' => 'manage_setting',
                 'display_name' => 'Manage Setting'
             ],
@@ -132,6 +137,11 @@ class DefaultPermissionsSeeder extends Seeder
             if (! $permissionExist) {
                 Permission::create($permission);
             }
+        }
+
+        $adminRole = RoleModel::whereName(RoleModel::ADMIN)->first();
+        if ($adminRole) {
+            $adminRole->givePermissionTo('manage_cash_advances');
         }
     }
 }

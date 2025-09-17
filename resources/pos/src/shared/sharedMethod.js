@@ -41,9 +41,9 @@ export const numFloatValidate = (event) => {
 };
 
 
-export const getFormattedMessage = (id) => {
+export const getFormattedMessage = (id, defaultText = null) => {
     if (!id) return "";
-    return <FormattedMessage id={id} defaultMessgae={id} />;
+    return <FormattedMessage id={id} defaultMessage={defaultText ?? id} />;
 };
 
 export const getFormattedOptions = (options) => {

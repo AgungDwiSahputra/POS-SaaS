@@ -19,7 +19,7 @@ class GenerateCrudPermissionsSeeder extends Seeder
             'adjustments', 'transfers', 'roles', 'brands',
             'warehouses', 'units', 'product_categories', 'products',
             'suppliers', 'customers', 'users', 'expense_categories',
-            'expenses', 'setting', 'dashboard', 'pos_screen', 'purchase',
+            'expenses', 'cash_advances', 'setting', 'dashboard', 'pos_screen', 'purchase',
             'sale', 'purchase_return', 'sale_return', 'email_templates',
             'reports', 'quotations', 'sms_templates', 'sms_apis',
             'variations',

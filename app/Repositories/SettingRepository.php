@@ -95,6 +95,7 @@ class SettingRepository extends BaseRepository
                 'sale_code',
                 'sale_return_code',
                 'expense_code',
+                'cash_advance_code',
                 'show_logo_in_receipt',
             ]);
 
@@ -189,6 +190,8 @@ class SettingRepository extends BaseRepository
                 'enable_pos_click_audio',
                 'click_audio',
                 'show_pos_stock_product',
+                // toggle revaluasi HPP dari harga line transfer pada fitur transfer
+                'transfer_line_revalue_hpp',
             ]);
 
             foreach ($settingInputArray as $key => $value) {

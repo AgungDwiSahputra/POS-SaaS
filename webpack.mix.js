@@ -1,3 +1,6 @@
+process.env.SASS_SILENCE_DEPRECATION_WARNINGS = 'true';
+process.env.SASS_SILENCE_DEPRECATIONS = 'legacy-js-api,import';
+
 const mix = require('laravel-mix');
 
 /*
@@ -15,6 +18,32 @@ mix.options({
     postCss: [
         require('autoprefixer'),
     ],
+}).override((config) => {
+    const updateSassLoaderOptions = (rule) => {
+        if (!rule || !rule.use) {
+            return;
+        }
+
+        rule.use.forEach((loader) => {
+            if (!loader.loader || !loader.loader.includes('sass-loader')) {
+                return;
+            }
+
+            loader.options = loader.options || {};
+            loader.options.sassOptions = {
+                ...(loader.options.sassOptions || {}),
+                silenceDeprecations: ['legacy-js-api', 'import'],
+            };
+        });
+    };
+
+    config.module?.rules?.forEach((rule) => {
+        if (Array.isArray(rule.oneOf)) {
+            rule.oneOf.forEach(updateSassLoaderOptions);
+        } else {
+            updateSassLoaderOptions(rule);
+        }
+    });
 });
 
 mix.setPublicPath('public');

@@ -249,6 +249,7 @@ export const userMenu = [
         subPath: {
             expensesSubPath: "/user/expenses",
             expenseCategoriesSubPath: "/user/expense-categories",
+            cashAdvancesSubPath: "/user/cash-advances",
         },
         subMenu: [
             {
@@ -266,6 +267,14 @@ export const userMenu = [
                 class: "d-flex",
                 permission: Permissions.MANAGE_EXPENSES_CATEGORIES,
                 to: "/user/expense-categories",
+            },
+            {
+                title: "cash-advance.title",
+                name: "cash advances",
+                fontIcon: <FontAwesomeIcon icon={faMoneyBill} />,
+                class: "d-flex",
+                permission: Permissions.MANAGE_CASH_ADVANCES,
+                to: "/user/cash-advances",
             },
         ],
     },
@@ -358,6 +367,7 @@ export const userMenu = [
         customerReportPath: "/user/report/customers",
         customerReportDetailsPath: "/user/report/customers/details",
         registerReportPath: "/user/report/register",
+        cashAdvanceReportPath: "/user/report/cash-advance",
         class: "d-flex",
         isSamePrefix: "true",
         permission: Permissions.MANAGE_REPORTS,
@@ -375,6 +385,7 @@ export const userMenu = [
             { title: "profit-loss.reports.title" },
             { title: "best-customer.report.title" },
             { title: "register.report.title" },
+            { title: "cash-advance.report.title" },
         ],
         items: [
             {
@@ -425,6 +436,10 @@ export const userMenu = [
             {
                 title: getFormattedMessage("register.report.title"),
                 to: "/user/report/register",
+            },
+            {
+                title: getFormattedMessage("cash-advance.report.title"),
+                to: "/user/report/cash-advance",
             },
         ],
     },

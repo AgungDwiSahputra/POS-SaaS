@@ -299,7 +299,57 @@ const ProfitLossReport = (props) => {
                             value={
                                 profitAndLossReport.gross_profit
                                     ? parseFloat(
-                                          profitAndLossReport.gross_profit
+                                        profitAndLossReport.gross_profit
+                                    ).toFixed(2)
+                                    : "0.00"
+                            }
+                        />
+
+                        <ProfitLossWidget
+                            className={"bg-success"}
+                            currency={
+                                frontSetting.value &&
+                                frontSetting.value.currency_symbol
+                            }
+                            icon={
+                                <FontAwesomeIcon
+                                    icon={faMoneyBillTrendUp}
+                                    className="fs-1-xl text-white"
+                                />
+                            }
+                            title={getFormattedMessage(
+                                "global.net-profit.title"
+                            )}
+                            allConfigData={allConfigData}
+                            moreText={`(
+                                            ${currencySymbolHandling(
+                                                allConfigData,
+                                                frontSetting.value &&
+                                                    frontSetting.value
+                                                        .currency_symbol,
+                                                profitAndLossReport.gross_profit
+                                                    ? profitAndLossReport.gross_profit
+                                                    : "0.00"
+                                            )}
+                                            ${placeholderText(
+                                                "global.gross-profit.title"
+                                            )}) - (
+                                            ${currencySymbolHandling(
+                                                allConfigData,
+                                                frontSetting.value &&
+                                                    frontSetting.value
+                                                        .currency_symbol,
+                                                profitAndLossReport.expenses
+                                                    ? profitAndLossReport.expenses
+                                                    : "0.00"
+                                            )}
+                                            ${placeholderText(
+                                                "expenses.title"
+                                            )})`}
+                            value={
+                                profitAndLossReport.net_profit
+                                    ? parseFloat(
+                                          profitAndLossReport.net_profit
                                       ).toFixed(2)
                                     : "0.00"
                             }

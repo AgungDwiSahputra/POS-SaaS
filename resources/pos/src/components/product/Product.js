@@ -4,6 +4,8 @@ import moment from "moment";
 import { Button, Image } from "react-bootstrap-v5";
 import MasterLayout from "../MasterLayout";
 import { fetchAllMainProducts } from "../../store/action/productAction";
+import { fetchAllWarehouses } from "../../store/action/warehouseAction";
+import ReactSelect from "../../shared/select/reactSelect";
 import ReactDataTable from "../../shared/table/ReactDataTable";
 import DeleteMainProduct from "./DeleteMainProduct";
 import TabTitle from "../../shared/tab-title/TabTitle";
@@ -33,7 +35,8 @@ const Product = (props) => {
         productUnitId,
         allConfigData,
         callAPIAfterImport,
-        isCallFetchDataApi
+        isCallFetchDataApi,
+        warehouses,
     } = props;
 
     const [deleteModel, setDeleteModel] = useState(false);
@@ -42,6 +45,7 @@ const Product = (props) => {
     const [lightBoxImage, setLightBoxImage] = useState([]);
 
     const [importProduct, setimportProduct] = useState(false);
+    const [warehouseValue, setWarehouseValue] = useState(null);
     const handleClose = () => {
         setimportProduct(!importProduct);
     };
@@ -63,8 +67,27 @@ const Product = (props) => {
     };
 
     const onChange = (filter) => {
-        fetchAllMainProducts(filter, true);
+        const merged = { ...filter };
+        if (warehouseValue && warehouseValue.value) {
+            merged.warehouse_id = warehouseValue.value;
+        }
+        fetchAllMainProducts(merged, true);
     };
+
+    useEffect(() => {
+        // load warehouses for filter dropdown
+        fetchAllWarehouses();
+    }, []);
+
+    useEffect(() => {
+        // initial fetch with warehouse filter if selected
+        const filter = {};
+        if (warehouseValue && warehouseValue.value) {
+            filter.warehouse_id = warehouseValue.value;
+        }
+        fetchAllMainProducts(filter, true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [warehouseValue]);
 
     const goToEditProduct = (item) => {
         const id = item.id;
@@ -114,13 +137,21 @@ const Product = (props) => {
                 product_unit: product?.attributes.product_unit?.name
                     ? product?.attributes.product_unit?.name
                     : "N/A",
-                in_stock: product.attributes.products?.reduce(
-                    (sum, product) =>
-                        product?.in_stock
-                            ? sum + product?.in_stock
-                            : 0,
-                    0
-                ),
+                in_stock: product.attributes.products?.reduce((sum, p) => {
+                    if (warehouseValue && warehouseValue.value && warehouses && warehouses.length) {
+                        const wh = warehouses.find(w => w.id === warehouseValue.value);
+                        const whName = wh?.attributes?.name;
+                        if (whName) {
+                            const list = p?.warehouse || [];
+                            const qtyForWh = list
+                                .filter((x) => x?.name === whName)
+                                .reduce((s, x) => s + (x?.total_quantity || 0), 0);
+                            return sum + qtyForWh;
+                        }
+                    }
+                    // fallback: total global
+                    return sum + (p?.in_stock ? p.in_stock : 0);
+                }, 0),
                 images: product?.attributes.images,
                 id: product.id,
                 currency: currencySymbol,
@@ -260,6 +291,20 @@ const Product = (props) => {
         <MasterLayout>
             <TopProgressBar />
             <TabTitle title={placeholderText("products.title")} />
+            <div className="mx-auto mb-md-5 col-12 col-md-4">
+                {warehouses && warehouses[0] && (
+                    <ReactSelect
+                        data={warehouses}
+                        onChange={(obj) => setWarehouseValue(obj)}
+                        defaultValue={warehouseValue}
+                        title={getFormattedMessage("warehouse.title")}
+                        errors={""}
+                        placeholder={placeholderText(
+                            "product.input.warehouse.placeholder.label"
+                        )}
+                    />
+                )}
+            </div>
             <ReactDataTable
                 columns={columns}
                 items={itemsValue}
@@ -321,7 +366,8 @@ const mapStateToProps = (state) => {
         productUnitId,
         allConfigData,
         callAPIAfterImport,
-        isCallFetchDataApi
+        isCallFetchDataApi,
+        warehouses,
     } = state;
     return {
         products,
@@ -331,11 +377,13 @@ const mapStateToProps = (state) => {
         productUnitId,
         allConfigData,
         callAPIAfterImport,
-        isCallFetchDataApi
+        isCallFetchDataApi,
+        warehouses,
     };
 };
 
 export default connect(mapStateToProps, {
     fetchAllMainProducts,
     productExcelAction,
+    fetchAllWarehouses,
 })(Product);

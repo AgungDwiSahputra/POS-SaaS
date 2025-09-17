@@ -28,7 +28,8 @@ export const fetchSales =
                     filter.search ||
                     filter.order_By ||
                     filter.created_at ||
-                    filter.customer_id)
+                    filter.customer_id ||
+                    filter.user_id)
             ) {
                 url += requestParam(filter, admin, null, null, url);
             }

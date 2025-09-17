@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Form } from "react-bootstrap-v5";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
@@ -23,10 +23,25 @@ const ReactMultiSelect = ({
     onChange,
     errors = "",
     option,
+    controlId,
 }) => {
+    const generatedId = useMemo(() => {
+        if (controlId) {
+            return controlId;
+        }
+
+        if (typeof ReactMultiSelect.idCounter === "undefined") {
+            ReactMultiSelect.idCounter = 0;
+        }
+
+        ReactMultiSelect.idCounter += 1;
+
+        return `react-multi-select-${ReactMultiSelect.idCounter}`;
+    }, [controlId]);
+
     return (
-        <Form.Group className="form-group w-100" controlId="formBasic">
-            {title ? <Form.Label>{title} :</Form.Label> : ""}
+        <Form.Group className="form-group w-100">
+            {title ? <Form.Label htmlFor={generatedId}>{title} :</Form.Label> : ""}
             {isRequired ? "" : <span className="required" />}
             <Select
                 placeholder={placeholder}
@@ -38,6 +53,7 @@ const ReactMultiSelect = ({
                 options={option}
                 styles={customStyles}
                 noOptionsMessage={() => getFormattedMessage("no-option.label")}
+                inputId={generatedId}
             />
             {errors ? (
                 <span className="text-danger d-block fw-400 fs-small mt-2">

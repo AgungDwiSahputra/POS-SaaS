@@ -138,7 +138,7 @@ return [
         'you_can_not_enable_more_than_4_taxes' => "Bạn không thể kích hoạt nhiều hơn 4 loại thuế.",
     ],
 
-    'success' => [
+'success' => [
         'cache_clear_successfully' => 'Xóa bộ nhớ đệm thành công.',
         'product_category_delete' => 'Danh mục sản phẩm đã được xóa thành công.',
         'status_updated' => 'Trạng thái được cập nhật thành công.',
@@ -174,6 +174,13 @@ return [
         'tax_status_changed' => "Trạng thái thuế đã được thay đổi thành công.",
         'pos_settings_updated' => 'Cài đặt POS đã được cập nhật thành công.',
         'dual_screen_settings_updated' => 'Cài đặt màn hình kép đã được cập nhật thành công.',
+    ],
+
+    'cash_advance' => [
+        'status' => [
+            'pending' => 'Outstanding',
+            'paid' => 'Paid Off',
+        ],
     ],
 
     'heading_discount' => 'GIẢM GIÁ',

@@ -75,8 +75,15 @@ const StockReport = (props) => {
             product_category_name: stockReport.attributes.product_category_name,
             product_cost: stockReport.attributes.product.product_cost,
             product_price: stockReport.attributes.product.product_price,
+            hpp: stockReport.attributes.product.hpp,
             product_unit: stockReport.attributes.product_unit_name,
             current_stock: stockReport.attributes.quantity,
+            total_hpp:
+                (stockReport.attributes.product.hpp || 0) *
+                (stockReport.attributes.quantity || 0),
+            total_assets:
+                (stockReport.attributes.product.hpp || 0) *
+                (stockReport.attributes.quantity || 0),
             id: stockReport.attributes.product_id,
             currency: currencySymbol,
         }));
@@ -148,6 +155,39 @@ const StockReport = (props) => {
                     row.product_price
                 ),
             sortField: "product_price",
+            sortable: false,
+        },
+        {
+            name: getFormattedMessage("globally.input.hpp.label", "HPP"),
+            selector: (row) =>
+                currencySymbolHandling(
+                    allConfigData,
+                    row.currency,
+                    row.hpp
+                ),
+            sortField: "hpp",
+            sortable: false,
+        },
+        {
+            name: getFormattedMessage("globally.total.hpp.label", "Total HPP"),
+            selector: (row) =>
+                currencySymbolHandling(
+                    allConfigData,
+                    row.currency,
+                    row.total_hpp
+                ),
+            sortField: "total_hpp",
+            sortable: false,
+        },
+        {
+            name: getFormattedMessage("globally.total.assets.label", "Total Assets"),
+            selector: (row) =>
+                currencySymbolHandling(
+                    allConfigData,
+                    row.currency,
+                    row.total_assets
+                ),
+            sortField: "total_assets",
             sortable: false,
         },
         {

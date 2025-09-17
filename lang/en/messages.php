@@ -141,7 +141,7 @@ return [
         'cannot_change_status_used_payment_method' => "Payment method status can't be changed because it is used in :module.",
     ],
 
-    'success' => [
+'success' => [
         'cache_clear_successfully' => 'Cache cleared Successfully',
         'product_category_delete' => 'Product category deleted successfully.',
         'status_updated' => 'Status updated successfully.',
@@ -178,6 +178,13 @@ return [
         'pos_settings_updated' => 'POS Settings updated successfully.',
         'dual_screen_settings_updated' => 'Dual Screen Settings updated successfully.',
         'payment_method_status_updated' => 'Payment method status updated successfully.'
+    ],
+
+    'cash_advance' => [
+        'status' => [
+            'pending' => 'Outstanding',
+            'paid' => 'Paid Off',
+        ],
     ],
 
     'heading_discount' => 'DISCOUNT',

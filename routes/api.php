@@ -14,6 +14,7 @@ use App\Http\Controllers\API\ReportAPIController;
 use App\Http\Controllers\PaypalPaymentController;
 use App\Http\Controllers\StripePaymentController;
 use App\Http\Controllers\API\ExpenseAPIController;
+use App\Http\Controllers\API\CashAdvanceAPIController;
 use App\Http\Controllers\API\PaymentMethodAPIController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\ProductAPIController;
@@ -245,6 +246,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         //expense route
         Route::middleware('permission:manage_expenses|manage_reports')->group(function () {
             Route::resource('expenses', ExpenseAPIController::class);
+        });
+
+        //cash advance route
+        Route::middleware('permission:manage_cash_advances|manage_reports')->group(function () {
+            Route::resource('cash-advances', CashAdvanceAPIController::class);
+            Route::get('cash-advances/{cash_advance}/payments', [CashAdvanceAPIController::class, 'payments']);
+            Route::post('cash-advances/{cash_advance}/payments', [CashAdvanceAPIController::class, 'storePayment']);
+            Route::get('cash-advance-report', [CashAdvanceAPIController::class, 'report']);
         });
 
         //setting route

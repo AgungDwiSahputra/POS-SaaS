@@ -26,6 +26,9 @@ import ExpenseCategory from "./components/expense-category/ExpenseCategory";
 import Expenses from "./components/expense/Expenses";
 import CreateExpense from "./components/expense/CreateExpense";
 import EditExpense from "./components/expense/EditExpense";
+import CashAdvances from "./components/cash-advance/CashAdvances";
+import CreateCashAdvance from "./components/cash-advance/CreateCashAdvance";
+import EditCashAdvance from "./components/cash-advance/EditCashAdvance";
 import Purchases from "./components/purchase/Purchases";
 import CreatePurchase from "./components/purchase/CreatePurchase";
 import EditPurchase from "./components/purchase/EditPurchase";
@@ -46,6 +49,7 @@ import EditPurchaseReturn from "./components/purchaseReturn/EditPurchaseReturn";
 import PurchaseReturnDetails from "./components/purchaseReturn/PurchaseReturnDetails";
 import WarehouseReport from "./components/report/warehouseReport/WarehouseReport";
 import SaleReport from "./components/report/saleReport/SaleReport";
+import CashAdvanceReport from "./components/report/cashAdvance/CashAdvanceReport";
 import StockReport from "./components/report/stockReport/StockReport";
 import StockDetails from "./components/report/stockReport/StockDetails";
 import TopSellingProductsReport from "./components/report/topSellingReport/TopSellingProductsReport";
@@ -330,6 +334,21 @@ export const route = [
         permission: Permissions.EDIT_EXPENSES,
     },
     {
+        path: "cash-advances",
+        ele: <CashAdvances />,
+        permission: Permissions.MANAGE_CASH_ADVANCES,
+    },
+    {
+        path: "cash-advances/create",
+        ele: <CreateCashAdvance />,
+        permission: Permissions.CREATE_CASH_ADVANCES,
+    },
+    {
+        path: "cash-advances/edit/:id",
+        ele: <EditCashAdvance />,
+        permission: Permissions.EDIT_CASH_ADVANCES,
+    },
+    {
         path: "purchases",
         ele: <Purchases />,
         permission: Permissions.MANAGE_PURCHASE,
@@ -472,6 +491,11 @@ export const route = [
     {
         path: "report/report-sale",
         ele: <SaleReport />,
+        permission: Permissions.MANAGE_REPORTS,
+    },
+    {
+        path: "report/cash-advance",
+        ele: <CashAdvanceReport />,
         permission: Permissions.MANAGE_REPORTS,
     },
     {

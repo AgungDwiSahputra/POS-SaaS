@@ -138,7 +138,7 @@ return [
         'you_can_not_enable_more_than_4_taxes' => "您最多只能启用4个税项。",
     ],
 
-    'success' => [
+'success' => [
         'cache_clear_successfully' => '缓存清除成功',
         'product_category_delete' => '产品类别删除成功。',
         'status_updated' => '状态更新成功。',
@@ -174,6 +174,13 @@ return [
         'tax_status_changed' => "税务状态更改成功。",
         'pos_settings_updated' => 'POS 设置已成功更新。',
         'dual_screen_settings_updated' => '双屏设置已成功更新。',
+    ],
+
+    'cash_advance' => [
+        'status' => [
+            'pending' => 'Outstanding',
+            'paid' => 'Paid Off',
+        ],
     ],
 
     'heading_discount' => '折扣',

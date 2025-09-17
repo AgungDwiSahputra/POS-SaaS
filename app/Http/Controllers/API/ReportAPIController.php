@@ -587,6 +587,9 @@ class ReportAPIController extends AppBaseController
 
         $data['gross_profit'] = $data['sales'] - $data['product_cost'] - $data['sale_returns'];
 
+        // Net Profit = Gross Profit - Expenses
+        $data['net_profit'] = $data['gross_profit'] - $data['expenses'];
+
         return $this->sendResponse($data, 'Profit loss report info retrieved successfully');
     }
 

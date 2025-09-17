@@ -138,7 +138,7 @@ return [
         'you_can_not_enable_more_than_4_taxes' => "4'ten fazla vergi etkinleştirilemez.",
     ],
 
-    'success' => [
+'success' => [
         'cache_clear_successfully' => 'Önbellek başarıyla temizlendi.',
         'product_category_delete' => 'Ürün kategorisi başarıyla silindi.',
         'status_updated' => 'Durum başarıyla güncellendi.',
@@ -174,6 +174,13 @@ return [
         'tax_status_changed' => "Vergi durumu başarıyla değiştirildi.",
         'pos_settings_updated' => 'POS ayarları başarıyla güncellendi.',
         'dual_screen_settings_updated' => 'Çift ekran ayarları başarıyla güncellendi.',
+    ],
+
+    'cash_advance' => [
+        'status' => [
+            'pending' => 'Outstanding',
+            'paid' => 'Paid Off',
+        ],
     ],
 
     'heading_discount' => 'İNDİRİM',
