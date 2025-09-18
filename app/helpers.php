@@ -56,7 +56,11 @@ if (! function_exists('getAppFaviconUrl')) {
         static $appFavicon;
 
         if (empty($appFavicon)) {
-            $appFavicon = SadminSetting::where('key', 'app_favicon')->first();
+            try {
+                $appFavicon = SadminSetting::where('key', 'app_favicon')->first();
+            } catch (\Exception $e) {
+                $appFavicon = null;
+            }
         }
 
         return $appFavicon->value ?? asset('images/infyom.png');
@@ -258,9 +262,22 @@ if (! function_exists('getSadminSettingValue')) {
             return $sadminSettingValues[$key];
         }
 
-        /** @var SadminSetting $sadminSetting */
-        $sadminSetting = SadminSetting::where('key', '=', $keyName)->first();
-        $sadminSettingValues[$key] = $sadminSetting->value ?? null;
+        try {
+            /** @var SadminSetting $sadminSetting */
+            $sadminSetting = SadminSetting::where('key', '=', $keyName)->first();
+            $sadminSettingValues[$key] = $sadminSetting->value ?? null;
+        } catch (\Exception $e) {
+            // Fallback values when database is not available
+            $fallbackValues = [
+                'hero_title' => 'Welcome to Ez POS',
+                'hero_description' => 'Complete Point of Sale solution for your business. Manage inventory, sales, and customers with ease.',
+                'hero_button_title' => 'Get Started',
+                'hero_image' => asset('assets/images/hero-image.svg'),
+                'app_name' => 'Ez POS',
+                'app_favicon' => asset('assets/images/favicon.png'),
+            ];
+            $sadminSettingValues[$key] = $fallbackValues[$keyName] ?? 'Ez POS';
+        }
 
         return $sadminSettingValues[$key];
     }
