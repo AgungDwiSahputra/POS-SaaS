@@ -74,7 +74,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::post('stripe/generate-session', [StripePaymentController::class, 'generateSession'])->name('stripe-generate-session');
     Route::post('paypal/generate-session', [PaypalPaymentController::class, 'generateSession'])->name('paypal-generate-session');
-    Route::post('razorpay/generate-session', [RazorpayPaymentController::class, 'generateSession'])->name('stripe-generate-session');
+    Route::post('razorpay/generate-session', [RazorpayPaymentController::class, 'generateSession'])->name('razorpay-generate-session');
     Route::post('paystack/generate-session', [PaystackPaymentController::class, 'generateSession'])->name('paystack-generate-session');
 
     Route::middleware(['check_subscription'])->group(function () {
