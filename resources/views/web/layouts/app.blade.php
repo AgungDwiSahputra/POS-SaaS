@@ -15,7 +15,7 @@
     <link rel="icon" type="image/png" href="{{ getAppFaviconUrl() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/slick-theme.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/slick.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/scss/style.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}" />
     {{-- <link href="{{ asset('assets/css/all.min.css') }}" rel="stylesheet" /> --}}
     <script src="{{ asset('assets/js/tailwindcss.js') }}"></script>
     <script src="{{ asset('assets/js/tailwind-config.js') }}"></script>

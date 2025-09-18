@@ -18,14 +18,30 @@ class HomeController extends AppBaseController
 {
     public function index()
     {
-        $services = Service::all();
-        $partners = Partner::all();
-        $whyChooseUs = WhyChooseUs::all();
-        $testimonials = Testimonial::all();
-        $faqs = Faq::latest()->limit(5)->get();
-        $plans = Plan::whereNot('assign_while_register', 1)->get();
-        $features = Feature::all();
-        $steps = Step::all();
+        try {
+            $services = Service::all();
+            $partners = Partner::all();
+            $whyChooseUs = WhyChooseUs::all();
+            $testimonials = Testimonial::all();
+            $faqs = Faq::latest()->limit(5)->get();
+            $plans = Plan::whereNot('assign_while_register', 1)->get();
+            $features = Feature::all();
+            $steps = Step::all();
+        } catch (\Exception $e) {
+            // Fallback data when database is not available
+            $services = collect([
+                (object) ['id' => 1, 'title' => 'Point of Sale', 'description' => 'Complete POS system for your business', 'icon' => 'fas fa-cash-register'],
+                (object) ['id' => 2, 'title' => 'Inventory Management', 'description' => 'Track and manage your inventory efficiently', 'icon' => 'fas fa-boxes'],
+                (object) ['id' => 3, 'title' => 'Sales Analytics', 'description' => 'Detailed reports and analytics for your sales', 'icon' => 'fas fa-chart-line'],
+            ]);
+            $partners = collect();
+            $whyChooseUs = collect();
+            $testimonials = collect();
+            $faqs = collect();
+            $plans = collect();
+            $features = collect();
+            $steps = collect();
+        }
 
         return view('web.home', compact('services', 'partners', 'whyChooseUs', 'testimonials', 'faqs', 'plans', 'features', 'steps'));
     }
