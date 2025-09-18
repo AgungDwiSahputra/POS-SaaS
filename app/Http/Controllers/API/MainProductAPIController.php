@@ -57,11 +57,15 @@ class MainProductAPIController extends AppBaseController
 
         if ($request->get('warehouse_id') && $request->get('warehouse_id') != 'null') {
             $warehouseId = $request->get('warehouse_id');
-            $products->whereHas('stock', function ($q) use ($warehouseId) {
+            $products->whereHas('products.stock', function ($q) use ($warehouseId) {
                 $q->where('manage_stocks.warehouse_id', $warehouseId);
             })->with([
-                'stock' => function (HasOne $query) use ($warehouseId) {
-                    $query->where('manage_stocks.warehouse_id', $warehouseId);
+                'products' => function ($query) use ($warehouseId) {
+                    $query->with([
+                        'stock' => function (HasOne $stockQuery) use ($warehouseId) {
+                            $stockQuery->where('manage_stocks.warehouse_id', $warehouseId);
+                        },
+                    ]);
                 },
             ]);
         }

@@ -34,24 +34,26 @@ const SaleReport = (props) => {
         users,
         customers,
     } = props;
+    const allLabelText = placeholderText("unit.filter.all.label");
+    const defaultDateRangeLabel = placeholderText(
+        "sale-report.receipt.date-range.default"
+    );
     const [isWarehouseValue, setIsWarehouseValue] = useState(false);
     const [selectedCashier, setSelectedCashier] = useState({
         value: "0",
-        label: getFormattedMessage("unit.filter.all.label"),
+        label: allLabelText,
     });
     const [selectedCustomer, setSelectedCustomer] = useState({
         value: "0",
-        label: getFormattedMessage("unit.filter.all.label"),
+        label: allLabelText,
     });
     const receiptRef = useRef();
+    const pendingPrintRef = useRef(null);
+    const isCustomPrintingRef = useRef(false);
     const currencySymbol =
         frontSetting &&
         frontSetting.value &&
         frontSetting.value.currency_symbol;
-
-    const handlePrint = useReactToPrint({
-        content: () => receiptRef.current,
-    });
 
     useEffect(() => {
         fetchUsers({}, true, "?page[size]=0&returnAll=true");
@@ -112,6 +114,129 @@ const SaleReport = (props) => {
             totalSaleReportExcel(dates, setIsWarehouseValue, extraFilters);
         }
     }, [isWarehouseValue, extraFilters, dates, totalSaleReportExcel]);
+
+    const dateRangeLabel = useMemo(() => {
+        if (dates?.start_date && dates?.end_date) {
+            return `${moment(dates.start_date).format("DD/MM/YYYY")} - ${moment(
+                dates.end_date
+            ).format("DD/MM/YYYY")}`;
+        }
+
+        return defaultDateRangeLabel;
+    }, [dates, defaultDateRangeLabel]);
+
+    const baseReceiptData = useMemo(
+        () => ({
+            sales,
+            currency: currencySymbol,
+            cashierName: activeCashierId ? selectedCashier?.label : allLabelText,
+            customerName: activeCustomerId ? selectedCustomer?.label : null,
+            dateRange: dateRangeLabel,
+        }),
+        [
+            sales,
+            currencySymbol,
+            activeCashierId,
+            selectedCashier,
+            activeCustomerId,
+            selectedCustomer,
+            dateRangeLabel,
+            allLabelText,
+        ]
+    );
+
+    const [printBundle, setPrintBundle] = useState(() => ({
+        ...baseReceiptData,
+        printedAt: moment().format("LLL"),
+    }));
+
+    useEffect(() => {
+        if (!isCustomPrintingRef.current) {
+            setPrintBundle((prev) => {
+                const next = {
+                    ...baseReceiptData,
+                    printedAt: prev.printedAt,
+                };
+
+                const isSame =
+                    prev.printedAt === next.printedAt &&
+                    prev.currency === next.currency &&
+                    prev.cashierName === next.cashierName &&
+                    prev.customerName === next.customerName &&
+                    prev.dateRange === next.dateRange &&
+                    prev.sales === next.sales;
+
+                return isSame ? prev : next;
+            });
+        }
+    }, [baseReceiptData]);
+
+    const handleReactPrint = useReactToPrint({
+        content: () => receiptRef.current,
+        onBeforeGetContent: () =>
+            new Promise((resolve) => {
+                if (pendingPrintRef.current) {
+                    setPrintBundle(pendingPrintRef.current);
+                    pendingPrintRef.current = null;
+                    setTimeout(resolve, 0);
+                } else {
+                    resolve();
+                }
+            }),
+        onAfterPrint: () => {
+            isCustomPrintingRef.current = false;
+            setPrintBundle({
+                ...baseReceiptData,
+                printedAt: moment().format("LLL"),
+            });
+        },
+    });
+
+    const triggerPrint = (bundle) => {
+        isCustomPrintingRef.current = true;
+        pendingPrintRef.current = bundle;
+        handleReactPrint();
+    };
+
+    const handlePrintAll = () => {
+        triggerPrint({
+            ...baseReceiptData,
+            printedAt: moment().format("LLL"),
+        });
+    };
+
+    const handlePrintSingle = (saleId) => {
+        const saleRecord = sales.find((sale) => sale.id === saleId);
+        if (!saleRecord) {
+            return;
+        }
+
+        const saleDate = getFormattedDate(
+            saleRecord.attributes?.date,
+            allConfigData
+        );
+        const saleTime = saleRecord.attributes?.created_at
+            ? moment(saleRecord.attributes.created_at).format("LT")
+            : "";
+
+        const singleDateRange = saleDate
+            ? saleTime
+                ? `${saleDate} (${saleTime})`
+                : saleDate
+            : baseReceiptData.dateRange;
+
+        triggerPrint({
+            ...baseReceiptData,
+            sales: [saleRecord],
+            cashierName:
+                saleRecord.attributes?.user_name || baseReceiptData.cashierName,
+            customerName:
+                saleRecord.attributes?.customer_name ??
+                baseReceiptData.customerName,
+            dateRange: singleDateRange,
+            printedAt: moment().format("LLL"),
+        });
+    };
 
     const itemsValue =
         currencySymbol &&
@@ -270,6 +395,23 @@ const SaleReport = (props) => {
                 );
             },
         },
+        {
+            name: getFormattedMessage("react-data-table.action.column.label"),
+            right: true,
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            cell: (row) => (
+                <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handlePrintSingle(row.id)}
+                    disabled={!row?.id}
+                >
+                    {getFormattedMessage("sale-report.print.single.button")}
+                </Button>
+            ),
+        },
     ];
 
     const onChange = (filter) => {
@@ -284,7 +426,7 @@ const SaleReport = (props) => {
         if (!option || option.value === "0") {
             setSelectedCashier({
                 value: "0",
-                label: getFormattedMessage("unit.filter.all.label"),
+                label: allLabelText,
             });
         } else {
             setSelectedCashier(option);
@@ -295,23 +437,12 @@ const SaleReport = (props) => {
         if (!option || option.value === "0") {
             setSelectedCustomer({
                 value: "0",
-                label: getFormattedMessage("unit.filter.all.label"),
+                label: allLabelText,
             });
         } else {
             setSelectedCustomer(option);
         }
     };
-
-    const dateRangeLabel = useMemo(() => {
-        if (dates?.start_date && dates?.end_date) {
-            return `${moment(dates.start_date).format("DD/MM/YYYY")} - ${moment(
-                dates.end_date
-            ).format("DD/MM/YYYY")}`;
-        }
-
-        return getFormattedMessage("sale-report.receipt.date-range.default");
-    }, [dates]);
-
     return (
         <MasterLayout>
             <TopProgressBar />
@@ -320,7 +451,7 @@ const SaleReport = (props) => {
                 <Button
                     variant="primary"
                     className="btn btn-primary"
-                    onClick={handlePrint}
+                    onClick={handlePrintAll}
                     disabled={!sales || sales.length === 0}
                 >
                     {getFormattedMessage("sale-report.print-receipt.button")}
@@ -353,17 +484,12 @@ const SaleReport = (props) => {
             <div style={{ display: "none" }}>
                 <SaleReportReceipt
                     ref={receiptRef}
-                    sales={sales}
-                    currency={currencySymbol}
-                    cashierName={
-                        activeCashierId
-                            ? selectedCashier?.label
-                            : getFormattedMessage("unit.filter.all.label")
-                    }
-                    customerName={
-                        activeCustomerId ? selectedCustomer?.label : null
-                    }
-                    dateRange={dateRangeLabel}
+                    sales={printBundle.sales}
+                    currency={printBundle.currency}
+                    cashierName={printBundle.cashierName}
+                    customerName={printBundle.customerName}
+                    dateRange={printBundle.dateRange}
+                    printedAt={printBundle.printedAt}
                     allConfigData={allConfigData}
                 />
             </div>
