@@ -157,7 +157,7 @@ class SaleReturnRepository extends BaseRepository
                 $customer->name,
                 $saleReturn->reference_code,
                 $saleReturn->date,
-                number_format($saleReturn->grand_total, 2),
+                smartNumberFormat($saleReturn->grand_total, 2),
                 getActiveStoreName(),
             ];
 
