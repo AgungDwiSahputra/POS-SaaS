@@ -68,8 +68,9 @@ const StockReport = (props) => {
 
     const itemsValue =
         currencySymbol &&
-        stockReports.length >= 0 &&
-        stockReports.map((stockReport) => ({
+        stockReports.data &&
+        stockReports.data.length >= 0 &&
+        stockReports.data.map((stockReport) => ({
             code: stockReport.attributes.product.code,
             name: stockReport.attributes.product.name,
             product_category_name: stockReport.attributes.product_category_name,
@@ -179,17 +180,7 @@ const StockReport = (props) => {
             sortField: "total_hpp",
             sortable: false,
         },
-        {
-            name: getFormattedMessage("globally.total.assets.label", "Total Assets"),
-            selector: (row) =>
-                currencySymbolHandling(
-                    allConfigData,
-                    row.currency,
-                    row.total_assets
-                ),
-            sortField: "total_assets",
-            sortable: false,
-        },
+
         {
             name: getFormattedMessage("current.stock.label"),
             sortField: "current_stock",
@@ -264,6 +255,40 @@ const StockReport = (props) => {
                     isEXCEL={itemsValue && itemsValue.length > 0}
                     onExcelClick={onExcelClick}
                 />
+                
+                {/* Total Assets Footer */}
+                {stockReports.data && stockReports.data.length > 0 && (
+                    <div className="card mt-3">
+                        <div className="card-body">
+                            <div className="row">
+                                <div className="col-md-4">
+                                    <div className="d-flex justify-content-between">
+                                        <strong>{getFormattedMessage("stock.report.total.products.label")}:</strong>
+                                        <span>{stockReports.total_products || 0}</span>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="d-flex justify-content-between">
+                                        <strong>{getFormattedMessage("stock.report.total.quantity.label")}:</strong>
+                                        <span>{stockReports.total_quantity || 0}</span>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="d-flex justify-content-between">
+                                        <strong>{getFormattedMessage("stock.report.total.assets.label")}:</strong>
+                                        <span className="text-success fw-bold">
+                                            {currencySymbolHandling(
+                                                allConfigData,
+                                                currencySymbol,
+                                                stockReports.total_asset || 0
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </MasterLayout>
     );

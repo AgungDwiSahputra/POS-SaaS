@@ -575,17 +575,24 @@ class ReportAPIController extends AppBaseController
 
         foreach ($sales as $sale) {
             foreach ($sale->saleItems as $saleItem) {
-                $productCost = $productCost + ($saleItem->product->product_cost * $saleItem->quantity);
+                // Menggunakan HPP (Harga Pokok Penjualan) instead of product_cost
+                $hpp = $saleItem->product->hpp ?? $saleItem->product->product_cost;
+                $productCost = $productCost + ($hpp * $saleItem->quantity);
             }
         }
 
         foreach ($allSaleReturnsItems as $saleReturn) {
-            $productItemCost = $productItemCost + ($saleReturn->product->product_cost * $saleReturn->quantity);
+            // Menggunakan HPP (Harga Pokok Penjualan) instead of product_cost
+            $hpp = $saleReturn->product->hpp ?? $saleReturn->product->product_cost;
+            $productItemCost = $productItemCost + ($hpp * $saleReturn->quantity);
         }
 
-        $data['product_cost'] = $productCost - $productItemCost;
+        $data['hpp_cost'] = $productCost - $productItemCost;
+        // Untuk backward compatibility, tetap set product_cost
+        $data['product_cost'] = $data['hpp_cost'];
 
-        $data['gross_profit'] = $data['sales'] - $data['product_cost'] - $data['sale_returns'];
+        // Rumus Laba Kotor baru: (Penjualan - Retur Penjualan - HPP)
+        $data['gross_profit'] = $data['sales'] - $data['sale_returns'] - $data['hpp_cost'];
 
         // Net Profit = Gross Profit - Expenses
         $data['net_profit'] = $data['gross_profit'] - $data['expenses'];
@@ -650,5 +657,82 @@ class ReportAPIController extends AppBaseController
         $salesData['totalSalesDue'] = $salesData['totalAmount'] - $salesData['totalPaid'];
 
         return $this->sendResponse($salesData, 'Customer info retrieved successfully');
+    }
+
+    /**
+     * Get sales report total summary for printing
+     * Menampilkan total penjualan, total pengembalian dana, total pembayaran, dan total data laporan penjualan lainnya
+     */
+    public function getSalesReportTotal(Request $request)
+    {
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $warehouseId = $request->get('warehouse_id');
+
+        $query = Sale::query();
+        
+        if ($startDate && $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        }
+        
+        if ($warehouseId) {
+            $query->where('warehouse_id', $warehouseId);
+        }
+
+        // Total Penjualan
+        $totalSales = $query->sum('grand_total');
+        $totalSalesCount = $query->count();
+
+        // Total Retur Penjualan
+        $saleReturnQuery = SaleReturn::query();
+        if ($startDate && $endDate) {
+            $saleReturnQuery->whereBetween('date', [$startDate, $endDate]);
+        }
+        if ($warehouseId) {
+            $saleReturnQuery->whereHas('warehouse', function($q) use ($warehouseId) {
+                $q->where('id', $warehouseId);
+            });
+        }
+        
+        $totalSaleReturns = $saleReturnQuery->sum('grand_total');
+        $totalSaleReturnsCount = $saleReturnQuery->count();
+
+        // Total Pembayaran
+        $paymentQuery = SalesPayment::query();
+        if ($startDate && $endDate) {
+            $paymentQuery->whereBetween('payment_date', [$startDate, $endDate]);
+        }
+        if ($warehouseId) {
+            $paymentQuery->whereHas('sale', function($q) use ($warehouseId) {
+                $q->where('warehouse_id', $warehouseId);
+            });
+        }
+        
+        $totalPayments = $paymentQuery->sum('amount');
+        $totalPaymentsCount = $paymentQuery->count();
+
+        // Net Sales (Penjualan Bersih)
+        $netSales = $totalSales - $totalSaleReturns;
+
+        // Outstanding Amount (Jumlah Belum Dibayar)
+        $outstandingAmount = $totalSales - $totalPayments;
+
+        $data = [
+            'total_sales' => $totalSales,
+            'total_sales_count' => $totalSalesCount,
+            'total_sale_returns' => $totalSaleReturns,
+            'total_sale_returns_count' => $totalSaleReturnsCount,
+            'total_payments' => $totalPayments,
+            'total_payments_count' => $totalPaymentsCount,
+            'net_sales' => $netSales,
+            'outstanding_amount' => $outstandingAmount,
+            'period' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate
+            ],
+            'warehouse_id' => $warehouseId
+        ];
+
+        return $this->sendResponse($data, 'Sales report total retrieved successfully');
     }
 }

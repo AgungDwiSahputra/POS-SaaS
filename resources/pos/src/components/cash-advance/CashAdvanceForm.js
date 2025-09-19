@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import { InputGroup } from "react-bootstrap-v5";
+import { InputGroup, Button, Modal, ListGroup } from "react-bootstrap-v5";
 import {
     decimalValidate,
     getFormattedMessage,
@@ -11,6 +11,7 @@ import {
 import ModelFooter from "../../shared/components/modelFooter";
 import ReactSelect from "../../shared/select/reactSelect";
 import ReactDatePicker from "../../shared/datepicker/ReactDatePicker";
+import { fetchCashAdvancesByIdentity } from "../../store/action/cashAdvanceIdentityAction";
 
 const CashAdvanceForm = (props) => {
     const {
@@ -40,6 +41,10 @@ const CashAdvanceForm = (props) => {
         issued_to_name: "",
         amount: "",
     });
+
+    const [showIdentityModal, setShowIdentityModal] = useState(false);
+    const [identitySearchResults, setIdentitySearchResults] = useState([]);
+    const [searchingIdentity, setSearchingIdentity] = useState(false);
     const [selectedWarehouse] = useState(
         singleCashAdvance
             ? [
@@ -102,6 +107,36 @@ const CashAdvanceForm = (props) => {
 
     const handleCallback = (date) => {
         setCashAdvanceValue((previousState) => ({ ...previousState, date }));
+    };
+
+    const handleSearchIdentity = async () => {
+        if (!cashAdvanceValue.issued_to_name.trim()) {
+            return;
+        }
+
+        setSearchingIdentity(true);
+        try {
+            const results = await fetchCashAdvancesByIdentity(
+                cashAdvanceValue.issued_to_name,
+                cashAdvanceValue.warehouse_id?.value
+            );
+            setIdentitySearchResults(results);
+            setShowIdentityModal(true);
+        } catch (error) {
+            console.error("Error searching identity:", error);
+        } finally {
+            setSearchingIdentity(false);
+        }
+    };
+
+    const handleSelectIdentity = (identity) => {
+        setCashAdvanceValue(prev => ({
+            ...prev,
+            issued_to_name: identity.issued_to_name,
+            issued_to_phone: identity.issued_to_phone || "",
+            issued_to_email: identity.issued_to_email || ""
+        }));
+        setShowIdentityModal(false);
     };
 
     const prepareData = (data) => {
@@ -167,16 +202,27 @@ const CashAdvanceForm = (props) => {
                                 {getFormattedMessage("cash-advance.input.recipient.label")}:
                             </label>
                             <span className="required" />
-                            <input
-                                type="text"
-                                name="issued_to_name"
-                                className="form-control"
-                                placeholder={placeholderText(
-                                    "cash-advance.input.recipient.placeholder.label"
-                                )}
-                                onChange={(e) => onChangeInput(e)}
-                                value={cashAdvanceValue.issued_to_name || ""}
-                            />
+                            <div className="d-flex gap-2">
+                                <input
+                                    type="text"
+                                    name="issued_to_name"
+                                    className="form-control"
+                                    placeholder={placeholderText(
+                                        "cash-advance.input.recipient.placeholder.label"
+                                    )}
+                                    onChange={(e) => onChangeInput(e)}
+                                    value={cashAdvanceValue.issued_to_name || ""}
+                                />
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={handleSearchIdentity}
+                                    disabled={!cashAdvanceValue.issued_to_name.trim() || searchingIdentity}
+                                    title="Use Same Identity"
+                                >
+                                    {searchingIdentity ? "..." : "🔍"}
+                                </Button>
+                            </div>
                             <span className="text-danger d-block fw-400 fs-small mt-2">
                                 {errors["issued_to_name"] ? errors["issued_to_name"] : null}
                             </span>
@@ -272,6 +318,58 @@ const CashAdvanceForm = (props) => {
                     </div>
                 </Form>
             </div>
+
+            {/* Identity Search Modal */}
+            <Modal show={showIdentityModal} onHide={() => setShowIdentityModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        {getFormattedMessage("cash-advance.identity.modal.title")}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {identitySearchResults.length > 0 ? (
+                        <ListGroup>
+                            {identitySearchResults.map((identity, index) => (
+                                <ListGroup.Item
+                                    key={index}
+                                    action
+                                    onClick={() => handleSelectIdentity(identity)}
+                                    className="d-flex justify-content-between align-items-start"
+                                >
+                                    <div className="ms-2 me-auto">
+                                        <div className="fw-bold">{identity.issued_to_name}</div>
+                                        <div className="text-muted">
+                                            {identity.issued_to_phone && (
+                                                <span className="me-3">📞 {identity.issued_to_phone}</span>
+                                            )}
+                                            {identity.issued_to_email && (
+                                                <span>📧 {identity.issued_to_email}</span>
+                                            )}
+                                        </div>
+                                        <small className="text-muted">
+                                            Warehouse: {identity.warehouse_name}
+                                        </small>
+                                    </div>
+                                    <span className="badge bg-primary rounded-pill">
+                                        {identity.total_advances} advances
+                                    </span>
+                                </ListGroup.Item>
+                            ))}
+                        </ListGroup>
+                    ) : (
+                        <div className="text-center py-4">
+                            <p className="text-muted">
+                                {getFormattedMessage("cash-advance.identity.no-results")}
+                            </p>
+                        </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowIdentityModal(false)}>
+                        {getFormattedMessage("globally.cancel-btn")}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

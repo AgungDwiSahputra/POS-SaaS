@@ -11,6 +11,7 @@ import {
 import ReactDataTable from "../../../shared/table/ReactDataTable";
 import { fetchSales } from "../../../store/action/salesAction";
 import { totalSaleReportExcel } from "../../../store/action/totalSaleReportExcel";
+import { fetchSalesReportTotal } from "../../../store/action/salesReportTotalAction";
 import TopProgressBar from "../../../shared/components/loaders/TopProgressBar";
 import moment from "moment";
 import { Button } from "react-bootstrap-v5";
@@ -18,6 +19,7 @@ import { fetchUsers } from "../../../store/action/userAction";
 import { fetchAllCustomer } from "../../../store/action/customerAction";
 import { useReactToPrint } from "react-to-print";
 import SaleReportReceipt from "./SaleReportReceipt";
+import SaleReportTotalReceipt from "./SaleReportTotalReceipt";
 
 const SaleReport = (props) => {
     const {
@@ -28,6 +30,7 @@ const SaleReport = (props) => {
         frontSetting,
         dates,
         totalSaleReportExcel,
+        fetchSalesReportTotal,
         allConfigData,
         fetchUsers,
         fetchAllCustomer,
@@ -48,6 +51,8 @@ const SaleReport = (props) => {
         label: allLabelText,
     });
     const receiptRef = useRef();
+    const totalReceiptRef = useRef();
+    const [totalData, setTotalData] = useState(null);
     const pendingPrintRef = useRef(null);
     const isCustomPrintingRef = useRef(false);
     const currencySymbol =
@@ -196,6 +201,25 @@ const SaleReport = (props) => {
         isCustomPrintingRef.current = true;
         pendingPrintRef.current = bundle;
         handleReactPrint();
+    };
+
+    const handlePrintTotal = useReactToPrint({
+        content: () => totalReceiptRef.current,
+    });
+
+    const onPrintTotalClick = async () => {
+        try {
+            const warehouseId = dates?.warehouse_id || null;
+            const totalResult = await fetchSalesReportTotal(dates, warehouseId, true);
+            setTotalData(totalResult);
+            
+            // Wait a bit for state to update, then print
+            setTimeout(() => {
+                handlePrintTotal();
+            }, 100);
+        } catch (error) {
+            console.error('Failed to fetch total data:', error);
+        }
     };
 
     const handlePrintAll = () => {
@@ -447,7 +471,15 @@ const SaleReport = (props) => {
         <MasterLayout>
             <TopProgressBar />
             <TabTitle title={placeholderText("sale.reports.title")} />
-            <div className="d-flex justify-content-end mb-3">
+            <div className="d-flex justify-content-end mb-3 gap-2">
+                <Button
+                    variant="success"
+                    className="btn btn-success"
+                    onClick={onPrintTotalClick}
+                    disabled={!sales || sales.length === 0}
+                >
+                    {getFormattedMessage("sale-report.print-total.button")}
+                </Button>
                 <Button
                     variant="primary"
                     className="btn btn-primary"
@@ -492,6 +524,15 @@ const SaleReport = (props) => {
                     printedAt={printBundle.printedAt}
                     allConfigData={allConfigData}
                 />
+                <SaleReportTotalReceipt
+                    ref={totalReceiptRef}
+                    totalData={totalData}
+                    currency={currencySymbol}
+                    dateRange={dateRangeLabel}
+                    printedAt={moment().format("LLL")}
+                    allConfigData={allConfigData}
+                    warehouseName={frontSetting?.company_name || ""}
+                />
             </div>
         </MasterLayout>
     );
@@ -522,6 +563,7 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps, {
     fetchSales,
     totalSaleReportExcel,
+    fetchSalesReportTotal,
     fetchUsers,
     fetchAllCustomer,
 })(SaleReport);

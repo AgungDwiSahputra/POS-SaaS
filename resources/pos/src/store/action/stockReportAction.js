@@ -27,7 +27,12 @@ export const stockReportAction =
             .then((response) => {
                 dispatch({
                     type: stockReportActionType.STOCK_REPORT,
-                    payload: response.data.data,
+                    payload: {
+                        data: response.data.data,
+                        total_asset: response.data.total_asset || 0,
+                        total_products: response.data.total_products || 0,
+                        total_quantity: response.data.total_quantity || 0
+                    },
                 });
                 dispatch(
                     setTotalRecord(
