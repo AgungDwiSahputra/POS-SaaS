@@ -55,13 +55,13 @@ const CustomPaperSize = ({ onCustomSizeChange, customSize, errors }) => {
                     <Col xs={12} md={4}>
                         <Form.Group>
                             <Form.Label>
-                                {getFormattedMessage("print-barcode.paper-width.label")} (inch)
+                                {getFormattedMessage("print-barcode.paper-width.label")} (mm)
                             </Form.Label>
                             <Form.Control
                                 type="number"
-                                step="0.1"
-                                min="0.1"
-                                placeholder="2.5"
+                                step="1"
+                                min="1"
+                                placeholder="63.5"
                                 value={customSize?.width || ''}
                                 onChange={(e) => handleSizeChange('width', e.target.value)}
                                 isInvalid={!!errors?.width}
@@ -76,13 +76,13 @@ const CustomPaperSize = ({ onCustomSizeChange, customSize, errors }) => {
                     <Col xs={12} md={4}>
                         <Form.Group>
                             <Form.Label>
-                                {getFormattedMessage("print-barcode.paper-height.label")} (inch)
+                                {getFormattedMessage("print-barcode.paper-height.label")} (mm)
                             </Form.Label>
                             <Form.Control
                                 type="number"
-                                step="0.1"
-                                min="0.1"
-                                placeholder="1.0"
+                                step="1"
+                                min="1"
+                                placeholder="25.4"
                                 value={customSize?.height || ''}
                                 onChange={(e) => handleSizeChange('height', e.target.value)}
                                 isInvalid={!!errors?.height}

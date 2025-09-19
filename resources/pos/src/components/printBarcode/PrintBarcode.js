@@ -178,10 +178,10 @@ const PrintBarcode = () => {
             // Validate custom paper size
             let customErrors = {};
             if (!customPaperSize.width || parseFloat(customPaperSize.width) <= 0) {
-                customErrors.width = "Width is required and must be greater than 0";
+                customErrors.width = "Width is required and must be greater than 0 mm";
             }
             if (!customPaperSize.height || parseFloat(customPaperSize.height) <= 0) {
-                customErrors.height = "Height is required and must be greater than 0";
+                customErrors.height = "Height is required and must be greater than 0 mm";
             }
             if (!customPaperSize.label || customPaperSize.label.trim() === '') {
                 customErrors.label = "Label is required";

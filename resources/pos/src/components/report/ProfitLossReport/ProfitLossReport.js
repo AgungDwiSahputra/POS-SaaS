@@ -293,9 +293,7 @@ const ProfitLossReport = (props) => {
                                                     ? profitAndLossReport.product_cost
                                                     : "0.00"
                                             )}
-                                            ${placeholderText(
-                                                "product.input.product-cost.label"
-                                            )})`}
+                                            HPP)`}
                             value={
                                 profitAndLossReport.gross_profit
                                     ? parseFloat(
