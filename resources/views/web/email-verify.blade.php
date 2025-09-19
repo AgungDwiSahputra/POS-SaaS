@@ -7,8 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ getAppName() }} - Email Verification</title>
     <link rel="icon" type="image/png" href="{{ getAppFaviconUrl() }}">
-    <script src="{{ asset('assets/js/tailwindcss.js') }}"></script>
-    <script src="{{ asset('assets/js/tailwind-config.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('assets/css/landing-page.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
 </head>
 
 <body class="font-['Poppins'] antialiased bg-gray-50 flex items-center justify-center min-h-screen px-4">

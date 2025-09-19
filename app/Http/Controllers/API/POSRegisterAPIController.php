@@ -56,13 +56,10 @@ class POSRegisterAPIController extends AppBaseController
         $register->bank_transfer = $data['today_sales_bank_transfer_payment'] ?? 0;
         $register->cheque = $data['today_sales_cheque_payment'] ?? 0;
         $register->other = $data['today_sales_other_payment'] ?? 0;
-        $register->bank_transfer = $data['today_sales_bank_transfer_payment'];
-        $register->cheque = $data['today_sales_cheque_payment'];
-        $register->other = $data['today_sales_other_payment'];
         $register->total_sale = $data['today_sales_amount'];
         $register->total_return = $data['today_sales_return_amount'];
         $register->total_amount = $data['today_sales_payment_amount'];
-        $register->notes = $input['notes'];
+        $register->notes = $input['notes'] ?? null;
         $register->save();
 
         return $this->sendSuccess('Register entry updated successfully.');
@@ -143,8 +140,15 @@ class POSRegisterAPIController extends AppBaseController
         // Get all active payment methods dynamically
         $paymentMethods = PaymentMethod::where('status', true)->get();
 
-        // Initialize payment methods array for dynamic display
-        $data['payment_methods'] = [];
+        // Initialize payment methods array and default totals
+        $data = [
+            'payment_methods' => [],
+            'today_sales_cash_payment' => 0,
+            'todays_specific_sales_cash_payment' => 0,
+            'today_sales_cheque_payment' => 0,
+            'today_sales_bank_transfer_payment' => 0,
+            'today_sales_other_payment' => 0,
+        ];
 
         // Calculate totals for each payment method
         foreach ($paymentMethods as $paymentMethod) {

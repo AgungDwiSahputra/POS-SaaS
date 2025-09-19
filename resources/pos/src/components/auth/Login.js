@@ -113,8 +113,11 @@ const Login = () => {
         setShowPassword(!showPassword);
     }
 
+    const appLogo = frontCms?.value?.app_logo || "/images/logo.png";
+    const logoAltText = placeholderText("app.logo.alt");
+
     return (
-        <div className="content d-flex flex-column flex-column-fluid position-relative" style={{ backgroundImage: "url(/assets/images/asked-bg.png)" }}>
+        <div className="content d-flex flex-column flex-column-fluid position-relative login-gradient-bg">
             <LanguageLayout/>
             <div className="content d-flex flex-column flex-column-fluid">
                 <div className="d-flex flex-wrap flex-column-fluid">
@@ -126,10 +129,11 @@ const Login = () => {
                             <a href="/" className="image mb-7 mb-sm-10">
                                 <Image
                                     className="logo-height image"
-                                    src={
-                                        frontCms &&
-                                        frontCms.value &&
-                                        frontCms.value.app_logo
+                                    src={appLogo}
+                                    alt={
+                                        logoAltText && logoAltText !== "app.logo.alt"
+                                            ? logoAltText
+                                            : "App logo"
                                     }
                                     height={60}
                                     style={{ objectFit: "contain" }}
