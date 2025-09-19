@@ -31,6 +31,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import ProductSearch from "../../shared/components/product-cart/search/ProductSearch";
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
+import CustomPaperSize from "./CustomPaperSize";
 
 const PrintBarcode = () => {
     const {
@@ -66,6 +67,13 @@ const PrintBarcode = () => {
         warehouse_id: "",
         paperSizeValue: "",
         code: "",
+        customSize: {},
+    });
+    const [customPaperSize, setCustomPaperSize] = useState({
+        enabled: false,
+        width: '',
+        height: '',
+        label: ''
     });
     const [updated, setUpdated] = useState(false);
     const [disabled, setDisabled] = useState(false);
@@ -109,6 +117,28 @@ const PrintBarcode = () => {
     const onPaperSizeChange = (obj) => {
         setPrintBarcodeValue((inputs) => ({ ...inputs, paperSizeValue: obj }));
         setIsPrintShow(true);
+        // Reset custom paper size when selecting preset
+        if (obj && !customPaperSize.enabled) {
+            setCustomPaperSize({
+                enabled: false,
+                width: '',
+                height: '',
+                label: ''
+            });
+        }
+    };
+
+    const onCustomSizeChange = (customSize) => {
+        setCustomPaperSize(customSize);
+        if (customSize.enabled) {
+            // Clear preset paper size when using custom
+            setPrintBarcodeValue((inputs) => ({ ...inputs, paperSizeValue: null }));
+        }
+        // Clear custom size errors
+        setErrors(prev => ({
+            ...prev,
+            customSize: {}
+        }));
     };
 
     const updatedQty = (qty) => {
@@ -140,10 +170,28 @@ const PrintBarcode = () => {
                     type: toastType.ERROR,
                 })
             );
-        } else if (!printBarcodeValue.paperSizeValue) {
+        } else if (!printBarcodeValue.paperSizeValue && !customPaperSize.enabled) {
             errorss["paperSizeValue"] = getFormattedMessage(
                 "globally.paper.size.validate.label"
             );
+        } else if (customPaperSize.enabled) {
+            // Validate custom paper size
+            let customErrors = {};
+            if (!customPaperSize.width || parseFloat(customPaperSize.width) <= 0) {
+                customErrors.width = "Width is required and must be greater than 0";
+            }
+            if (!customPaperSize.height || parseFloat(customPaperSize.height) <= 0) {
+                customErrors.height = "Height is required and must be greater than 0";
+            }
+            if (!customPaperSize.label || customPaperSize.label.trim() === '') {
+                customErrors.label = "Label is required";
+            }
+            
+            if (Object.keys(customErrors).length > 0) {
+                errorss["customSize"] = customErrors;
+            } else {
+                isValid = true;
+            }
         } else {
             isValid = true;
         }
@@ -191,9 +239,22 @@ const PrintBarcode = () => {
     });
 
     const preparePrint = () => {
+        let paperSizeToUse = printBarcodeValue.paperSizeValue;
+        
+        // If custom paper size is enabled, create a custom paper size object
+        if (customPaperSize.enabled) {
+            paperSizeToUse = {
+                value: 'custom',
+                label: customPaperSize.label,
+                width: parseFloat(customPaperSize.width),
+                height: parseFloat(customPaperSize.height),
+                isCustom: true
+            };
+        }
+        
         const formValue = {
             products: updateProducts,
-            paperSize: printBarcodeValue.paperSizeValue,
+            paperSize: paperSizeToUse,
             printBarcodeQuantity: printBarcodeQuantity,
         };
         return formValue;
@@ -510,6 +571,16 @@ const PrintBarcode = () => {
                             )}
                         />
                     </Col>
+                </Row>
+                
+                {/* Custom Paper Size Component */}
+                <CustomPaperSize
+                    onCustomSizeChange={onCustomSizeChange}
+                    customSize={customPaperSize}
+                    errors={errors.customSize}
+                />
+                
+                <Row>
                     <Col xs={12} md={6} className="d-md-flex justify-content-space-between align-items-center">
                         <div className="mt-4 px-2">
                             <div>

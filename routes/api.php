@@ -254,6 +254,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
             Route::get('cash-advances/{cash_advance}/payments', [CashAdvanceAPIController::class, 'payments']);
             Route::post('cash-advances/{cash_advance}/payments', [CashAdvanceAPIController::class, 'storePayment']);
             Route::get('cash-advance-report', [CashAdvanceAPIController::class, 'report']);
+            
+            // Cash advance with same identity features
+            Route::get('cash-advances-by-identity', [CashAdvanceAPIController::class, 'getByNameAndWarehouse']);
+            Route::post('cash-advances-with-same-identity', [CashAdvanceAPIController::class, 'createWithSameIdentity']);
         });
 
         //setting route
@@ -430,6 +434,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
             [ReportAPIController::class, 'getPurchaseReturnProductReportExport']
         );
         Route::get('get-product-count', [ReportAPIController::class, 'getProductQuantity']);
+        
+        // Sales report total for printing
+        Route::get('sales-report-total', [ReportAPIController::class, 'getSalesReportTotal']);
 
         Route::get('config', [UserAPIController::class, 'config']);
 

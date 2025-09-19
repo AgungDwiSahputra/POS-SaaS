@@ -42,8 +42,20 @@ class PrintButton extends React.PureComponent {
                                 ? "print-main__print7"
                                 : "" || paperSize.value === 8
                                 ? "print-main__print8"
+                                : "" || paperSize.value === 'custom'
+                                ? "print-main__custom"
                                 : ""
                         } barcode-main__barcode-item barcode-main__barcode-style`}
+                        style={paperSize.isCustom ? {
+                            width: `${paperSize.width}in`,
+                            height: `${paperSize.height}in`,
+                            display: 'inline-block',
+                            margin: '2px',
+                            padding: '4px',
+                            border: '1px solid #000',
+                            fontSize: '8px',
+                            textAlign: 'center'
+                        } : {}}
                     >
                         <div className="fw-bolder lh-1">
                             {barcodeOptions.companyName && companyName}

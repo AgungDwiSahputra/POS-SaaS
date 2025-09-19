@@ -182,4 +182,73 @@ class CashAdvanceAPIController extends AppBaseController
             ],
         ]);
     }
+
+    /**
+     * Get existing cash advances by name and warehouse for creating similar entries
+     * Mendapatkan kasbon berdasarkan nama dan gudang untuk membuat data identitas yang sama
+     */
+    public function getByNameAndWarehouse(Request $request): JsonResponse
+    {
+        $name = $request->get('name');
+        $warehouseId = $request->get('warehouse_id');
+
+        if (!$name) {
+            return $this->sendError('Name parameter is required');
+        }
+
+        $query = CashAdvance::with(['warehouse', 'recordedBy'])
+            ->where('issued_to_name', 'LIKE', "%{$name}%");
+
+        if ($warehouseId) {
+            $query->where('warehouse_id', $warehouseId);
+        }
+
+        $cashAdvances = $query->orderByDesc('created_at')->get();
+
+        // Group by unique identity (name + phone + email + warehouse)
+        $uniqueIdentities = $cashAdvances->groupBy(function ($item) {
+            return $item->issued_to_name . '|' . $item->issued_to_phone . '|' . $item->issued_to_email . '|' . $item->warehouse_id;
+        })->map(function ($group) {
+            $latest = $group->first();
+            return [
+                'issued_to_name' => $latest->issued_to_name,
+                'issued_to_phone' => $latest->issued_to_phone,
+                'issued_to_email' => $latest->issued_to_email,
+                'warehouse_id' => $latest->warehouse_id,
+                'warehouse_name' => $latest->warehouse?->name,
+                'last_used' => $latest->created_at,
+                'total_advances' => $group->count(),
+                'total_amount' => $group->sum('amount'),
+                'total_outstanding' => $group->sum(function ($item) {
+                    return max(0, $item->amount - $item->paid_amount);
+                })
+            ];
+        })->values();
+
+        return $this->sendResponse($uniqueIdentities, 'Cash advance identities retrieved successfully');
+    }
+
+    /**
+     * Create new cash advance with same identity data
+     * Membuat kasbon baru dengan data identitas yang sama
+     */
+    public function createWithSameIdentity(CreateCashAdvanceRequest $request): CashAdvanceResource
+    {
+        $input = $request->all();
+        
+        // Jika reference_id diberikan, ambil data identitas dari kasbon yang sudah ada
+        if ($request->filled('reference_id')) {
+            $referenceCashAdvance = CashAdvance::find($request->get('reference_id'));
+            if ($referenceCashAdvance) {
+                $input['issued_to_name'] = $referenceCashAdvance->issued_to_name;
+                $input['issued_to_phone'] = $referenceCashAdvance->issued_to_phone;
+                $input['issued_to_email'] = $referenceCashAdvance->issued_to_email;
+                $input['warehouse_id'] = $referenceCashAdvance->warehouse_id;
+            }
+        }
+
+        $cashAdvance = $this->cashAdvanceRepository->storeCashAdvance($input);
+
+        return new CashAdvanceResource($cashAdvance);
+    }
 }

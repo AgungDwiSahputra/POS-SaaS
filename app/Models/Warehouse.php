@@ -62,7 +62,13 @@ class Warehouse extends BaseModel
         'city',
         'email',
         'zip_code',
+        'type',
+        'address',
     ];
+
+    // Constants for warehouse types
+    const TYPE_WAREHOUSE = 'warehouse';
+    const TYPE_STORE = 'store';
 
     public static function rules(): array
     {
@@ -92,6 +98,8 @@ class Warehouse extends BaseModel
             'city' => $this->city,
             'email' => $this->email,
             'zip_code' => $this->zip_code,
+            'type' => $this->type ?? self::TYPE_WAREHOUSE,
+            'address' => $this->address,
             'created_at' => $this->created_at,
         ];
 
