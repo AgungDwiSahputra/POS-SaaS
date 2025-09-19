@@ -9,16 +9,18 @@ const SaleReportTotalReceipt = forwardRef(({
     allConfigData,
     warehouseName
 }, ref) => {
-    const currencySymbol = currencySymbolHandling(allConfigData, currency);
+    const currencySymbol = currencySymbolHandling(allConfigData, currency) || 'Rp ';
     
     // Helper function to safely format numbers and handle NaN
     const formatCurrency = (value) => {
+        if (value === null || value === undefined || value === '') return '0.00';
         const numValue = parseFloat(value);
         if (isNaN(numValue)) return '0.00';
         return numValue.toFixed(2);
     };
     
     const formatCount = (value) => {
+        if (value === null || value === undefined || value === '') return 0;
         const numValue = parseInt(value);
         if (isNaN(numValue)) return 0;
         return numValue;
@@ -27,53 +29,53 @@ const SaleReportTotalReceipt = forwardRef(({
     return (
         <div ref={ref} className="receipt-print-area">
             <div className="receipt-header text-center mb-4">
-                <h3>Sales Report Total</h3>
-                <p>{warehouseName || 'All Warehouses'}</p>
-                <p>{dateRange || 'All Dates'}</p>
-                <p>Printed at: {printedAt}</p>
+                <h3>{getFormattedMessage("sale-report.total.title") || "Sales Report Total"}</h3>
+                <p>{warehouseName || getFormattedMessage("unit.filter.all.label") || 'All Warehouses'}</p>
+                <p>{dateRange || getFormattedMessage("sale-report.receipt.date-range.default") || 'All Dates'}</p>
+                <p>{getFormattedMessage("sale-report.printed-at.label") || "Printed at"}: {printedAt}</p>
             </div>
 
             <div className="receipt-body">
                 <table className="table table-borderless">
                     <tbody>
                         <tr>
-                            <td><strong>Total Sales:</strong></td>
+                            <td><strong>{getFormattedMessage("sale-report.total.sales.label") || "Total Sales"}:</strong></td>
                             <td className="text-end">
                                 <strong>{currencySymbol}{formatCurrency(totalData?.total_sales)}</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td>Sales Count:</td>
-                            <td className="text-end">{formatCount(totalData?.total_sales_count)} transactions</td>
+                            <td>{getFormattedMessage("sale-report.total.sales-count.label") || "Sales Count"}:</td>
+                            <td className="text-end">{formatCount(totalData?.total_sales_count)} {getFormattedMessage("sale-report.total.transactions.label") || "transactions"}</td>
                         </tr>
                         <tr>
-                            <td><strong>Total Returns:</strong></td>
+                            <td><strong>{getFormattedMessage("sale-report.total.returns.label") || "Total Returns"}:</strong></td>
                             <td className="text-end">
                                 <strong>{currencySymbol}{formatCurrency(totalData?.total_sale_returns)}</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td>Returns Count:</td>
-                            <td className="text-end">{formatCount(totalData?.total_sale_returns_count)} transactions</td>
+                            <td>{getFormattedMessage("sale-report.total.returns-count.label") || "Returns Count"}:</td>
+                            <td className="text-end">{formatCount(totalData?.total_sale_returns_count)} {getFormattedMessage("sale-report.total.transactions.label") || "transactions"}</td>
                         </tr>
                         <tr>
-                            <td><strong>Total Payments:</strong></td>
+                            <td><strong>{getFormattedMessage("sale-report.total.payments.label") || "Total Payments"}:</strong></td>
                             <td className="text-end">
                                 <strong>{currencySymbol}{formatCurrency(totalData?.total_payments)}</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td>Payments Count:</td>
-                            <td className="text-end">{formatCount(totalData?.total_payments_count)} transactions</td>
+                            <td>{getFormattedMessage("sale-report.total.payments-count.label") || "Payments Count"}:</td>
+                            <td className="text-end">{formatCount(totalData?.total_payments_count)} {getFormattedMessage("sale-report.total.transactions.label") || "transactions"}</td>
                         </tr>
                         <tr className="border-top">
-                            <td><strong>Net Sales:</strong></td>
+                            <td><strong>{getFormattedMessage("sale-report.total.net-sales.label") || "Net Sales"}:</strong></td>
                             <td className="text-end">
                                 <strong>{currencySymbol}{formatCurrency(totalData?.net_sales)}</strong>
                             </td>
                         </tr>
                         <tr>
-                            <td><strong>Outstanding Amount:</strong></td>
+                            <td><strong>{getFormattedMessage("sale-report.total.outstanding.label") || "Outstanding Amount"}:</strong></td>
                             <td className="text-end">
                                 <strong>{currencySymbol}{formatCurrency(totalData?.outstanding_amount)}</strong>
                             </td>
@@ -83,7 +85,7 @@ const SaleReportTotalReceipt = forwardRef(({
             </div>
 
             <div className="receipt-footer text-center mt-4">
-                <p>--- End of Report ---</p>
+                <p>{getFormattedMessage("sale-report.total.footer.label") || "--- End of Report ---"}</p>
             </div>
 
             <style jsx>{`
