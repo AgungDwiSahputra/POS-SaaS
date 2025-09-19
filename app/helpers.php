@@ -56,7 +56,11 @@ if (! function_exists('getAppFaviconUrl')) {
         static $appFavicon;
 
         if (empty($appFavicon)) {
-            $appFavicon = SadminSetting::where('key', 'app_favicon')->first();
+            try {
+                $appFavicon = SadminSetting::where('key', 'app_favicon')->first();
+            } catch (\Exception $e) {
+                $appFavicon = null;
+            }
         }
 
         return $appFavicon->value ?? asset('images/infyom.png');
@@ -224,11 +228,14 @@ if (! function_exists('getLogo')) {
 if (! function_exists('currencyAlignment')) {
     function currencyAlignment($amount)
     {
+        // Use smart formatting for better display
+        $formattedAmount = is_numeric($amount) ? smartNumberFormat($amount, 2) : $amount;
+        
         if (getSettingValue('is_currency_right') != 1) {
-            return getCurrencyCode() . ' ' . $amount;
+            return getCurrencyCode() . ' ' . $formattedAmount;
         }
 
-        return $amount . ' ' . getCurrencyCode();
+        return $formattedAmount . ' ' . getCurrencyCode();
     }
 }
 
@@ -258,9 +265,22 @@ if (! function_exists('getSadminSettingValue')) {
             return $sadminSettingValues[$key];
         }
 
-        /** @var SadminSetting $sadminSetting */
-        $sadminSetting = SadminSetting::where('key', '=', $keyName)->first();
-        $sadminSettingValues[$key] = $sadminSetting->value ?? null;
+        try {
+            /** @var SadminSetting $sadminSetting */
+            $sadminSetting = SadminSetting::where('key', '=', $keyName)->first();
+            $sadminSettingValues[$key] = $sadminSetting->value ?? null;
+        } catch (\Exception $e) {
+            // Fallback values when database is not available
+            $fallbackValues = [
+                'hero_title' => 'Welcome to Ez POS',
+                'hero_description' => 'Complete Point of Sale solution for your business. Manage inventory, sales, and customers with ease.',
+                'hero_button_title' => 'Get Started',
+                'hero_image' => asset('assets/images/hero-image.svg'),
+                'app_name' => 'Ez POS',
+                'app_favicon' => asset('assets/images/favicon.png'),
+            ];
+            $sadminSettingValues[$key] = $fallbackValues[$keyName] ?? 'Ez POS';
+        }
 
         return $sadminSettingValues[$key];
     }
@@ -396,5 +416,48 @@ if (!function_exists('getActiveStoreName')) {
             return $store->name ?? (getSettingValue('store_name') ?? null);
         }
         return getSettingValue('store_name') ?? null;
+    }
+}
+
+if (!function_exists('smartNumberFormat')) {
+    /**
+     * Format number without unnecessary .00 for whole numbers
+     * 
+     * @param float $number
+     * @param int $decimals
+     * @param string $decimal_separator
+     * @param string $thousands_separator
+     * @return string
+     */
+    function smartNumberFormat($number, $decimals = 2, $decimal_separator = '.', $thousands_separator = ',')
+    {
+        // Format the number with specified decimals
+        $formatted = number_format($number, $decimals, $decimal_separator, $thousands_separator);
+        
+        // If decimals is 2 and the number ends with .00, remove it
+        if ($decimals == 2 && substr($formatted, -3) === $decimal_separator . '00') {
+            $formatted = substr($formatted, 0, -3);
+        }
+        
+        return $formatted;
+    }
+}
+
+if (!function_exists('smartCurrencyAlignment')) {
+    /**
+     * Currency alignment with smart number formatting (no .00 for whole numbers)
+     * 
+     * @param float $amount
+     * @return string
+     */
+    function smartCurrencyAlignment($amount)
+    {
+        $formattedAmount = smartNumberFormat($amount, 2);
+        
+        if (getSettingValue('is_currency_right') != 1) {
+            return getCurrencyCode() . ' ' . $formattedAmount;
+        }
+
+        return $formattedAmount . ' ' . getCurrencyCode();
     }
 }

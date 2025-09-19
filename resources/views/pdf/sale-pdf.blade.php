@@ -198,13 +198,13 @@
                     <tr align="center">
                         <td>{{ $saleItem->product->name }} ({{ $saleItem->product->code }})</td>
                         <td class="icon-style">
-                            {{ currencyAlignment(number_format((float) $saleItem->net_unit_price, 2)) }}</td>
+                            {{ currencyAlignment($saleItem->net_unit_price) }}</td>
                         <td>{{ $saleItem->quantity }}</td>
                         <td class="icon-style">
-                            {{ currencyAlignment(number_format((float) $saleItem->discount_amount, 2)) }}</td>
-                        <td class="icon-style">{{ currencyAlignment(number_format((float) $saleItem->tax_amount, 2)) }}
+                            {{ currencyAlignment($saleItem->discount_amount) }}</td>
+                        <td class="icon-style">{{ currencyAlignment($saleItem->tax_amount) }}
                         </td>
-                        <td class="icon-style">{{ currencyAlignment(number_format((float) $saleItem->sub_total, 2)) }}
+                        <td class="icon-style">{{ currencyAlignment($saleItem->sub_total) }}
                         </td>
                     </tr>
                 @endforeach
@@ -227,26 +227,26 @@
                                 <td>{{ getLoginUserLanguage() == 'cn' ? __('messages.pdf.order_tax') : __('messages.pdf.order_tax') }}
                                 </td>
                                 <td class="icon-style">
-                                    {{ currencyAlignment(number_format((float) $sale->tax_amount, 2)) }}</td>
+                                    {{ currencyAlignment($sale->tax_amount) }}</td>
                             </tr>
                             <tr>
                                 <td>{{ getLoginUserLanguage() == 'cn' ? __('messages.pdf.discount') : __('messages.pdf.discount') }}
                                 </td>
                                 <td class="icon-style">
-                                    {{ currencyAlignment(number_format((float) $sale->discount, 2)) }}</td>
+                                    {{ currencyAlignment($sale->discount) }}</td>
                             </tr>
                             <tr>
                                 <td>{{ getLoginUserLanguage() == 'cn' ? __('messages.pdf.shipping') : __('messages.pdf.shipping') }}
                                 </td>
                                 <td class="icon-style">
-                                    {{ currencyAlignment(number_format((float) $sale->shipping, 2)) }}</td>
+                                    {{ currencyAlignment($sale->shipping) }}</td>
                             </tr>
                             @if ($sale->payment_status == \App\Models\Sale::PAID)
                                 <tr>
                                     <td>{{ getLoginUserLanguage() == 'cn' ? __('messages.pdf.paid_amount') : __('messages.pdf.paid_amount') }}
                                     </td>
                                     <td class="icon-style">
-                                        {{ currencyAlignment(number_format((float) $sale->payments->sum('amount'), 2)) }}
+                                        {{ currencyAlignment($sale->payments->sum('amount')) }}
                                     </td>
                                 </tr>
                             @endif
@@ -254,7 +254,7 @@
                                 <td>{{ getLoginUserLanguage() == 'cn' ? __('messages.pdf.total') : __('messages.pdf.total') }}
                                 </td>
                                 <td class="icon-style">
-                                    {{ currencyAlignment(number_format((float) $sale->grand_total, 2)) }}</td>
+                                    {{ currencyAlignment($sale->grand_total) }}</td>
                             </tr>
                         </tbody>
                     </table>

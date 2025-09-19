@@ -19,9 +19,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function () {
-//     return view('web.app');
-// });
+Route::get('/test', function () {
+    return 'Hello World! Server is working.';
+});
 
 Route::any('/app', function () {
     return view('web.app');

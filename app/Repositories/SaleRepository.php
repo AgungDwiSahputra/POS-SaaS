@@ -154,14 +154,14 @@ class SaleRepository extends BaseRepository
                 $payAmount = $sale->grand_total;
             }
 
-            $payAmount = number_format($payAmount, 2);
-            $dueAmount = number_format($dueAmount, 2);
+            $payAmount = smartNumberFormat($payAmount, 2);
+            $dueAmount = smartNumberFormat($dueAmount, 2);
 
             $replace = [
                 $customer->name,
                 $sale->reference_code,
                 $sale->date,
-                number_format($sale->grand_total, 2),
+                smartNumberFormat($sale->grand_total, 2),
                 $payAmount,
                 $dueAmount,
                 getActiveStoreName(),

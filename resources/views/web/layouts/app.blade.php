@@ -13,15 +13,8 @@
         @endif
     </title>
     <link rel="icon" type="image/png" href="{{ getAppFaviconUrl() }}">
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"
-        integrity="sha512-XtmMtDEcNz2j7ekrtHvOVR4iwwaD6o/FUJe6+Zq+HgcCsk3kj4uSQQR8weQ2QVj1hYGtG2ZIk3v9lmYQFqA29A=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"
-        integrity="sha512-6lPL9i9GhlQQCm7u6k8Zcx2DEULFvt88NItVuoO9sm9Z1wGqlD6r6E1zCTnjfKkVN1J5x1Qvy7CkfwPwBXD9eA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="{{ asset('assets/css/landing-page.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/slick-theme.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/slick.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}" />
     {{-- <link href="{{ asset('assets/css/all.min.css') }}" rel="stylesheet" /> --}}
 

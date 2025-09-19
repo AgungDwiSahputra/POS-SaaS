@@ -112,6 +112,15 @@ export const formatAmount = (num) => {
     return num;
 };
 
+export const smartToFixed = (num, decimals = 2) => {
+    const fixed = parseFloat(num).toFixed(decimals);
+    // If decimals is 2 and the number ends with .00, remove it
+    if (decimals === 2 && fixed.endsWith('.00')) {
+        return fixed.slice(0, -3);
+    }
+    return fixed;
+};
+
 export const currencySymbolHandling = (
     isRightside,
     currency,
@@ -122,13 +131,13 @@ export const currencySymbolHandling = (
         if (is_forment) {
             return formatAmount(value) + " " + currency;
         } else {
-            return parseFloat(value).toFixed(2) + " " + currency;
+            return smartToFixed(value, 2) + " " + currency;
         }
     } else {
         if (is_forment) {
             return currency + " " + formatAmount(value);
         } else {
-            return currency + " " + parseFloat(value).toFixed(2);
+            return currency + " " + smartToFixed(value, 2);
         }
     }
 };

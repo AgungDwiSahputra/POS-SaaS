@@ -18,7 +18,13 @@ class SetLanguage
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $sadminSetting = SadminSetting::where('key', 'show_landing_page')->first()->value ?? '1';
+        try {
+            $sadminSetting = SadminSetting::where('key', 'show_landing_page')->first()->value ?? '1';
+        } catch (\Exception $e) {
+            // Fallback when database is not available
+            $sadminSetting = '1';
+        }
+        
         if ($sadminSetting) {
             $userId = session()->get('auth');
             $localLanguage = session()->get('locale');
@@ -26,8 +32,12 @@ class SetLanguage
             if ($localLanguage) {
                 App::setLocale($localLanguage);
             } elseif ($userId) {
-                $user = User::find($userId);
-                App::setLocale($user->language);
+                try {
+                    $user = User::find($userId);
+                    App::setLocale($user->language);
+                } catch (\Exception $e) {
+                    App::setLocale('en');
+                }
             } else {
                 App::setLocale('en');
             }
