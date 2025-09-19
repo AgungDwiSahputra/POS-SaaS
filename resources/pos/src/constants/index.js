@@ -65,6 +65,7 @@ export const apiBaseURL = {
     WAREHOUSE_REPORT: "warehouse-report",
     WAREHOUSE_DETAILS: "warehouse-details",
     STOCK_REPORT: "stock-report",
+    SALES_REPORT_TOTAL: "sales-report-total",
     PRODUCT_STOCK_REPORT: "product-stock-alerts",
     TOP_SELLING_REPORT: "top-selling-product-report",
     STOCK_SALE_TAB: "get-sale-product-report",

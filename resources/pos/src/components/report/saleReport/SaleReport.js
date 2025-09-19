@@ -527,8 +527,8 @@ const SaleReport = (props) => {
                 <SaleReportTotalReceipt
                     ref={totalReceiptRef}
                     totalData={totalData}
-                    currency={printBundle.currency}
-                    dateRange={printBundle.dateRange}
+                    currency={currencySymbol}
+                    dateRange={dateRangeLabel}
                     printedAt={moment().format("LLL")}
                     allConfigData={allConfigData}
                     warehouseName={frontSetting?.company_name || ""}
