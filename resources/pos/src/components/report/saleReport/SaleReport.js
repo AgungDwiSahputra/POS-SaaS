@@ -468,7 +468,7 @@ const SaleReport = (props) => {
             ),
             cell: (row) => {
                 if (row.isSummary) {
-                    return <span className="fw-semibold">-</span>;
+                    return <span className="fw-semibold">{' '}</span>;
                 }
                 return (
                     <span className="badge bg-light-primary">
@@ -509,7 +509,7 @@ const SaleReport = (props) => {
             sortable: false,
             cell: (row) => {
                 if (row.isSummary) {
-                    return <span className="fw-semibold">-</span>;
+                    return <span className="fw-semibold">{' '}</span>;
                 }
                 return (
                     (row.status === 1 && (
@@ -606,7 +606,7 @@ const SaleReport = (props) => {
             sortable: false,
             cell: (row) => {
                 if (row.isSummary) {
-                    return <span className="fw-semibold">-</span>;
+                    return <span className="fw-semibold">{' '}</span>;
                 }
                 return (
                     (row.payment_status === 1 && (

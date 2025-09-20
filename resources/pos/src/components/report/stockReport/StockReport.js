@@ -190,14 +190,14 @@ const StockReport = (props) => {
             selector: (row) => row.name,
             sortField: "name",
             sortable: false,
-            cell: (row) => (row.isSummary ? <span className="fw-semibold">-</span> : row.name),
+            cell: (row) => (row.isSummary ? <span className="fw-semibold">{' '}</span> : row.name),
         },
         {
             name: getFormattedMessage("product.product-details.category.label"),
             selector: (row) => row.product_category_name,
             sortField: "product_category_name",
             sortable: false,
-            cell: (row) => (row.isSummary ? <span className="fw-semibold">-</span> : row.product_category_name),
+            cell: (row) => (row.isSummary ? <span className="fw-semibold">{' '}</span> : row.product_category_name),
         },
         {
             name: getFormattedMessage("product.product-details.cost.label"),
@@ -211,7 +211,7 @@ const StockReport = (props) => {
             sortable: false,
             cell: (row) =>
                 row.isSummary
-                    ? <span className="fw-semibold">-</span>
+                    ? <span className="fw-semibold">{' '}</span>
                     : currencySymbolHandling(
                           allConfigData,
                           row.currency,
@@ -230,7 +230,7 @@ const StockReport = (props) => {
             sortable: false,
             cell: (row) =>
                 row.isSummary
-                    ? <span className="fw-semibold">-</span>
+                    ? <span className="fw-semibold">{' '}</span>
                     : currencySymbolHandling(
                           allConfigData,
                           row.currency,
@@ -249,7 +249,7 @@ const StockReport = (props) => {
             sortable: false,
             cell: (row) =>
                 row.isSummary
-                    ? <span className="fw-semibold">-</span>
+                    ? <span className="fw-semibold">{' '}</span>
                     : currencySymbolHandling(
                           allConfigData,
                           row.currency,
@@ -286,7 +286,7 @@ const StockReport = (props) => {
             sortable: false,
             cell: (row) => {
                 if (row.isSummary) {
-                    return <span className="fw-semibold">-</span>;
+                    return <span className="fw-semibold">{' '}</span>;
                 }
                 return (
                     <div>
