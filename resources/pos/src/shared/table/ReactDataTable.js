@@ -73,6 +73,7 @@ const ReactDataTable = (props) => {
         customerValue,
         onCustomerChange,
         customerLabel,
+        conditionalRowStyles = [],
     } = props;
     const [perPage, setPerPages] = useState(defaultLimit);
     const [pageSize, setPageSize] = useState(Filters.OBJ.pageSize);
@@ -415,6 +416,7 @@ const ReactDataTable = (props) => {
                 sortIcon={renderSortIcons(direction)}
                 persistTableHead={false}
                 selectableRows={selectableRows}
+                conditionalRowStyles={conditionalRowStyles}
             />
         </div>
     );
@@ -427,5 +429,6 @@ ReactDataTable.propTypes = {
     totalRows: PropTypes.number,
     onChange: PropTypes.func,
     sortAction: PropTypes.func,
+    conditionalRowStyles: PropTypes.array,
 };
 export default ReactDataTable;

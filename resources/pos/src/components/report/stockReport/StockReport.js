@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import MasterLayout from "../../MasterLayout";
 import TabTitle from "../../../shared/tab-title/TabTitle";
 import {
@@ -88,6 +88,61 @@ const StockReport = (props) => {
             currency: currencySymbol,
         }));
 
+    const totalAssetsValue = useMemo(() => {
+        if (!Array.isArray(stockReports) || stockReports.length === 0) {
+            return 0;
+        }
+
+        return stockReports.reduce((sum, stockReport) => {
+            const quantity = parseFloat(stockReport.attributes?.quantity) || 0;
+            const hpp =
+                parseFloat(stockReport.attributes?.product?.hpp) || 0;
+
+            return sum + quantity * hpp;
+        }, 0);
+    }, [stockReports]);
+
+    const summaryRow = useMemo(
+        () => ({
+            id: 'stock-summary-row',
+            isSummary: true,
+            code: 'Total',
+            time: '',
+            date: '',
+            name: '',
+            product_category_name: '',
+            product_cost: 0,
+            product_price: 0,
+            hpp: 0,
+            total_hpp: totalAssetsValue,
+            total_assets: totalAssetsValue,
+            current_stock: '',
+            product_unit: '',
+            currency: currencySymbol,
+        }),
+        [totalAssetsValue, currencySymbol]
+    );
+
+    const itemsWithSummary = useMemo(() => {
+        if (!itemsValue || itemsValue.length === 0) {
+            return itemsValue;
+        }
+
+        return [...itemsValue, summaryRow];
+    }, [itemsValue, summaryRow]);
+
+    const summaryRowStyles = useMemo(
+        () => [
+            {
+                when: (row) => row?.isSummary,
+                style: {
+                    fontWeight: 600,
+                },
+            },
+        ],
+        []
+    );
+
     const onChange = (filter) => {
         stockReportAction(
             warehouseValue.value
@@ -116,6 +171,13 @@ const StockReport = (props) => {
             sortField: "code",
             sortable: false,
             cell: (row) => {
+                if (row.isSummary) {
+                    return (
+                        <span className="fw-semibold">
+                            {getFormattedMessage('react-data-table.total-row.label')}
+                        </span>
+                    );
+                }
                 return (
                     <span className="badge bg-light-danger">
                         <span>{row.code}</span>
@@ -128,12 +190,14 @@ const StockReport = (props) => {
             selector: (row) => row.name,
             sortField: "name",
             sortable: false,
+            cell: (row) => (row.isSummary ? <span className="fw-semibold">-</span> : row.name),
         },
         {
             name: getFormattedMessage("product.product-details.category.label"),
             selector: (row) => row.product_category_name,
             sortField: "product_category_name",
             sortable: false,
+            cell: (row) => (row.isSummary ? <span className="fw-semibold">-</span> : row.product_category_name),
         },
         {
             name: getFormattedMessage("product.product-details.cost.label"),
@@ -145,6 +209,14 @@ const StockReport = (props) => {
                 ),
             sortField: "product_cost",
             sortable: false,
+            cell: (row) =>
+                row.isSummary
+                    ? <span className="fw-semibold">-</span>
+                    : currencySymbolHandling(
+                          allConfigData,
+                          row.currency,
+                          row.product_cost
+                      ),
         },
         {
             name: getFormattedMessage("price.title"),
@@ -156,6 +228,14 @@ const StockReport = (props) => {
                 ),
             sortField: "product_price",
             sortable: false,
+            cell: (row) =>
+                row.isSummary
+                    ? <span className="fw-semibold">-</span>
+                    : currencySymbolHandling(
+                          allConfigData,
+                          row.currency,
+                          row.product_price
+                      ),
         },
         {
             name: getFormattedMessage("globally.input.hpp.label", "HPP"),
@@ -167,6 +247,14 @@ const StockReport = (props) => {
                 ),
             sortField: "hpp",
             sortable: false,
+            cell: (row) =>
+                row.isSummary
+                    ? <span className="fw-semibold">-</span>
+                    : currencySymbolHandling(
+                          allConfigData,
+                          row.currency,
+                          row.hpp
+                      ),
         },
         {
             name: getFormattedMessage("globally.total.hpp.label", "Total HPP"),
@@ -178,23 +266,28 @@ const StockReport = (props) => {
                 ),
             sortField: "total_hpp",
             sortable: false,
-        },
-        {
-            name: getFormattedMessage("globally.total.assets.label", "Total Assets"),
-            selector: (row) =>
-                currencySymbolHandling(
+            cell: (row) => {
+                const value = currencySymbolHandling(
                     allConfigData,
                     row.currency,
-                    row.total_assets
-                ),
-            sortField: "total_assets",
-            sortable: false,
+                    row.total_hpp
+                );
+
+                return row.isSummary ? (
+                    <span className="fw-semibold">{value}</span>
+                ) : (
+                    value
+                );
+            },
         },
         {
             name: getFormattedMessage("current.stock.label"),
             sortField: "current_stock",
             sortable: false,
             cell: (row) => {
+                if (row.isSummary) {
+                    return <span className="fw-semibold">-</span>;
+                }
                 return (
                     <div>
                         <div className="badge bg-light-info me-2">
@@ -216,13 +309,15 @@ const StockReport = (props) => {
             button: true,
             width: "115px",
             cell: (row) => (
-                <button
-                    className="btn btn-sm btn-primary"
-                    variant="primary"
-                    onClick={() => onReportsClick(row)}
-                >
-                    {getFormattedMessage("reports.title")}
-                </button>
+                row.isSummary ? null : (
+                    <button
+                        className="btn btn-sm btn-primary"
+                        variant="primary"
+                        onClick={() => onReportsClick(row)}
+                    >
+                        {getFormattedMessage("reports.title")}
+                    </button>
+                )
             ),
         },
     ];
@@ -257,12 +352,13 @@ const StockReport = (props) => {
             <div className="pt-md-7">
                 <ReactDataTable
                     columns={columns}
-                    items={itemsValue}
+                    items={itemsWithSummary}
                     onChange={onChange}
                     isLoading={isLoading}
                     totalRows={totalRecord}
                     isEXCEL={itemsValue && itemsValue.length > 0}
                     onExcelClick={onExcelClick}
+                    conditionalRowStyles={summaryRowStyles}
                 />
             </div>
         </MasterLayout>
