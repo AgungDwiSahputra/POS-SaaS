@@ -18,6 +18,7 @@ import { fetchUsers } from "../../../store/action/userAction";
 import { fetchAllCustomer } from "../../../store/action/customerAction";
 import { useReactToPrint } from "react-to-print";
 import SaleReportReceipt from "./SaleReportReceipt";
+import SaleReportSummaryReceipt from "./SaleReportSummaryReceipt";
 
 const SaleReport = (props) => {
     const {
@@ -50,6 +51,9 @@ const SaleReport = (props) => {
     const receiptRef = useRef();
     const pendingPrintRef = useRef(null);
     const isCustomPrintingRef = useRef(false);
+    const summaryReceiptRef = useRef();
+    const summaryPendingPrintRef = useRef(null);
+    const isSummaryCustomPrintingRef = useRef(false);
     const currencySymbol =
         frontSetting &&
         frontSetting.value &&
@@ -150,6 +154,89 @@ const SaleReport = (props) => {
         printedAt: moment().format("LLL"),
     }));
 
+    const parseAmount = (value) => {
+        const numeric = parseFloat(value);
+
+        return Number.isFinite(numeric) ? numeric : 0;
+    };
+
+    const saleSummary = useMemo(() => {
+        const summary = {
+            totalSalesGross: 0,
+            totalRefunds: 0,
+            netSales: 0,
+            totalPayments: 0,
+            totalReceived: 0,
+            totalDue: 0,
+            totalDiscount: 0,
+            totalTax: 0,
+            totalShipping: 0,
+            orderCount: 0,
+            completedCount: 0,
+            pendingCount: 0,
+            orderedCount: 0,
+            returnCount: 0,
+        };
+
+        if (!Array.isArray(sales) || sales.length === 0) {
+            return summary;
+        }
+
+        sales.forEach((sale) => {
+            const attributes = sale?.attributes ?? sale ?? {};
+            const isReturn = Number(attributes?.is_return) === 1;
+            const status = Number(attributes?.status);
+            const grandTotal = Math.max(parseAmount(attributes?.grand_total), 0);
+            const paidAmount = parseAmount(attributes?.paid_amount);
+            const receivedAmount = parseAmount(attributes?.received_amount);
+            const dueAmount = Math.max(parseAmount(attributes?.due_amount), 0);
+            const discount = parseAmount(attributes?.discount);
+            const taxAmount = parseAmount(attributes?.tax_amount);
+            const shipping = parseAmount(attributes?.shipping);
+
+            summary.orderCount += 1;
+            summary.totalPayments += paidAmount;
+            summary.totalReceived += receivedAmount;
+            summary.totalDue += dueAmount;
+            summary.totalDiscount += discount;
+            summary.totalTax += taxAmount;
+            summary.totalShipping += shipping;
+
+            if (status === 1) {
+                summary.completedCount += 1;
+            } else if (status === 2) {
+                summary.pendingCount += 1;
+            } else if (status === 3) {
+                summary.orderedCount += 1;
+            }
+
+            if (isReturn) {
+                summary.returnCount += 1;
+                summary.totalRefunds += grandTotal;
+            } else {
+                summary.totalSalesGross += grandTotal;
+            }
+        });
+
+        summary.netSales = summary.totalSalesGross - summary.totalRefunds;
+
+        return summary;
+    }, [sales]);
+
+    const summaryPrintData = useMemo(
+        () => ({
+            totals: saleSummary,
+            currency: currencySymbol,
+            dateRange: dateRangeLabel,
+        }),
+        [saleSummary, currencySymbol, dateRangeLabel]
+    );
+
+    const [summaryPrintBundle, setSummaryPrintBundle] = useState(() => ({
+        ...summaryPrintData,
+        printedAt: moment().format("LLL"),
+    }));
+
     useEffect(() => {
         if (!isCustomPrintingRef.current) {
             setPrintBundle((prev) => {
@@ -170,6 +257,15 @@ const SaleReport = (props) => {
             });
         }
     }, [baseReceiptData]);
+
+    useEffect(() => {
+        if (!isSummaryCustomPrintingRef.current) {
+            setSummaryPrintBundle((prev) => ({
+                ...summaryPrintData,
+                printedAt: prev.printedAt,
+            }));
+        }
+    }, [summaryPrintData]);
 
     const handleReactPrint = useReactToPrint({
         content: () => receiptRef.current,
@@ -198,9 +294,43 @@ const SaleReport = (props) => {
         handleReactPrint();
     };
 
+    const handleSummaryReactPrint = useReactToPrint({
+        content: () => summaryReceiptRef.current,
+        onBeforeGetContent: () =>
+            new Promise((resolve) => {
+                if (summaryPendingPrintRef.current) {
+                    setSummaryPrintBundle(summaryPendingPrintRef.current);
+                    summaryPendingPrintRef.current = null;
+                    setTimeout(resolve, 0);
+                } else {
+                    resolve();
+                }
+            }),
+        onAfterPrint: () => {
+            isSummaryCustomPrintingRef.current = false;
+            setSummaryPrintBundle({
+                ...summaryPrintData,
+                printedAt: moment().format("LLL"),
+            });
+        },
+    });
+
+    const triggerSummaryPrint = (bundle) => {
+        isSummaryCustomPrintingRef.current = true;
+        summaryPendingPrintRef.current = bundle;
+        handleSummaryReactPrint();
+    };
+
     const handlePrintAll = () => {
         triggerPrint({
             ...baseReceiptData,
+            printedAt: moment().format("LLL"),
+        });
+    };
+
+    const handlePrintSummary = () => {
+        triggerSummaryPrint({
+            ...summaryPrintData,
             printedAt: moment().format("LLL"),
         });
     };
@@ -255,8 +385,75 @@ const SaleReport = (props) => {
                 ? sale.attributes.paid_amount
                 : (0.0).toFixed(2),
             currency: currencySymbol,
+            sortable_date: sale.attributes.created_at,
             id: sale.id,
         }));
+
+    const summaryRow = useMemo(
+        () => ({
+            id: 'sales-summary-row',
+            isSummary: true,
+            reference_code: 'Total',
+            date: '',
+            time: '',
+            user_name: '',
+            customer_name: '',
+            warehouse_name: '',
+            status: '',
+            payment_status: '',
+            grand_total: saleSummary.totalSalesGross,
+            paid_amount: saleSummary.totalPayments,
+            currency: currencySymbol,
+            sortable_date: '',
+        }),
+        [saleSummary, currencySymbol]
+    );
+
+    const itemsWithSummary = useMemo(() => {
+        if (!itemsValue || itemsValue.length === 0) {
+            return itemsValue;
+        }
+
+        return [...itemsValue, summaryRow];
+    }, [itemsValue, summaryRow]);
+
+    const sortSummaryLast = (selector) => (rowA, rowB) => {
+        const aSummary = rowA?.isSummary;
+        const bSummary = rowB?.isSummary;
+        if (aSummary && !bSummary) {
+            return 1;
+        }
+        if (!aSummary && bSummary) {
+            return -1;
+        }
+        if (aSummary && bSummary) {
+            return 0;
+        }
+
+        const aValue = selector(rowA);
+        const bValue = selector(rowB);
+
+        if (aValue > bValue) {
+            return 1;
+        }
+        if (aValue < bValue) {
+            return -1;
+        }
+
+        return 0;
+    };
+
+    const summaryRowStyles = useMemo(
+        () => [
+            {
+                when: (row) => row?.isSummary,
+                style: {
+                    fontWeight: 600,
+                },
+            },
+        ],
+        []
+    );
 
     const columns = [
         {
@@ -266,7 +463,13 @@ const SaleReport = (props) => {
             selector: (row) => row.date,
             sortField: "created_at",
             sortable: true,
+            sortFunction: sortSummaryLast((row) =>
+                row?.sortable_date ? new Date(row.sortable_date).getTime() : 0
+            ),
             cell: (row) => {
+                if (row.isSummary) {
+                    return <span className="fw-semibold">-</span>;
+                }
                 return (
                     <span className="badge bg-light-primary">
                         <div className="mb-1">{row.time}</div>
@@ -280,6 +483,13 @@ const SaleReport = (props) => {
             sortField: "reference_code",
             sortable: false,
             cell: (row) => {
+                if (row.isSummary) {
+                    return (
+                        <span className="fw-semibold">
+                            {getFormattedMessage('react-data-table.total-row.label')}
+                        </span>
+                    );
+                }
                 return (
                     <span className="badge bg-light-danger">
                         <span>{row.reference_code}</span>
@@ -298,6 +508,9 @@ const SaleReport = (props) => {
             sortField: "status",
             sortable: false,
             cell: (row) => {
+                if (row.isSummary) {
+                    return <span className="fw-semibold">-</span>;
+                }
                 return (
                     (row.status === 1 && (
                         <span className="badge bg-light-success">
@@ -345,6 +558,20 @@ const SaleReport = (props) => {
                 ),
             sortField: "grand_total",
             sortable: true,
+            sortFunction: sortSummaryLast((row) => parseAmount(row.grand_total)),
+            cell: (row) => {
+                const value = currencySymbolHandling(
+                    allConfigData,
+                    row.currency,
+                    row.grand_total
+                );
+
+                return row.isSummary ? (
+                    <span className="fw-semibold">{value}</span>
+                ) : (
+                    value
+                );
+            },
         },
         {
             name: getFormattedMessage("globally.detail.paid"),
@@ -356,6 +583,20 @@ const SaleReport = (props) => {
                 ),
             sortField: "paid_amount",
             sortable: true,
+            sortFunction: sortSummaryLast((row) => parseAmount(row.paid_amount)),
+            cell: (row) => {
+                const value = currencySymbolHandling(
+                    allConfigData,
+                    row.currency,
+                    row.paid_amount
+                );
+
+                return row.isSummary ? (
+                    <span className="fw-semibold">{value}</span>
+                ) : (
+                    value
+                );
+            },
         },
         {
             name: getFormattedMessage(
@@ -364,6 +605,9 @@ const SaleReport = (props) => {
             sortField: "payment_status",
             sortable: false,
             cell: (row) => {
+                if (row.isSummary) {
+                    return <span className="fw-semibold">-</span>;
+                }
                 return (
                     (row.payment_status === 1 && (
                         <span className="badge bg-light-success">
@@ -402,14 +646,16 @@ const SaleReport = (props) => {
             allowOverflow: true,
             button: true,
             cell: (row) => (
-                <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handlePrintSingle(row.id)}
-                    disabled={!row?.id}
-                >
-                    {getFormattedMessage("sale-report.print.single.button")}
-                </Button>
+                row.isSummary ? null : (
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handlePrintSingle(row.id)}
+                        disabled={!row?.id}
+                    >
+                        {getFormattedMessage("sale-report.print.single.button")}
+                    </Button>
+                )
             ),
         },
     ];
@@ -447,7 +693,15 @@ const SaleReport = (props) => {
         <MasterLayout>
             <TopProgressBar />
             <TabTitle title={placeholderText("sale.reports.title")} />
-            <div className="d-flex justify-content-end mb-3">
+            <div className="d-flex justify-content-end gap-2 mb-3">
+                <Button
+                    variant="outline-primary"
+                    className="btn btn-outline-primary"
+                    onClick={handlePrintSummary}
+                    disabled={!sales || sales.length === 0}
+                >
+                    {getFormattedMessage("sale-report.print-summary.button")}
+                </Button>
                 <Button
                     variant="primary"
                     className="btn btn-primary"
@@ -459,7 +713,7 @@ const SaleReport = (props) => {
             </div>
             <ReactDataTable
                 columns={columns}
-                items={itemsValue}
+                items={itemsWithSummary}
                 onChange={onChange}
                 isLoading={isLoading}
                 totalRows={totalRecord}
@@ -480,6 +734,7 @@ const SaleReport = (props) => {
                 customerValue={selectedCustomer}
                 onCustomerChange={handleCustomerFilter}
                 customerLabel={getFormattedMessage("sale-report.input.customer.label")}
+                conditionalRowStyles={summaryRowStyles}
             />
             <div style={{ display: "none" }}>
                 <SaleReportReceipt
@@ -490,6 +745,14 @@ const SaleReport = (props) => {
                     customerName={printBundle.customerName}
                     dateRange={printBundle.dateRange}
                     printedAt={printBundle.printedAt}
+                    allConfigData={allConfigData}
+                />
+                <SaleReportSummaryReceipt
+                    ref={summaryReceiptRef}
+                    totals={summaryPrintBundle.totals}
+                    currency={summaryPrintBundle.currency}
+                    dateRange={summaryPrintBundle.dateRange}
+                    printedAt={summaryPrintBundle.printedAt}
                     allConfigData={allConfigData}
                 />
             </div>

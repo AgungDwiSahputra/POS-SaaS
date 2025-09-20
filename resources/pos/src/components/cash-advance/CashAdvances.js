@@ -23,6 +23,8 @@ import ReactSelect from "../../shared/select/reactSelect";
 import { fetchUsers } from "../../store/action/userAction";
 import CashAdvancePaymentsModal from "./CashAdvancePaymentsModal";
 import { useIntl } from "react-intl";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
 const CashAdvances = (props) => {
     const {
@@ -44,6 +46,28 @@ const CashAdvances = (props) => {
     const navigate = useNavigate();
     const filtersRef = useRef({});
     const intl = useIntl();
+    const canCreateCashAdvance = getPermission(
+        allConfigData?.permissions,
+        Permissions.CREATE_CASH_ADVANCES
+    );
+
+    const handleDuplicate = (cashAdvanceRow) => {
+        if (!cashAdvanceRow) {
+            return;
+        }
+
+        navigate('/user/cash-advances/create', {
+            state: {
+                prefill: {
+                    warehouse_id: cashAdvanceRow.warehouse_id,
+                    warehouse_name: cashAdvanceRow.warehouse_name,
+                    issued_to_name: cashAdvanceRow.issued_to_name,
+                    issued_to_phone: cashAdvanceRow.issued_to_phone,
+                    issued_to_email: cashAdvanceRow.issued_to_email,
+                },
+            },
+        });
+    };
 
     useEffect(() => {
         fetchUsers({}, true, "?page[size]=0&returnAll=true");
@@ -123,6 +147,7 @@ const CashAdvances = (props) => {
             issued_to_phone: cashAdvance.attributes.issued_to_phone,
             issued_to_email: cashAdvance.attributes.issued_to_email,
             warehouse_name: cashAdvance.attributes.warehouse_name,
+            warehouse_id: cashAdvance.attributes.warehouse_id,
             recorded_by_name: cashAdvance.attributes.recorded_by_name,
             amount: cashAdvance.attributes.amount,
             paid_amount: cashAdvance.attributes.paid_amount,
@@ -243,16 +268,33 @@ const CashAdvances = (props) => {
             allowOverflow: true,
             button: true,
             cell: (row) => (
-                <Button
-                    variant="outline-primary"
-                    size="sm"
-                    onClick={() => {
-                        setSelectedAdvance(row);
-                        setIsPaymentModalOpen(true);
-                    }}
-                >
-                    {getFormattedMessage("cash-advance.payment.view")}
-                </Button>
+                <div className="d-flex flex-wrap align-items-center gap-2">
+                    <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="d-flex align-items-center gap-1 text-nowrap"
+                        onClick={() => {
+                            setSelectedAdvance(row);
+                            setIsPaymentModalOpen(true);
+                        }}
+                    >
+                        {getFormattedMessage("cash-advance.payment.view")}
+                    </Button>
+                    {canCreateCashAdvance ? (
+                        <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            className="d-flex align-items-center gap-1 text-nowrap"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleDuplicate(row);
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faCopy} />
+                            {getFormattedMessage("cash-advance.duplicate.button")}
+                        </Button>
+                    ) : null}
+                </div>
             ),
         },
         ...((getPermission(allConfigData?.permissions, Permissions.EDIT_CASH_ADVANCES) ||

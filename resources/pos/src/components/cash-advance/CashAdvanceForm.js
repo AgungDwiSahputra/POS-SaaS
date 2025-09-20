@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Form from "react-bootstrap/Form";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
@@ -20,19 +20,39 @@ const CashAdvanceForm = (props) => {
         singleCashAdvance,
         warehouses,
         frontSetting,
+        prefillData = null,
     } = props;
     const navigate = useNavigate();
-    const [cashAdvanceValue, setCashAdvanceValue] = useState({
+    const prefillWarehouseOption = useMemo(() => {
+        if (!prefillData || !prefillData.warehouse_id) {
+            return null;
+        }
+
+        return {
+            value: prefillData.warehouse_id,
+            label: prefillData.warehouse_name,
+        };
+    }, [prefillData]);
+
+    const [cashAdvanceValue, setCashAdvanceValue] = useState(() => ({
         date: singleCashAdvance
             ? moment(singleCashAdvance[0].date).toDate()
             : new Date(),
-        warehouse_id: singleCashAdvance ? singleCashAdvance[0].warehouse_id : "",
-        issued_to_name: singleCashAdvance ? singleCashAdvance[0].issued_to_name : "",
-        issued_to_phone: singleCashAdvance ? singleCashAdvance[0].issued_to_phone : "",
-        issued_to_email: singleCashAdvance ? singleCashAdvance[0].issued_to_email : "",
+        warehouse_id: singleCashAdvance
+            ? singleCashAdvance[0].warehouse_id
+            : prefillWarehouseOption || "",
+        issued_to_name: singleCashAdvance
+            ? singleCashAdvance[0].issued_to_name
+            : prefillData?.issued_to_name || "",
+        issued_to_phone: singleCashAdvance
+            ? singleCashAdvance[0].issued_to_phone
+            : prefillData?.issued_to_phone || "",
+        issued_to_email: singleCashAdvance
+            ? singleCashAdvance[0].issued_to_email
+            : prefillData?.issued_to_email || "",
         amount: singleCashAdvance ? singleCashAdvance[0].amount : "",
         notes: singleCashAdvance ? singleCashAdvance[0].notes : "",
-    });
+    }));
 
     const [errors, setErrors] = useState({
         date: "",
@@ -40,16 +60,17 @@ const CashAdvanceForm = (props) => {
         issued_to_name: "",
         amount: "",
     });
-    const [selectedWarehouse] = useState(
-        singleCashAdvance
-            ? [
-                {
-                    label: singleCashAdvance[0].warehouse_id.label,
-                    value: singleCashAdvance[0].warehouse_id.value,
-                },
-            ]
-            : null
-    );
+    const selectedWarehouse = useMemo(() => {
+        if (singleCashAdvance) {
+            return singleCashAdvance[0].warehouse_id;
+        }
+
+        if (prefillWarehouseOption) {
+            return prefillWarehouseOption;
+        }
+
+        return null;
+    }, [singleCashAdvance, prefillWarehouseOption]);
 
     const disabled =
         singleCashAdvance &&
