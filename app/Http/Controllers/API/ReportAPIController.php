@@ -557,8 +557,8 @@ class ReportAPIController extends AppBaseController
         $data['Revenue'] = $data['sales'] - $data['sale_returns'];
         $data['payments_received'] = $data['sales_payment_amount'] + $data['purchase_returns'];
 
-        $productCost = 0;
-        $productItemCost = 0;
+        $totalHpp = 0;
+        $returnedHpp = 0;
 
         $sales = Sale::whereBetween(
             'date',
@@ -575,17 +575,20 @@ class ReportAPIController extends AppBaseController
 
         foreach ($sales as $sale) {
             foreach ($sale->saleItems as $saleItem) {
-                $productCost = $productCost + ($saleItem->product->product_cost * $saleItem->quantity);
+                $hpp = (float) ($saleItem->product->hpp ?? $saleItem->product->product_cost ?? 0);
+                $totalHpp += $hpp * $saleItem->quantity;
             }
         }
 
         foreach ($allSaleReturnsItems as $saleReturn) {
-            $productItemCost = $productItemCost + ($saleReturn->product->product_cost * $saleReturn->quantity);
+            $hpp = (float) ($saleReturn->product->hpp ?? $saleReturn->product->product_cost ?? 0);
+            $returnedHpp += $hpp * $saleReturn->quantity;
         }
 
-        $data['product_cost'] = $productCost - $productItemCost;
+        $data['hpp'] = $totalHpp - $returnedHpp;
+        $data['product_cost'] = $data['hpp'];
 
-        $data['gross_profit'] = $data['sales'] - $data['product_cost'] - $data['sale_returns'];
+        $data['gross_profit'] = ($data['sales'] - $data['sale_returns']) - $data['hpp'];
 
         // Net Profit = Gross Profit - Expenses
         $data['net_profit'] = $data['gross_profit'] - $data['expenses'];

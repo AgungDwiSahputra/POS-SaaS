@@ -289,12 +289,12 @@ const ProfitLossReport = (props) => {
                                                 frontSetting.value &&
                                                     frontSetting.value
                                                         .currency_symbol,
-                                                profitAndLossReport.product_cost
-                                                    ? profitAndLossReport.product_cost
+                                                profitAndLossReport.hpp
+                                                    ? profitAndLossReport.hpp
                                                     : "0.00"
                                             )}
                                             ${placeholderText(
-                                                "product.input.product-cost.label"
+                                                "globally.input.hpp.label"
                                             )})`}
                             value={
                                 profitAndLossReport.gross_profit
