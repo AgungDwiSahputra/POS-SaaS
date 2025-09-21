@@ -30,19 +30,19 @@ class TransferAPIController extends AppBaseController
     {
         $perPage = getPageSize($request);
 
-        $transfers = $this->transferRepository->with([
-            'fromWarehouse',
-            'toWarehouse',
-            'fromStore',
-            'toStore',
-            'transferItems'
-        ]);
+        $transfers = $this->transferRepository;
 
         if ($request->get('status') && $request->get('status') != 'null') {
             $transfers->Where('status', $request->get('status'));
         }
 
-        $transfers = $transfers->paginate($perPage);
+        $transfers = $transfers->with([
+            'fromWarehouse',
+            'toWarehouse',
+            'fromStore',
+            'toStore',
+            'transferItems'
+        ])->paginate($perPage);
 
         TransferResource::usingWithCollection();
 
@@ -108,7 +108,7 @@ class TransferAPIController extends AppBaseController
         try {
             DB::beginTransaction();
 
-            $transfer = $this->transferRepository->with('transferItems')->where('id', $id)->firstOrFail();
+            $transfer = $this->transferRepository->where('id', $id)->with('transferItems')->firstOrFail();
 
             // Revert HPP effect from line price revaluation (if toggle on and transfer completed)
             if ($transfer->status == \App\Models\Transfer::COMPLETED && (int) (getSettingValue('transfer_line_revalue_hpp') ?? 0) === 1) {
