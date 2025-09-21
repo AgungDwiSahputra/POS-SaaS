@@ -1,34 +1,103 @@
 [
     {
-        "label": "40 per sheet (a4) (1.799 * 1.003)",
-        "value": 1
+        "label": "40 per sheet (A4) (1.799 × 1.003)",
+        "value": 1,
+        "config": {
+            "labelWidthIn": 1.799,
+            "labelHeightIn": 1.003,
+            "pageWidthIn": 8.27,
+            "columnGapIn": 0.1,
+            "rowGapIn": 0.1,
+            "paddingIn": 0.04
+        }
     },
     {
-        "label": "30 per sheet (2.625 * 1)",
-        "value": 2
+        "label": "30 per sheet (2.625 × 1)",
+        "value": 2,
+        "config": {
+            "labelWidthIn": 2.625,
+            "labelHeightIn": 1,
+            "pageWidthIn": 8.5,
+            "columnGapIn": 0.1,
+            "rowGapIn": 0.1,
+            "paddingIn": 0.04
+        }
     },
     {
-        "label": "24 per sheet (a4) (2.48 * 1.334)",
-        "value": 3
+        "label": "24 per sheet (A4) (2.48 × 1.334)",
+        "value": 3,
+        "config": {
+            "labelWidthIn": 2.48,
+            "labelHeightIn": 1.334,
+            "pageWidthIn": 8.27,
+            "columnGapIn": 0.12,
+            "rowGapIn": 0.12,
+            "paddingIn": 0.04
+        }
     },
     {
-        "label": "20 per sheet (4 * 1)",
-        "value": 4
+        "label": "20 per sheet (4 × 1)",
+        "value": 4,
+        "config": {
+            "labelWidthIn": 4,
+            "labelHeightIn": 1,
+            "pageWidthIn": 8.27,
+            "columnGapIn": 0.12,
+            "rowGapIn": 0.12,
+            "paddingIn": 0.06
+        }
     },
     {
-        "label": "18 per sheet (a4) (2.5 * 1.835)",
-        "value": 5
+        "label": "18 per sheet (A4) (2.5 × 1.835)",
+        "value": 5,
+        "config": {
+            "labelWidthIn": 2.5,
+            "labelHeightIn": 1.835,
+            "pageWidthIn": 8.27,
+            "columnGapIn": 0.12,
+            "rowGapIn": 0.12,
+            "paddingIn": 0.04
+        }
     },
     {
-        "label": "14 per sheet (4 * 1.33)",
-        "value": 6
+        "label": "14 per sheet (4 × 1.33)",
+        "value": 6,
+        "config": {
+            "labelWidthIn": 4,
+            "labelHeightIn": 1.33,
+            "pageWidthIn": 8.27,
+            "columnGapIn": 0.12,
+            "rowGapIn": 0.12,
+            "paddingIn": 0.06
+        }
     },
     {
-        "label": "12 per sheet (a4) (2.5 * 2.834)",
-        "value": 7
+        "label": "12 per sheet (A4) (2.5 × 2.834)",
+        "value": 7,
+        "config": {
+            "labelWidthIn": 2.5,
+            "labelHeightIn": 2.834,
+            "pageWidthIn": 8.27,
+            "columnGapIn": 0.12,
+            "rowGapIn": 0.12,
+            "paddingIn": 0.04
+        }
     },
     {
-        "label": "10 per sheet (4 * 2)",
-        "value": 8
+        "label": "10 per sheet (4 × 2)",
+        "value": 8,
+        "config": {
+            "labelWidthIn": 4,
+            "labelHeightIn": 2,
+            "pageWidthIn": 8.27,
+            "columnGapIn": 0.15,
+            "rowGapIn": 0.15,
+            "paddingIn": 0.06
+        }
+    },
+    {
+        "label": "Custom size",
+        "value": "custom",
+        "isCustom": true
     }
 ]

@@ -60,18 +60,21 @@ const Transfers = (props) => {
         currencySymbol &&
         tansfers.length >= 0 &&
         tansfers.map((tansfer) => {
+            const attributes = tansfer.attributes || {};
             return {
                 date: getFormattedDate(
-                    tansfer.attributes.date,
+                    attributes.date,
                     allConfigData && allConfigData
                 ),
-                time: moment(tansfer.attributes.created_at).format("LT"),
-                reference_code: tansfer.attributes.reference_code,
-                from_warehouse_id: tansfer.attributes.from_warehouse.name,
-                to_warehouse_id: tansfer.attributes.to_warehouse.name,
-                items: tansfer.attributes.transfer_items.length,
-                grand_total: tansfer.attributes.grand_total,
-                status: tansfer.attributes.status,
+                time: moment(attributes.created_at).format("LT"),
+                reference_code: attributes.reference_code,
+                from_warehouse_id: attributes.from_warehouse?.name,
+                to_warehouse_id: attributes.to_warehouse?.name,
+                from_store_name: attributes.from_store?.name,
+                to_store_name: attributes.to_store?.name,
+                items: attributes.transfer_items?.length ?? 0,
+                grand_total: attributes.grand_total,
+                status: attributes.status,
                 id: tansfer.id,
                 currency: currencySymbol,
             };
@@ -97,9 +100,19 @@ const Transfers = (props) => {
             sortable: false,
         },
         {
+            name: getFormattedMessage("transfer.from-store.title"),
+            selector: (row) => row.from_store_name,
+            sortable: false,
+        },
+        {
             name: getFormattedMessage("transfer.to-warehouse.title"),
             selector: (row) => row.to_warehouse_id,
             sortField: "to_warehouse_id",
+            sortable: false,
+        },
+        {
+            name: getFormattedMessage("transfer.to-store.title"),
+            selector: (row) => row.to_store_name,
             sortable: false,
         },
         {

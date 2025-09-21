@@ -1,14 +1,16 @@
 .barcode-main {
     border: 1px solid #ccc;
-    display: block;
+    display: flex;
+    flex-wrap: wrap;
     page-break-after: always;
     padding: 0.1in;
-    width: 8.25in;
 
     &__barcode-item {
         border: 1px dotted #ccc;
-        display: block;
-        float: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         font-size: 12px;
         line-height: 14px;
         overflow: hidden;
@@ -19,8 +21,9 @@
     }
 
     &__barcode-style {
-        padding: 0.04in;
-        width: 1.799in;
+        padding: var(--barcode-padding, 0.04in);
+        width: var(--barcode-label-width, 1.799in);
+        min-height: var(--barcode-label-height, 1.003in);
 
         img {
             height: 26px;
@@ -68,4 +71,3 @@
         width: 50%;
     }
 }
-

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Row, Table } from "react-bootstrap-v5";
+import { Button, Row, Table, InputGroup } from "react-bootstrap-v5";
 import { Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useReactToPrint } from "react-to-print";
@@ -56,8 +56,9 @@ const PrintBarcode = () => {
         product_price: 0,
         quantity: 10,
     });
-    const [print, setPrint] = useState([]);
+    const [print, setPrint] = useState(null);
     const [isPrintShow, setIsPrintShow] = useState(false);
+    const [paperLayout, setPaperLayout] = useState(null);
     const [quantity, setQuantity] = useState(0);
     const [companyName, setCompanyName] = useState(true);
     const [productName, setProductName] = useState(true);
@@ -66,11 +67,95 @@ const PrintBarcode = () => {
         warehouse_id: "",
         paperSizeValue: "",
         code: "",
+        customWidth: "",
+        customHeight: "",
+    });
+    const [customPaper, setCustomPaper] = useState({
+        widthMm: 38,
+        heightMm: 25,
+        pageWidthMm: 210,
+        columnGapMm: 3,
+        rowGapMm: 3,
+        paddingMm: 2,
     });
     const [updated, setUpdated] = useState(false);
     const [disabled, setDisabled] = useState(false);
     const componentRef = useRef();
     const dispatch = useDispatch();
+
+    const DEFAULT_LAYOUT = {
+        labelWidthIn: 1.799,
+        labelHeightIn: 1.003,
+        pageWidthIn: 8.27,
+        columnGapIn: 0.1,
+        rowGapIn: 0.1,
+        paddingIn: 0.04,
+    };
+
+    const mmToInches = (value) => {
+        const numeric = Number.parseFloat(value);
+
+        return Number.isFinite(numeric) ? numeric / 25.4 : 0;
+    };
+
+    const buildLayoutFromPreset = (option) => {
+        if (!option || !option.config) {
+            return null;
+        }
+
+        return {
+            ...DEFAULT_LAYOUT,
+            ...option.config,
+        };
+    };
+
+    const buildLayoutFromCustom = (config) => {
+        if (!config) {
+            return null;
+        }
+
+        const widthMm = Number.parseFloat(config.widthMm);
+        const heightMm = Number.parseFloat(config.heightMm);
+        const pageWidthMm = Number.parseFloat(config.pageWidthMm);
+        const columnGapMm = Number.parseFloat(config.columnGapMm);
+        const rowGapMm = Number.parseFloat(config.rowGapMm);
+        const paddingMm = Number.parseFloat(config.paddingMm);
+
+        if (!Number.isFinite(widthMm) || widthMm <= 0) {
+            return null;
+        }
+
+        if (!Number.isFinite(heightMm) || heightMm <= 0) {
+            return null;
+        }
+
+        const labelWidthIn = mmToInches(widthMm);
+        const labelHeightIn = mmToInches(heightMm);
+        const pageWidthIn = Math.max(mmToInches(pageWidthMm || 210), labelWidthIn + 0.25);
+
+        return {
+            labelWidthIn,
+            labelHeightIn,
+            pageWidthIn,
+            columnGapIn: Math.max(mmToInches(columnGapMm || 0), 0),
+            rowGapIn: Math.max(mmToInches(rowGapMm || 0), 0),
+            paddingIn: Math.max(mmToInches(paddingMm || 0), 0.01),
+        };
+    };
+
+    const resolveLayoutForOption = (option) => {
+        if (!option) {
+            return null;
+        }
+
+        if (option.isCustom) {
+            return buildLayoutFromCustom(customPaper);
+        }
+
+        const presetLayout = buildLayoutFromPreset(option);
+
+        return presetLayout || DEFAULT_LAYOUT;
+    };
 
     useEffect(() => {
         dispatch(fetchAllWarehouses());
@@ -85,12 +170,17 @@ const PrintBarcode = () => {
     }, [printBarcodeValue.warehouse_id]);
 
     useEffect(() => {
-        if (printBarcodeValue) {
-            if (updateProducts.length) {
-                setPrint(preparePrint);
-            }
+        if (printBarcodeValue && updateProducts.length) {
+            setPrint(preparePrint());
         }
-    }, [updateProducts, printBarcodeValue, printBarcodeQuantity]);
+    }, [updateProducts, printBarcodeValue, printBarcodeQuantity, paperLayout]);
+
+    useEffect(() => {
+        if (printBarcodeValue.paperSizeValue?.isCustom) {
+            const customLayout = buildLayoutFromCustom(customPaper);
+            setPaperLayout(customLayout);
+        }
+    }, [customPaper, printBarcodeValue.paperSizeValue]);
 
     useEffect(() => {
         if(isCustomBarcode && (!updateProducts.length || !updateProducts[0].product_price || updateProducts[0].product_price <= 0)) {
@@ -106,9 +196,24 @@ const PrintBarcode = () => {
         errors["warehouse_id"] = "";
     };
 
-    const onPaperSizeChange = (obj) => {
-        setPrintBarcodeValue((inputs) => ({ ...inputs, paperSizeValue: obj }));
-        setIsPrintShow(true);
+    const onPaperSizeChange = (option) => {
+        setPrintBarcodeValue((inputs) => ({ ...inputs, paperSizeValue: option }));
+        setErrors((prev) => ({
+            ...prev,
+            paperSizeValue: "",
+            customWidth: "",
+            customHeight: "",
+        }));
+
+        const nextLayout = resolveLayoutForOption(option);
+        setPaperLayout(nextLayout);
+
+        if (option?.isCustom) {
+            setIsPrintShow(false);
+            setUpdated(false);
+        } else {
+            setIsPrintShow(true);
+        }
     };
 
     const updatedQty = (qty) => {
@@ -144,11 +249,49 @@ const PrintBarcode = () => {
             errorss["paperSizeValue"] = getFormattedMessage(
                 "globally.paper.size.validate.label"
             );
+        } else if (printBarcodeValue.paperSizeValue.isCustom) {
+            if (customPaper.widthMm <= 0) {
+                errorss.customWidth = getFormattedMessage(
+                    "print-barcode.custom-size.width.validate"
+                );
+            }
+            if (customPaper.heightMm <= 0) {
+                errorss.customHeight = getFormattedMessage(
+                    "print-barcode.custom-size.height.validate"
+                );
+            }
+            if (!paperLayout) {
+                errorss.paperSizeValue = getFormattedMessage(
+                    "print-barcode.custom-size.layout.validate"
+                );
+            }
         } else {
+            isValid = true;
+        }
+        if (Object.keys(errorss).length === 0) {
             isValid = true;
         }
         setErrors(errorss);
         return isValid;
+    };
+
+    const handleCustomPaperChange = (field) => (event) => {
+        const { value } = event.target;
+        setCustomPaper((prev) => ({
+            ...prev,
+            [field]: value === "" ? "" : Number(value),
+        }));
+
+        if (field === "widthMm") {
+            setErrors((prev) => ({ ...prev, customWidth: "" }));
+        }
+
+        if (field === "heightMm") {
+            setErrors((prev) => ({ ...prev, customHeight: "" }));
+        }
+
+        setIsPrintShow(false);
+        setUpdated(false);
     };
 
     const onResetClick = () => {
@@ -168,9 +311,22 @@ const PrintBarcode = () => {
         setErrors({
             warehouse_id: "",
             paperSizeValue: "",
+            code: "",
+            customWidth: "",
+            customHeight: "",
         });
         setProductName(false);
         setPrice(false);
+        setPaperLayout(null);
+        setCustomPaper({
+            widthMm: 38,
+            heightMm: 25,
+            pageWidthMm: 210,
+            columnGapMm: 3,
+            rowGapMm: 3,
+            paddingMm: 2,
+        });
+        setIsPrintShow(false);
     };
 
     const printPaymentReceiptPdf = (event) => {
@@ -194,6 +350,7 @@ const PrintBarcode = () => {
         const formValue = {
             products: updateProducts,
             paperSize: printBarcodeValue.paperSizeValue,
+            layout: paperLayout || DEFAULT_LAYOUT,
             printBarcodeQuantity: printBarcodeQuantity,
         };
         return formValue;
@@ -319,7 +476,7 @@ const PrintBarcode = () => {
         <MasterLayout>
             <TopProgressBar />
             <TabTitle title={placeholderText("print.barcode.title")} />
-            {print.length !== 0 ? loadPrintBlock() : ""}
+            {print && print.products?.length ? loadPrintBlock() : ""}
             <div className="card card-body">
                 <div className="col-lg-4 mb-3">
                     <div className="form-check form-switch">
@@ -609,6 +766,128 @@ const PrintBarcode = () => {
                         </div>
                     </Col>
                 </Row>
+                {printBarcodeValue.paperSizeValue?.isCustom && (
+                    <Row className="g-3 mb-4">
+                        <Col xs={12} md={4}>
+                            <label className="form-label">
+                                {getFormattedMessage(
+                                    "print-barcode.custom.width.label"
+                                )}
+                            </label>
+                            <InputGroup>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step="0.1"
+                                    className="form-control"
+                                    value={customPaper.widthMm}
+                                    onChange={handleCustomPaperChange("widthMm")}
+                                />
+                                <InputGroup.Text>mm</InputGroup.Text>
+                            </InputGroup>
+                            {errors.customWidth ? (
+                                <span className="text-danger d-block fw-400 fs-small mt-2">
+                                    {errors.customWidth}
+                                </span>
+                            ) : null}
+                        </Col>
+                        <Col xs={12} md={4}>
+                            <label className="form-label">
+                                {getFormattedMessage(
+                                    "print-barcode.custom.height.label"
+                                )}
+                            </label>
+                            <InputGroup>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step="0.1"
+                                    className="form-control"
+                                    value={customPaper.heightMm}
+                                    onChange={handleCustomPaperChange("heightMm")}
+                                />
+                                <InputGroup.Text>mm</InputGroup.Text>
+                            </InputGroup>
+                            {errors.customHeight ? (
+                                <span className="text-danger d-block fw-400 fs-small mt-2">
+                                    {errors.customHeight}
+                                </span>
+                            ) : null}
+                        </Col>
+                        <Col xs={12} md={4}>
+                            <label className="form-label">
+                                {getFormattedMessage(
+                                    "print-barcode.custom.page-width.label"
+                                )}
+                            </label>
+                            <InputGroup>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step="0.1"
+                                    className="form-control"
+                                    value={customPaper.pageWidthMm}
+                                    onChange={handleCustomPaperChange("pageWidthMm")}
+                                />
+                                <InputGroup.Text>mm</InputGroup.Text>
+                            </InputGroup>
+                        </Col>
+                        <Col xs={12} md={4}>
+                            <label className="form-label">
+                                {getFormattedMessage(
+                                    "print-barcode.custom.horizontal-gap.label"
+                                )}
+                            </label>
+                            <InputGroup>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step="0.1"
+                                    className="form-control"
+                                    value={customPaper.columnGapMm}
+                                    onChange={handleCustomPaperChange("columnGapMm")}
+                                />
+                                <InputGroup.Text>mm</InputGroup.Text>
+                            </InputGroup>
+                        </Col>
+                        <Col xs={12} md={4}>
+                            <label className="form-label">
+                                {getFormattedMessage(
+                                    "print-barcode.custom.vertical-gap.label"
+                                )}
+                            </label>
+                            <InputGroup>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step="0.1"
+                                    className="form-control"
+                                    value={customPaper.rowGapMm}
+                                    onChange={handleCustomPaperChange("rowGapMm")}
+                                />
+                                <InputGroup.Text>mm</InputGroup.Text>
+                            </InputGroup>
+                        </Col>
+                        <Col xs={12} md={4}>
+                            <label className="form-label">
+                                {getFormattedMessage(
+                                    "print-barcode.custom.padding.label"
+                                )}
+                            </label>
+                            <InputGroup>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step="0.1"
+                                    className="form-control"
+                                    value={customPaper.paddingMm}
+                                    onChange={handleCustomPaperChange("paddingMm")}
+                                />
+                                <InputGroup.Text>mm</InputGroup.Text>
+                            </InputGroup>
+                        </Col>
+                    </Row>
+                )}
                 <div className="d-xl-flex align-items-center justify-content-between">
                     <div className="d-xl-flex align-items-center justify-content-between">
                         <button
@@ -647,14 +926,14 @@ const PrintBarcode = () => {
                     </div>
                 </div>
                 {
-                    <BarcodeShow
-                        updateProducts={updateProducts}
-                        barcodeOptions={barcodeOptions}
-                        frontSetting={frontSetting}
-                        paperSize={printBarcodeValue.paperSizeValue}
-                        updated={updated}
-                        allConfigData={allConfigData}
-                    />
+                <BarcodeShow
+                    updateProducts={updateProducts}
+                    barcodeOptions={barcodeOptions}
+                    frontSetting={frontSetting}
+                    layout={paperLayout || DEFAULT_LAYOUT}
+                    updated={updated}
+                    allConfigData={allConfigData}
+                />
                 }
             </div>
         </MasterLayout>
