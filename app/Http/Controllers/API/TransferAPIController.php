@@ -31,8 +31,11 @@ class TransferAPIController extends AppBaseController
         $perPage = getPageSize($request);
 
         $transfers = $this->transferRepository->with([
-            'fromWarehouse.store',
-            'toWarehouse.store',
+            'fromWarehouse',
+            'toWarehouse',
+            'fromStore',
+            'toStore',
+            'transferItems'
         ]);
 
         if ($request->get('status') && $request->get('status') != 'null') {
@@ -60,14 +63,14 @@ class TransferAPIController extends AppBaseController
     {
         $input = $request->all();
         $transfer = $this->transferRepository->storeTransfer($input);
-        $transfer->load(['transferItems.product', 'fromWarehouse.store', 'toWarehouse.store']);
+        $transfer->load(['transferItems.product', 'fromWarehouse', 'toWarehouse', 'fromStore', 'toStore']);
 
         return new TransferResource($transfer);
     }
 
     public function show(Transfer $transfer)
     {
-        $transfer = $transfer->load('transferItems.product', 'fromWarehouse.store', 'toWarehouse.store');
+        $transfer = $transfer->load('transferItems.product', 'fromWarehouse', 'toWarehouse', 'fromStore', 'toStore');
 
         return new TransferResource($transfer);
     }
@@ -76,8 +79,10 @@ class TransferAPIController extends AppBaseController
     {
         $transfer = $transfer->load(
             'transferItems.product.stocks',
-            'fromWarehouse.store',
-            'toWarehouse.store'
+            'fromWarehouse',
+            'toWarehouse',
+            'fromStore',
+            'toStore'
         );
 
         return new TransferResource($transfer);
@@ -87,7 +92,7 @@ class TransferAPIController extends AppBaseController
     {
         $input = $request->all();
         $transfer = $this->transferRepository->updateTransfer($input, $id);
-        $transfer->load(['transferItems.product', 'fromWarehouse.store', 'toWarehouse.store']);
+        $transfer->load(['transferItems.product', 'fromWarehouse', 'toWarehouse', 'fromStore', 'toStore']);
 
         return new TransferResource($transfer);
     }
