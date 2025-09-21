@@ -76,10 +76,16 @@ class Purchase extends BaseModel implements HasMedia, JsonResourceful
 
     const PURCHASE_PDF = 'purchase_pdf';
 
+    // Purchase types
+    const REGULAR_PURCHASE = 1;
+    const STORE_TO_WAREHOUSE_PURCHASE = 2;
+
     protected $fillable = [
         'date',
         'supplier_id',
         'warehouse_id',
+        'from_store_id',
+        'purchase_type',
         'tax_rate',
         'tax_amount',
         'discount',
@@ -98,8 +104,10 @@ class Purchase extends BaseModel implements HasMedia, JsonResourceful
 
     public static $rules = [
         'date' => 'required|date',
-        'supplier_id' => 'required|exists:suppliers,id',
+        'supplier_id' => 'nullable|exists:suppliers,id',
         'warehouse_id' => 'required|exists:warehouses,id',
+        'from_store_id' => 'nullable|exists:stores,id',
+        'purchase_type' => 'required|integer|in:1,2',
         'tax_rate' => 'nullable|numeric',
         'tax_amount' => 'nullable|numeric',
         'discount' => 'nullable|numeric',
@@ -172,21 +180,36 @@ class Purchase extends BaseModel implements HasMedia, JsonResourceful
 
     public function prepareAttributes(): array
     {
-        $store = $this->warehouse?->store;
+        // Get store information based on purchase type
+        $fromStoreData = null;
+        $toStoreData = null;
+        
+        if ($this->purchase_type == self::STORE_TO_WAREHOUSE_PURCHASE) {
+            $fromStoreData = $this->fromStore ? [
+                'id' => $this->fromStore->id,
+                'name' => $this->fromStore->name,
+            ] : null;
+        }
+        
+        // Destination store is always from warehouse relationship
+        $toStoreData = $this->warehouse?->store ? [
+            'id' => $this->warehouse->store->id,
+            'name' => $this->warehouse->store->name,
+        ] : null;
 
         $fields = [
             'date' => $this->date,
             'supplier_id' => $this->supplier_id,
-            'supplier_name' => $this->supplier->name,
+            'supplier_name' => $this->supplier?->name,
             'warehouse_id' => $this->warehouse_id,
             'warehouse_name' => $this->warehouse->name,
-            'store' => $store
-                ? [
-                    'id' => $store->id,
-                    'name' => $store->name,
-                ]
-                : null,
-            'store_name' => $store?->name,
+            'from_store_id' => $this->from_store_id,
+            'purchase_type' => $this->purchase_type,
+            'purchase_type_label' => $this->getPurchaseTypeLabel(),
+            'from_store' => $fromStoreData,
+            'to_store' => $toStoreData,
+            'store' => $toStoreData, // Backward compatibility
+            'store_name' => $toStoreData?['name'], // Backward compatibility
             'tax_rate' => $this->tax_rate,
             'tax_amount' => $this->tax_amount,
             'discount' => $this->discount,
@@ -245,5 +268,49 @@ class Purchase extends BaseModel implements HasMedia, JsonResourceful
 
         return $query->where('reference_code', 'LIKE', '%' . $search . '%')
             ->orWhere('grand_total', 'LIKE', '%' . $search . '%');
+    }
+
+    public function fromStore(): BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'from_store_id', 'id');
+    }
+
+    /**
+     * Get purchase type label
+     */
+    public function getPurchaseTypeLabel(): string
+    {
+        return match($this->purchase_type) {
+            self::REGULAR_PURCHASE => 'Pembelian Regular',
+            self::STORE_TO_WAREHOUSE_PURCHASE => 'Pembelian Toko ke Gudang',
+            default => 'Unknown'
+        };
+    }
+
+    /**
+     * Check if this is a store-based purchase
+     */
+    public function isStorePurchase(): bool
+    {
+        return $this->purchase_type == self::STORE_TO_WAREHOUSE_PURCHASE;
+    }
+
+    /**
+     * Get the source location name
+     */
+    public function getSourceLocationName(): string
+    {
+        if ($this->purchase_type == self::STORE_TO_WAREHOUSE_PURCHASE) {
+            return $this->fromStore?->name ?? 'Unknown Store';
+        }
+        return $this->supplier?->name ?? 'Unknown Supplier';
+    }
+
+    /**
+     * Get the destination location name
+     */
+    public function getDestinationLocationName(): string
+    {
+        return $this->warehouse?->name ?? 'Unknown Warehouse';
     }
 }

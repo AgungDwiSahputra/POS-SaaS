@@ -84,12 +84,20 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
 
     const PENDING = 3;
 
+    // Transfer types
+    const WAREHOUSE_TO_WAREHOUSE = 1;
+    const STORE_TO_WAREHOUSE = 2;
+    const STORE_TO_STORE = 3;
+
     protected $fillable = [
         'tenant_id',
         'date',
         'date',
         'from_warehouse_id',
         'to_warehouse_id',
+        'from_store_id',
+        'to_store_id',
+        'transfer_type',
         'tax_rate',
         'tax_amount',
         'discount',
@@ -102,8 +110,11 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
 
     public static $rules = [
         'date' => 'date|required',
-        'from_warehouse_id' => 'required|exists:warehouses,id',
-        'to_warehouse_id' => 'required|exists:warehouses,id',
+        'from_warehouse_id' => 'nullable|exists:warehouses,id',
+        'to_warehouse_id' => 'nullable|exists:warehouses,id',
+        'from_store_id' => 'nullable|exists:stores,id',
+        'to_store_id' => 'nullable|exists:stores,id',
+        'transfer_type' => 'required|integer|in:1,2,3',
         'tax_rate' => 'nullable|numeric',
         'tax_amount' => 'nullable|numeric',
         'discount' => 'nullable|numeric',
@@ -132,13 +143,44 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
 
     public function prepareAttributes(): array
     {
-        $fromStore = $this->fromWarehouse?->store;
-        $toStore = $this->toWarehouse?->store;
+        // Get store information based on transfer type
+        $fromStoreData = null;
+        $toStoreData = null;
+        
+        if ($this->transfer_type == self::STORE_TO_WAREHOUSE || $this->transfer_type == self::STORE_TO_STORE) {
+            $fromStoreData = $this->fromStore ? [
+                'id' => $this->fromStore->id,
+                'name' => $this->fromStore->name,
+            ] : null;
+        } else {
+            // For warehouse-to-warehouse, get store from warehouse relationship
+            $fromStoreData = $this->fromWarehouse?->store ? [
+                'id' => $this->fromWarehouse->store->id,
+                'name' => $this->fromWarehouse->store->name,
+            ] : null;
+        }
+
+        if ($this->transfer_type == self::STORE_TO_STORE) {
+            $toStoreData = $this->toStore ? [
+                'id' => $this->toStore->id,
+                'name' => $this->toStore->name,
+            ] : null;
+        } else {
+            // For other types, get store from warehouse relationship
+            $toStoreData = $this->toWarehouse?->store ? [
+                'id' => $this->toWarehouse->store->id,
+                'name' => $this->toWarehouse->store->name,
+            ] : null;
+        }
 
         $fields = [
             'date' => $this->date,
             'from_warehouse_id' => $this->from_warehouse_id,
             'to_warehouse_id' => $this->to_warehouse_id,
+            'from_store_id' => $this->from_store_id,
+            'to_store_id' => $this->to_store_id,
+            'transfer_type' => $this->transfer_type,
+            'transfer_type_label' => $this->getTransferTypeLabel(),
             'tax_rate' => $this->tax_rate,
             'tax_amount' => $this->tax_amount,
             'discount' => $this->discount,
@@ -150,18 +192,8 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
             'transfer_items' => $this->transferItems,
             'from_warehouse' => $this->fromWarehouse,
             'to_warehouse' => $this->toWarehouse,
-            'from_store' => $fromStore
-                ? [
-                    'id' => $fromStore->id,
-                    'name' => $fromStore->name,
-                ]
-                : null,
-            'to_store' => $toStore
-                ? [
-                    'id' => $toStore->id,
-                    'name' => $toStore->name,
-                ]
-                : null,
+            'from_store' => $fromStoreData,
+            'to_store' => $toStoreData,
             'created_at' => $this->created_at,
         ];
 
@@ -181,5 +213,58 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
     public function transferItems(): HasMany
     {
         return $this->hasMany(TransferItem::class, 'transfer_id', 'id');
+    }
+
+    public function fromStore(): BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'from_store_id', 'id');
+    }
+
+    public function toStore(): BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'to_store_id', 'id');
+    }
+
+    /**
+     * Get transfer type label
+     */
+    public function getTransferTypeLabel(): string
+    {
+        return match($this->transfer_type) {
+            self::WAREHOUSE_TO_WAREHOUSE => 'Gudang ke Gudang',
+            self::STORE_TO_WAREHOUSE => 'Toko ke Gudang',
+            self::STORE_TO_STORE => 'Toko ke Toko',
+            default => 'Unknown'
+        };
+    }
+
+    /**
+     * Check if this is a store-based transfer
+     */
+    public function isStoreTransfer(): bool
+    {
+        return in_array($this->transfer_type, [self::STORE_TO_WAREHOUSE, self::STORE_TO_STORE]);
+    }
+
+    /**
+     * Get the source location name
+     */
+    public function getSourceLocationName(): string
+    {
+        if ($this->transfer_type == self::STORE_TO_WAREHOUSE || $this->transfer_type == self::STORE_TO_STORE) {
+            return $this->fromStore?->name ?? 'Unknown Store';
+        }
+        return $this->fromWarehouse?->name ?? 'Unknown Warehouse';
+    }
+
+    /**
+     * Get the destination location name
+     */
+    public function getDestinationLocationName(): string
+    {
+        if ($this->transfer_type == self::STORE_TO_STORE) {
+            return $this->toStore?->name ?? 'Unknown Store';
+        }
+        return $this->toWarehouse?->name ?? 'Unknown Warehouse';
     }
 }

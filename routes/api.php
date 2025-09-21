@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\StoreAPIController;
+use App\Http\Controllers\API\StoreAPIController;
 use App\Http\Controllers\API\HoldAPIController;
 use App\Http\Controllers\API\RoleAPIController;
 use App\Http\Controllers\API\SaleAPIController;
@@ -160,6 +160,16 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
         Route::middleware('permission:manage_transfers')->group(function () {
             Route::resource('transfers', TransferAPIController::class);
+        });
+
+        // Store management routes
+        Route::prefix('stores')->group(function () {
+            Route::get('/', [StoreAPIController::class, 'index']);
+            Route::get('/{storeId}/warehouses', [StoreAPIController::class, 'warehouses']);
+            Route::get('/warehouses/all', [StoreAPIController::class, 'allWarehouses']);
+            Route::post('/validate/store-to-warehouse-transfer', [StoreAPIController::class, 'validateStoreToWarehouseTransfer']);
+            Route::post('/validate/store-to-store-transfer', [StoreAPIController::class, 'validateStoreToStoreTransfer']);
+            Route::post('/validate/store-to-warehouse-purchase', [StoreAPIController::class, 'validateStoreToWarehousePurchase']);
         });
 
         Route::post('import-products', [ProductAPIController::class, 'importProducts']);

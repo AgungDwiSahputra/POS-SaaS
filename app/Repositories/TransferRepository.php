@@ -6,6 +6,7 @@ use App\Models\ManageStock;
 use App\Models\Product;
 use App\Models\Transfer;
 use App\Models\TransferItem;
+use App\Services\StoreSelectionService;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,11 @@ class TransferRepository extends BaseRepository
      */
     protected $fieldSearchable = [
         'date',
+        'from_warehouse_id',
+        'to_warehouse_id',
+        'from_store_id',
+        'to_store_id',
+        'transfer_type',
         'tax_rate',
         'tax_amount',
         'discount',
@@ -31,6 +37,13 @@ class TransferRepository extends BaseRepository
         'created_at',
         'reference_code',
     ];
+
+    private StoreSelectionService $storeSelectionService;
+
+    public function __construct(StoreSelectionService $storeSelectionService)
+    {
+        $this->storeSelectionService = $storeSelectionService;
+    }
 
     /**
      * @var string[]
@@ -70,8 +83,23 @@ class TransferRepository extends BaseRepository
             DB::beginTransaction();
 
             $input['date'] = $input['date'] ?? date('Y/m/d');
+            
+            // Determine transfer type and validate
+            $transferType = $this->storeSelectionService->getTransferType(
+                $input['from_store_id'] ?? null,
+                $input['to_store_id'] ?? null,
+                $input['from_warehouse_id'] ?? null,
+                $input['to_warehouse_id'] ?? null
+            );
+            
+            $input['transfer_type'] = $transferType;
+            
+            // Validate based on transfer type
+            $this->validateTransferInput($input, $transferType);
+            
             $TransferInputArray = Arr::only($input, [
-                'from_warehouse_id', 'to_warehouse_id', 'tax_rate', 'tax_amount', 'discount', 'shipping', 'grand_total',
+                'from_warehouse_id', 'to_warehouse_id', 'from_store_id', 'to_store_id', 'transfer_type',
+                'tax_rate', 'tax_amount', 'discount', 'shipping', 'grand_total',
                 'note', 'date', 'status',
             ]);
 
@@ -537,5 +565,91 @@ class TransferRepository extends BaseRepository
         $transfer->update($transferInputArray);
 
         return $transfer;
+    }
+
+    /**
+     * Validate transfer input based on transfer type
+     */
+    private function validateTransferInput(array $input, int $transferType): void
+    {
+        switch ($transferType) {
+            case Transfer::WAREHOUSE_TO_WAREHOUSE:
+                if (empty($input['from_warehouse_id']) || empty($input['to_warehouse_id'])) {
+                    throw new UnprocessableEntityHttpException('From warehouse and to warehouse are required for warehouse-to-warehouse transfer');
+                }
+                if ($input['from_warehouse_id'] == $input['to_warehouse_id']) {
+                    throw new UnprocessableEntityHttpException('From warehouse and to warehouse cannot be the same');
+                }
+                break;
+
+            case Transfer::STORE_TO_WAREHOUSE:
+                if (empty($input['from_store_id']) || empty($input['to_warehouse_id'])) {
+                    throw new UnprocessableEntityHttpException('From store and to warehouse are required for store-to-warehouse transfer');
+                }
+                
+                $validation = $this->storeSelectionService->validateStoreToWarehouseTransfer(
+                    $input['from_store_id'],
+                    $input['to_warehouse_id']
+                );
+                
+                if (!$validation['valid']) {
+                    throw new UnprocessableEntityHttpException(implode(', ', $validation['errors']));
+                }
+                break;
+
+            case Transfer::STORE_TO_STORE:
+                if (empty($input['from_store_id']) || empty($input['to_store_id'])) {
+                    throw new UnprocessableEntityHttpException('From store and to store are required for store-to-store transfer');
+                }
+                
+                $validation = $this->storeSelectionService->validateStoreToStoreTransfer(
+                    $input['from_store_id'],
+                    $input['to_store_id']
+                );
+                
+                if (!$validation['valid']) {
+                    throw new UnprocessableEntityHttpException(implode(', ', $validation['errors']));
+                }
+                break;
+
+            default:
+                throw new UnprocessableEntityHttpException('Invalid transfer type');
+        }
+    }
+
+    /**
+     * Get stock location based on transfer type
+     */
+    private function getStockLocation(Transfer $transfer, bool $isSource = true): array
+    {
+        if ($isSource) {
+            if ($transfer->transfer_type == Transfer::STORE_TO_WAREHOUSE || $transfer->transfer_type == Transfer::STORE_TO_STORE) {
+                return [
+                    'type' => 'store',
+                    'id' => $transfer->from_store_id,
+                    'name' => $transfer->fromStore?->name ?? 'Unknown Store'
+                ];
+            } else {
+                return [
+                    'type' => 'warehouse',
+                    'id' => $transfer->from_warehouse_id,
+                    'name' => $transfer->fromWarehouse?->name ?? 'Unknown Warehouse'
+                ];
+            }
+        } else {
+            if ($transfer->transfer_type == Transfer::STORE_TO_STORE) {
+                return [
+                    'type' => 'store',
+                    'id' => $transfer->to_store_id,
+                    'name' => $transfer->toStore?->name ?? 'Unknown Store'
+                ];
+            } else {
+                return [
+                    'type' => 'warehouse',
+                    'id' => $transfer->to_warehouse_id,
+                    'name' => $transfer->toWarehouse?->name ?? 'Unknown Warehouse'
+                ];
+            }
+        }
     }
 }
