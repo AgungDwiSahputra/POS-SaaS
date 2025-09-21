@@ -35,10 +35,20 @@ class StoreAPIController extends AppBaseController
     {
         $perPage = getPageSize($request);
         $userStores = UserStore::where('user_id', auth()->id())->pluck('store_id')->toArray();
-        if (!empty($userStores)) {
-            $stores = $this->storeRepository->whereIn('id', $userStores)->paginate($perPage);
+        
+        // Fallback jika repository null
+        if (!$this->storeRepository) {
+            if (!empty($userStores)) {
+                $stores = Store::whereIn('id', $userStores)->paginate($perPage);
+            } else {
+                $stores = Store::where('user_id', auth()->id())->paginate($perPage);
+            }
         } else {
-            $stores = $this->storeRepository->where('user_id', auth()->id())->paginate($perPage);
+            if (!empty($userStores)) {
+                $stores = $this->storeRepository->whereIn('id', $userStores)->paginate($perPage);
+            } else {
+                $stores = $this->storeRepository->where('user_id', auth()->id())->paginate($perPage);
+            }
         }        
          
         StoreResource::usingWithCollection();
