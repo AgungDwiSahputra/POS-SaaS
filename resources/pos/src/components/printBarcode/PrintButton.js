@@ -5,10 +5,20 @@ import {
     getFormattedMessage,
 } from "../../shared/sharedMethod";
 
+const DEFAULT_LAYOUT = {
+    labelWidthIn: 1.799,
+    labelHeightIn: 1.003,
+    pageWidthIn: 8.27,
+    columnGapIn: 0.1,
+    rowGapIn: 0.1,
+    paddingIn: 0.04,
+};
+
 class PrintButton extends React.PureComponent {
     render() {
-        const print = this.props.updateProducts;
-        const paperSize = print.paperSize;
+        const print = this.props.updateProducts || {};
+        const layout = print.layout;
+        const products = print.products || [];
         const frontSetting = this.props.frontSetting;
         const allConfigData = this.props.allConfigData;
         const barcodeOptions = this.props.barcodeOptions;
@@ -19,31 +29,38 @@ class PrintButton extends React.PureComponent {
             frontSetting.value &&
             frontSetting.value.currency_symbol;
 
+        const effectiveLayout = layout &&
+            layout.labelWidthIn > 0 &&
+            layout.labelHeightIn > 0
+            ? { ...DEFAULT_LAYOUT, ...layout }
+            : DEFAULT_LAYOUT;
+
+        const containerStyle = {
+            width: `${effectiveLayout.pageWidthIn}in`,
+            maxWidth: `${effectiveLayout.pageWidthIn}in`,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: `${effectiveLayout.rowGapIn}in ${effectiveLayout.columnGapIn}in`,
+            justifyContent: "flex-start",
+            '--barcode-label-width': `${effectiveLayout.labelWidthIn}in`,
+            '--barcode-label-height': `${effectiveLayout.labelHeightIn}in`,
+            '--barcode-padding': `${effectiveLayout.paddingIn}in`,
+        };
+
+        const itemStyle = {
+            width: `${effectiveLayout.labelWidthIn}in`,
+            minHeight: `${effectiveLayout.labelHeightIn}in`,
+            padding: `${effectiveLayout.paddingIn}in`,
+        };
+
         function printFunction(product) {
             let indents = [];
             for (let i = 0; i < product.quantity; i++) {
                 indents.push(
                     <div
                         key={i}
-                        className={`${
-                            paperSize.value === 1
-                                ? "print-main__print1"
-                                : "" || paperSize.value === 2
-                                ? "print-main__print2"
-                                : "" || paperSize.value === 3
-                                ? "print-main__print3"
-                                : "" ||
-                                  paperSize.value === 4 ||
-                                  paperSize.value === 6
-                                ? "print-main__print4"
-                                : "" || paperSize.value === 5
-                                ? "print-main__print5"
-                                : "" || paperSize.value === 7
-                                ? "print-main__print7"
-                                : "" || paperSize.value === 8
-                                ? "print-main__print8"
-                                : ""
-                        } barcode-main__barcode-item barcode-main__barcode-style`}
+                        className="barcode-main__barcode-item barcode-main__barcode-style"
+                        style={itemStyle}
                     >
                         <div className="fw-bolder lh-1">
                             {barcodeOptions.companyName && companyName}
@@ -82,10 +99,16 @@ class PrintButton extends React.PureComponent {
 
         return (
             <div className="p-4">
-                {print.products &&
-                    print.products.map((product, index) => {
-                        return printFunction(product, index);
-                    })}
+                {products.map((product, index) => (
+                    <div
+                        className="barcode-main"
+                        id={`print-${index}`}
+                        key={index}
+                        style={containerStyle}
+                    >
+                        {printFunction(product, index)}
+                    </div>
+                ))}
             </div>
         );
     }

@@ -328,7 +328,7 @@ const SaleReport = (props) => {
         });
     };
 
-    const handlePrintSummary = () => {
+    const handlePrintTotals = () => {
         triggerSummaryPrint({
             ...summaryPrintData,
             printedAt: moment().format("LLL"),
@@ -371,23 +371,31 @@ const SaleReport = (props) => {
     const itemsValue =
         currencySymbol &&
         sales.length >= 0 &&
-        sales.map((sale) => ({
-            date: getFormattedDate(sale.attributes.date, allConfigData),
-            time: moment(sale.attributes.created_at).format("LT"),
-            reference_code: sale.attributes.reference_code,
-            customer_name: sale.attributes.customer_name,
-            warehouse_name: sale.attributes.warehouse_name,
-            user_name: sale.attributes.user_name,
-            status: sale.attributes.status,
-            payment_status: sale.attributes.payment_status,
-            grand_total: sale.attributes.grand_total,
-            paid_amount: sale.attributes.paid_amount
-                ? sale.attributes.paid_amount
-                : (0.0).toFixed(2),
-            currency: currencySymbol,
-            sortable_date: sale.attributes.created_at,
-            id: sale.id,
-        }));
+        sales.map((sale) => {
+            const attributes = sale.attributes || {};
+            const isReturn = Number(attributes.is_return) === 1;
+            const grandTotal = parseAmount(attributes.grand_total);
+            const paidAmount = parseAmount(attributes.paid_amount);
+            const refundAmount = isReturn ? grandTotal : 0;
+
+            return {
+                date: getFormattedDate(attributes.date, allConfigData),
+                time: moment(attributes.created_at).format("LT"),
+                reference_code: attributes.reference_code,
+                customer_name: attributes.customer_name,
+                warehouse_name: attributes.warehouse_name,
+                user_name: attributes.user_name,
+                status: attributes.status,
+                payment_status: attributes.payment_status,
+                grand_total: grandTotal,
+                paid_amount: paidAmount,
+                refund_amount: refundAmount,
+                is_return: isReturn,
+                currency: currencySymbol,
+                sortable_date: attributes.created_at,
+                id: sale.id,
+            };
+        });
 
     const summaryRow = useMemo(
         () => ({
@@ -403,6 +411,7 @@ const SaleReport = (props) => {
             payment_status: '',
             grand_total: saleSummary.totalSalesGross,
             paid_amount: saleSummary.totalPayments,
+            refund_amount: saleSummary.totalRefunds,
             currency: currencySymbol,
             sortable_date: '',
         }),
@@ -574,6 +583,35 @@ const SaleReport = (props) => {
             },
         },
         {
+            name: getFormattedMessage("sale-report.summary.total-refunds"),
+            selector: (row) =>
+                currencySymbolHandling(
+                    allConfigData,
+                    row.currency,
+                    row.refund_amount
+                ),
+            sortField: "refund_amount",
+            sortable: true,
+            sortFunction: sortSummaryLast((row) => parseAmount(row.refund_amount)),
+            cell: (row) => {
+                const value = currencySymbolHandling(
+                    allConfigData,
+                    row.currency,
+                    row.refund_amount
+                );
+
+                if (row.isSummary) {
+                    return <span className="fw-semibold">{value}</span>;
+                }
+
+                if (!row.is_return || parseAmount(row.refund_amount) === 0) {
+                    return <span className="text-muted">-</span>;
+                }
+
+                return value;
+            },
+        },
+        {
             name: getFormattedMessage("globally.detail.paid"),
             selector: (row) =>
                 currencySymbolHandling(
@@ -697,10 +735,10 @@ const SaleReport = (props) => {
                 <Button
                     variant="outline-primary"
                     className="btn btn-outline-primary"
-                    onClick={handlePrintSummary}
+                    onClick={handlePrintTotals}
                     disabled={!sales || sales.length === 0}
                 >
-                    {getFormattedMessage("sale-report.print-summary.button")}
+                    {getFormattedMessage("sale-report.print-total.button")}
                 </Button>
                 <Button
                     variant="primary"

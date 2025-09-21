@@ -30,7 +30,10 @@ class TransferAPIController extends AppBaseController
     {
         $perPage = getPageSize($request);
 
-        $transfers = $this->transferRepository;
+        $transfers = $this->transferRepository->with([
+            'fromWarehouse.store',
+            'toWarehouse.store',
+        ]);
 
         if ($request->get('status') && $request->get('status') != 'null') {
             $transfers->Where('status', $request->get('status'));
@@ -57,20 +60,25 @@ class TransferAPIController extends AppBaseController
     {
         $input = $request->all();
         $transfer = $this->transferRepository->storeTransfer($input);
+        $transfer->load(['transferItems.product', 'fromWarehouse.store', 'toWarehouse.store']);
 
         return new TransferResource($transfer);
     }
 
     public function show(Transfer $transfer)
     {
-        $transfer = $transfer->load('transferItems.product');
+        $transfer = $transfer->load('transferItems.product', 'fromWarehouse.store', 'toWarehouse.store');
 
         return new TransferResource($transfer);
     }
 
     public function edit(Transfer $transfer): TransferResource
     {
-        $transfer = $transfer->load('transferItems.product.stocks', 'fromWarehouse', 'toWarehouse');
+        $transfer = $transfer->load(
+            'transferItems.product.stocks',
+            'fromWarehouse.store',
+            'toWarehouse.store'
+        );
 
         return new TransferResource($transfer);
     }
@@ -79,6 +87,7 @@ class TransferAPIController extends AppBaseController
     {
         $input = $request->all();
         $transfer = $this->transferRepository->updateTransfer($input, $id);
+        $transfer->load(['transferItems.product', 'fromWarehouse.store', 'toWarehouse.store']);
 
         return new TransferResource($transfer);
     }

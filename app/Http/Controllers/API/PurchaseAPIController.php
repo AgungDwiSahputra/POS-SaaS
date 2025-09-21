@@ -43,7 +43,10 @@ class PurchaseAPIController extends AppBaseController
         $supplier = (Supplier::where('name', 'LIKE', "%$search%")->get()->count() != 0);
         $warehouse = (Warehouse::where('name', 'LIKE', "%$search%")->get()->count() != 0);
         $products = (Product::where('name', 'LIKE', "%$search%")->get()->count() != 0);
-        $purchases = $this->purchaseRepository;
+        $purchases = $this->purchaseRepository->with([
+            'supplier',
+            'warehouse.store',
+        ]);
         if ($supplier || $warehouse || $products) {
             $purchases->whereHas('supplier', function (Builder $q) use ($search, $supplier) {
                 if ($supplier) {
@@ -83,20 +86,21 @@ class PurchaseAPIController extends AppBaseController
     {
         $input = $request->all();
         $purchase = $this->purchaseRepository->storePurchase($input);
+        $purchase->load(['purchaseItems.product', 'supplier', 'warehouse.store']);
 
         return new PurchaseResource($purchase);
     }
 
     public function show($id): PurchaseResource
     {
-        $purchase = $this->purchaseRepository->find($id);
+        $purchase = $this->purchaseRepository->with(['supplier', 'warehouse.store', 'purchaseItems.product'])->find($id);
 
         return new PurchaseResource($purchase);
     }
 
     public function edit(Purchase $purchase): PurchaseResource
     {
-        $purchase = $purchase->load('purchaseItems.product.stocks', 'warehouse');
+        $purchase = $purchase->load('purchaseItems.product.stocks', 'warehouse.store', 'supplier');
 
         return new PurchaseResource($purchase);
     }
@@ -105,6 +109,7 @@ class PurchaseAPIController extends AppBaseController
     {
         $input = $request->all();
         $purchase = $this->purchaseRepository->updatePurchase($input, $id);
+        $purchase->load(['purchaseItems.product', 'supplier', 'warehouse.store']);
 
         return new PurchaseResource($purchase);
     }

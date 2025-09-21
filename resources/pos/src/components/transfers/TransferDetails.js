@@ -96,6 +96,16 @@ const TransferDetails = (props) => {
                             <tr>
                                 <td>
                                     {getFormattedMessage(
+                                        "transfer.from-store.title"
+                                    )}
+                                </td>
+                                <td>
+                                    {transferDetails?.attributes?.from_store?.name || '-'}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {getFormattedMessage(
                                         "transfer.to-warehouse.title"
                                     )}
                                 </td>
@@ -104,6 +114,16 @@ const TransferDetails = (props) => {
                                         transferDetails?.attributes
                                             ?.to_warehouse?.name
                                     }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {getFormattedMessage(
+                                        "transfer.to-store.title"
+                                    )}
+                                </td>
+                                <td>
+                                    {transferDetails?.attributes?.to_store?.name || '-'}
                                 </td>
                             </tr>
                             <tr>

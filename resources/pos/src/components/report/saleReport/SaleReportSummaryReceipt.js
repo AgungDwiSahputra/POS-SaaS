@@ -27,80 +27,137 @@ const SaleReportSummaryReceipt = forwardRef(
             return parsed.toLocaleString();
         };
 
-        const lines = [
-            {
-                key: "totalSalesGross",
+        const metricDefinitions = {
+            totalSalesGross: {
                 label: getFormattedMessage("sale-report.summary.total-sales"),
                 formatter: formatCurrency,
             },
-            {
-                key: "totalRefunds",
+            totalRefunds: {
                 label: getFormattedMessage("sale-report.summary.total-refunds"),
                 formatter: formatCurrency,
             },
-            {
-                key: "netSales",
+            netSales: {
                 label: getFormattedMessage("sale-report.summary.net-sales"),
                 formatter: formatCurrency,
             },
-            {
-                key: "totalPayments",
+            totalPayments: {
                 label: getFormattedMessage("sale-report.summary.total-payments"),
                 formatter: formatCurrency,
             },
-            {
-                key: "totalReceived",
+            totalReceived: {
                 label: getFormattedMessage("sale-report.summary.total-received"),
                 formatter: formatCurrency,
             },
-            {
-                key: "totalDue",
+            totalDue: {
                 label: getFormattedMessage("sale-report.summary.total-due"),
                 formatter: formatCurrency,
             },
-            {
-                key: "totalDiscount",
+            totalDiscount: {
                 label: getFormattedMessage("sale-report.summary.total-discount"),
                 formatter: formatCurrency,
             },
-            {
-                key: "totalTax",
+            totalTax: {
                 label: getFormattedMessage("sale-report.summary.total-tax"),
                 formatter: formatCurrency,
             },
-            {
-                key: "totalShipping",
+            totalShipping: {
                 label: getFormattedMessage("sale-report.summary.total-shipping"),
                 formatter: formatCurrency,
             },
-            {
-                key: "orderCount",
+            orderCount: {
                 label: getFormattedMessage("sale-report.summary.order-count"),
                 formatter: formatNumber,
             },
-            {
-                key: "completedCount",
+            completedCount: {
                 label: getFormattedMessage(
                     "sale-report.summary.completed-count"
                 ),
                 formatter: formatNumber,
             },
-            {
-                key: "pendingCount",
-                label: getFormattedMessage("sale-report.summary.pending-count"),
+            pendingCount: {
+                label: getFormattedMessage(
+                    "sale-report.summary.pending-count"
+                ),
                 formatter: formatNumber,
             },
-            {
-                key: "orderedCount",
-                label: getFormattedMessage("sale-report.summary.ordered-count"),
+            orderedCount: {
+                label: getFormattedMessage(
+                    "sale-report.summary.ordered-count"
+                ),
                 formatter: formatNumber,
             },
-            {
-                key: "returnCount",
+            returnCount: {
                 label: getFormattedMessage("sale-report.summary.return-count"),
                 formatter: formatNumber,
             },
+        };
+
+        const sections = [
+            {
+                title: getFormattedMessage(
+                    "sale-report.summary.section.sales"
+                ),
+                keys: ["totalSalesGross", "totalRefunds", "netSales"],
+            },
+            {
+                title: getFormattedMessage(
+                    "sale-report.summary.section.payments"
+                ),
+                keys: ["totalPayments", "totalReceived", "totalDue"],
+            },
+            {
+                title: getFormattedMessage(
+                    "sale-report.summary.section.adjustments"
+                ),
+                keys: ["totalDiscount", "totalTax", "totalShipping"],
+            },
+            {
+                title: getFormattedMessage(
+                    "sale-report.summary.section.orders"
+                ),
+                keys: [
+                    "orderCount",
+                    "completedCount",
+                    "pendingCount",
+                    "orderedCount",
+                    "returnCount",
+                ],
+            },
         ];
+
+        const getMetricValue = (key) => {
+            const raw = totals?.[key];
+            const parsed = Number(raw);
+
+            if (!Number.isFinite(parsed)) {
+                return 0;
+            }
+
+            return parsed;
+        };
+
+        const renderMetricLine = (key) => {
+            const definition = metricDefinitions[key];
+            if (!definition) {
+                return null;
+            }
+
+            const value = getMetricValue(key);
+
+            return (
+                <div
+                    key={key}
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "4px",
+                    }}
+                >
+                    <span>{definition.label}</span>
+                    <span>{definition.formatter(value)}</span>
+                </div>
+            );
+        };
 
         return (
             <div
@@ -136,17 +193,18 @@ const SaleReportSummaryReceipt = forwardRef(
                         marginBottom: "8px",
                     }}
                 >
-                    {lines.map(({ key, label, formatter }) => (
-                        <div
-                            key={key}
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                marginBottom: "4px",
-                            }}
-                        >
-                            <span>{label}</span>
-                            <span>{formatter(totals?.[key])}</span>
+                    {sections.map(({ title, keys }) => (
+                        <div key={title} style={{ marginBottom: "8px" }}>
+                            <div
+                                style={{
+                                    fontWeight: 600,
+                                    textTransform: "uppercase",
+                                    marginBottom: "4px",
+                                }}
+                            >
+                                {title}
+                            </div>
+                            {keys.map((key) => renderMetricLine(key))}
                         </div>
                     ))}
                 </div>

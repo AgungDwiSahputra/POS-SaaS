@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Store;
 use App\Traits\HasJsonResourcefulData;
 use App\Traits\Multitenantable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
@@ -126,5 +128,10 @@ class Warehouse extends BaseModel
     public function purchases(): HasMany
     {
         return $this->hasMany(Purchase::class, 'warehouse_id', 'id');
+    }
+
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'tenant_id', 'tenant_id');
     }
 }

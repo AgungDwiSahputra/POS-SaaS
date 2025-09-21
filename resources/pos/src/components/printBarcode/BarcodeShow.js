@@ -3,10 +3,19 @@ import { Image } from "react-bootstrap-v5";
 import { currencySymbolHandling } from "../../shared/sharedMethod";
 import { getFormattedMessage } from "../../shared/sharedMethod";
 
+const DEFAULT_LAYOUT = {
+    labelWidthIn: 1.799,
+    labelHeightIn: 1.003,
+    pageWidthIn: 8.27,
+    columnGapIn: 0.1,
+    rowGapIn: 0.1,
+    paddingIn: 0.04,
+};
+
 const BarcodeShow = (props) => {
     const {
         updateProducts,
-        paperSize,
+        layout,
         updated,
         frontSetting,
         allConfigData,
@@ -19,31 +28,47 @@ const BarcodeShow = (props) => {
         frontSetting.value &&
         frontSetting.value.currency_symbol;
 
+    const effectiveLayout = (() => {
+        if (
+            layout &&
+            layout.labelWidthIn > 0 &&
+            layout.labelHeightIn > 0
+        ) {
+            return {
+                ...DEFAULT_LAYOUT,
+                ...layout,
+            };
+        }
+
+        return DEFAULT_LAYOUT;
+    })();
+
+    const containerStyle = {
+        width: `${effectiveLayout.pageWidthIn}in`,
+        maxWidth: `${effectiveLayout.pageWidthIn}in`,
+        display: "flex",
+        flexWrap: "wrap",
+        gap: `${effectiveLayout.rowGapIn}in ${effectiveLayout.columnGapIn}in`,
+        justifyContent: "flex-start",
+        '--barcode-label-width': `${effectiveLayout.labelWidthIn}in`,
+        '--barcode-label-height': `${effectiveLayout.labelHeightIn}in`,
+        '--barcode-padding': `${effectiveLayout.paddingIn}in`,
+    };
+
+    const itemStyle = {
+        width: `${effectiveLayout.labelWidthIn}in`,
+        minHeight: `${effectiveLayout.labelHeightIn}in`,
+        padding: `${effectiveLayout.paddingIn}in`,
+    };
+
     const loopBarcode = (product) => {
         let indents = [];
         for (let i = 0; i < product.quantity; i++) {
             indents.push(
                 <div
                     key={i}
-                    className={`${
-                        paperSize.value === 1
-                            ? "col-md-3"
-                            : "" || paperSize.value === 2
-                            ? "col-md-4 barcode-main__box-height2"
-                            : "" || paperSize.value === 3
-                            ? "col-md-4 barcode-main__box-height3"
-                            : "" ||
-                              paperSize.value === 4 ||
-                              paperSize.value === 6
-                            ? "col-md-6 barcode-main__box-height2 px-20"
-                            : "" || paperSize.value === 5
-                            ? "col-md-4 barcode-main__box-height3 px-13"
-                            : "" || paperSize.value === 7
-                            ? "col-md-4 barcode-main__box-height7 px-20"
-                            : "" || paperSize.value === 8
-                            ? "col-md-6 barcode-main__box-height7 px-20"
-                            : ""
-                    } barcode-main__barcode-item barcode-main__barcode-style`}
+                    className="barcode-main__barcode-item barcode-main__barcode-style"
+                    style={itemStyle}
                 >
                     <div className="fw-bolder lh-1">
                         {barcodeOptions.companyName && companyName}
@@ -82,20 +107,17 @@ const BarcodeShow = (props) => {
         <>
             {
                 <div className="col-md-12 d-flex d-wrap justify-content-between flex-column overflow-auto">
-                    {updated
-                        ? updateProducts
-                            ? updateProducts.map((product, index) => {
-                                  return (
-                                      <div
-                                          className="barcode-main"
-                                          id="demo"
-                                          key={index}
-                                      >
-                                          {loopBarcode(product)}
-                                      </div>
-                                  );
-                              })
-                            : ""
+                    {updated && updateProducts
+                        ? updateProducts.map((product, index) => (
+                              <div
+                                  className="barcode-main"
+                                  id="demo"
+                                  key={index}
+                                  style={containerStyle}
+                              >
+                                  {loopBarcode(product)}
+                              </div>
+                          ))
                         : ""}
                 </div>
             }

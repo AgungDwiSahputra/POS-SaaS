@@ -106,7 +106,7 @@ const StockReport = (props) => {
         () => ({
             id: 'stock-summary-row',
             isSummary: true,
-            code: 'Total',
+            code: 'total-asset-summary',
             time: '',
             date: '',
             name: '',
@@ -174,7 +174,7 @@ const StockReport = (props) => {
                 if (row.isSummary) {
                     return (
                         <span className="fw-semibold">
-                            {getFormattedMessage('react-data-table.total-row.label')}
+                            {getFormattedMessage('stock-report.summary.total-asset')}
                         </span>
                     );
                 }
@@ -257,7 +257,7 @@ const StockReport = (props) => {
                       ),
         },
         {
-            name: getFormattedMessage("globally.total.hpp.label", "Total HPP"),
+            name: getFormattedMessage("stock-report.column.total-asset"),
             selector: (row) =>
                 currencySymbolHandling(
                     allConfigData,
