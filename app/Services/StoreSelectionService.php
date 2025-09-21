@@ -165,16 +165,16 @@ class StoreSelectionService
     public function getTransferType(?int $fromStoreId, ?int $toStoreId, ?int $fromWarehouseId, ?int $toWarehouseId): int
     {
         // Constants for transfer types
-        const WAREHOUSE_TO_WAREHOUSE = 1;
-        const STORE_TO_WAREHOUSE = 2;
-        const STORE_TO_STORE = 3;
+        $WAREHOUSE_TO_WAREHOUSE = 1;
+        $STORE_TO_WAREHOUSE = 2;
+        $STORE_TO_STORE = 3;
 
         if ($fromStoreId && $toStoreId) {
-            return self::STORE_TO_STORE;
+            return $STORE_TO_STORE;
         } elseif ($fromStoreId && $toWarehouseId) {
-            return self::STORE_TO_WAREHOUSE;
+            return $STORE_TO_WAREHOUSE;
         } else {
-            return self::WAREHOUSE_TO_WAREHOUSE;
+            return $WAREHOUSE_TO_WAREHOUSE;
         }
     }
 
@@ -184,10 +184,10 @@ class StoreSelectionService
     public function getPurchaseType(?int $fromStoreId): int
     {
         // Constants for purchase types
-        const REGULAR_PURCHASE = 1;
-        const STORE_TO_WAREHOUSE_PURCHASE = 2;
+        $REGULAR_PURCHASE = 1;
+        $STORE_TO_WAREHOUSE_PURCHASE = 2;
 
-        return $fromStoreId ? self::STORE_TO_WAREHOUSE_PURCHASE : self::REGULAR_PURCHASE;
+        return $fromStoreId ? $STORE_TO_WAREHOUSE_PURCHASE : $REGULAR_PURCHASE;
     }
 
     /**

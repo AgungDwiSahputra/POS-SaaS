@@ -209,7 +209,7 @@ class Purchase extends BaseModel implements HasMedia, JsonResourceful
             'from_store' => $fromStoreData,
             'to_store' => $toStoreData,
             'store' => $toStoreData, // Backward compatibility
-            'store_name' => $toStoreData?['name'], // Backward compatibility
+            'store_name' => $toStoreData['name'] ?? null, // Backward compatibility
             'tax_rate' => $this->tax_rate,
             'tax_amount' => $this->tax_amount,
             'discount' => $this->discount,

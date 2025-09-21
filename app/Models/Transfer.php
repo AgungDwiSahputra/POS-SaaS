@@ -92,7 +92,6 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
     protected $fillable = [
         'tenant_id',
         'date',
-        'date',
         'from_warehouse_id',
         'to_warehouse_id',
         'from_store_id',
