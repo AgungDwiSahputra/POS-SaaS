@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import MasterLayout from "../MasterLayout";
 import HeaderTitle from "../header/HeaderTitle";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import CashAdvanceForm from "./CashAdvanceForm";
 import { addCashAdvance } from "../../store/action/cashAdvanceAction";
 import { fetchActiveIdentitiesForSelect } from "../../store/action/cashAdvanceIdentityAction";
@@ -12,6 +12,8 @@ import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
 const CreateCashAdvance = (props) => {
     const { addCashAdvance, frontSetting, activeIdentitiesForSelect, fetchActiveIdentitiesForSelect } = props;
     const navigate = useNavigate();
+    const location = useLocation();
+    const prefillData = location.state?.prefill ?? null;
 
     const addCashAdvanceData = (formValue) => {
         addCashAdvance(formValue, navigate);

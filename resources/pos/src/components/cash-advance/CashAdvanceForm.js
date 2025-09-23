@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import moment from "moment";
@@ -21,58 +21,35 @@ const CashAdvanceForm = (props) => {
         singleCashAdvance,
         warehouses,
         frontSetting,
-        activeIdentitiesForSelect,
-        fetchActiveIdentitiesForSelect,
     } = props;
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const identityIdFromUrl = searchParams.get('identity_id');
-    
     const [cashAdvanceValue, setCashAdvanceValue] = useState({
         date: singleCashAdvance
             ? moment(singleCashAdvance[0].date).toDate()
             : new Date(),
-        identity_id: singleCashAdvance ? singleCashAdvance[0].identity_id : (identityIdFromUrl || ""),
+        warehouse_id: singleCashAdvance ? singleCashAdvance[0].warehouse_id : "",
+        issued_to_name: singleCashAdvance ? singleCashAdvance[0].issued_to_name : "",
+        issued_to_phone: singleCashAdvance ? singleCashAdvance[0].issued_to_phone : "",
+        issued_to_email: singleCashAdvance ? singleCashAdvance[0].issued_to_email : "",
         amount: singleCashAdvance ? singleCashAdvance[0].amount : "",
         notes: singleCashAdvance ? singleCashAdvance[0].notes : "",
-    });
+    }));
 
     const [errors, setErrors] = useState({
         date: "",
         identity_id: "",
         amount: "",
     });
-    const [selectedIdentity, setSelectedIdentity] = useState(
-        singleCashAdvance && singleCashAdvance[0].identity_id
+    const [selectedWarehouse] = useState(
+        singleCashAdvance
             ? [
                 {
-                    label: singleCashAdvance[0].identity_name || singleCashAdvance[0].issued_to_name,
-                    value: singleCashAdvance[0].identity_id,
+                    label: singleCashAdvance[0].warehouse_id.label,
+                    value: singleCashAdvance[0].warehouse_id.value,
                 },
             ]
-            : (identityIdFromUrl ? activeIdentitiesForSelect.find(
-                (identity) => identity.value === identityIdFromUrl
-            ) : null)
+            : null
     );
-
-    useEffect(() => {
-        fetchActiveIdentitiesForSelect();
-    }, []);
-
-    useEffect(() => {
-        if (identityIdFromUrl && activeIdentitiesForSelect.length > 0) {
-            const identity = activeIdentitiesForSelect.find(
-                (identity) => identity.value === identityIdFromUrl
-            );
-            if (identity) {
-                setSelectedIdentity(identity);
-                setCashAdvanceValue(prev => ({
-                    ...prev,
-                    identity_id: identityIdFromUrl
-                }));
-            }
-        }
-    }, [identityIdFromUrl, activeIdentitiesForSelect]);
 
     const disabled =
         singleCashAdvance &&

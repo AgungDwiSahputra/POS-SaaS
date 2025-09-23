@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import MasterLayout from "../../MasterLayout";
 import TabTitle from "../../../shared/tab-title/TabTitle";
 import {
@@ -38,6 +38,33 @@ const ProfitLossReport = (props) => {
     const [created_at] = useState(Filters.OBJ.created_at);
     const startMonth = moment().startOf("month").format(dateFormat.NATIVE);
     const today = moment().format(dateFormat.NATIVE);
+
+    const parseAmount = (value) => {
+        const numeric = Number.parseFloat(value);
+
+        return Number.isFinite(numeric) ? numeric : 0;
+    };
+
+    const grossProfitAmount = useMemo(() => {
+        const salesAmount = parseAmount(profitAndLossReport?.sales);
+        const saleReturnAmount = parseAmount(profitAndLossReport?.sale_returns);
+        const hppAmount = parseAmount(profitAndLossReport?.hpp);
+
+        return salesAmount - saleReturnAmount - hppAmount;
+    }, [profitAndLossReport]);
+
+    const revenueAmount = useMemo(() => {
+        const salesAmount = parseAmount(profitAndLossReport?.sales);
+        const saleReturnAmount = parseAmount(profitAndLossReport?.sale_returns);
+
+        return salesAmount - saleReturnAmount;
+    }, [profitAndLossReport]);
+
+    const netProfitAmount = useMemo(() => {
+        const expensesAmount = parseAmount(profitAndLossReport?.expenses);
+
+        return grossProfitAmount - expensesAmount;
+    }, [grossProfitAmount, profitAndLossReport]);
 
     useEffect(() => {
         onChangeDidMount();
@@ -217,9 +244,9 @@ const ProfitLossReport = (props) => {
                                             frontSetting.value &&
                                                 frontSetting.value
                                                     .currency_symbol,
-                                            profitAndLossReport.sales
-                                                ? profitAndLossReport.sales
-                                                : "0.00"
+                                            parseAmount(
+                                                profitAndLossReport.sales
+                                            )
                                         )}
                                         ${placeholderText("sales.title")}) - (
                                         ${currencySymbolHandling(
@@ -227,20 +254,14 @@ const ProfitLossReport = (props) => {
                                             frontSetting.value &&
                                                 frontSetting.value
                                                     .currency_symbol,
-                                            profitAndLossReport.sale_returns
-                                                ? profitAndLossReport.sale_returns
-                                                : "0.00"
+                                            parseAmount(
+                                                profitAndLossReport.sale_returns
+                                            )
                                         )}
                                         ${placeholderText(
                                             "sales-return.title"
                                         )})`}
-                            value={
-                                profitAndLossReport.Revenue
-                                    ? parseFloat(
-                                          profitAndLossReport.Revenue
-                                      ).toFixed(2)
-                                    : "0.00"
-                            }
+                            value={revenueAmount.toFixed(2)}
                         />
 
                         <ProfitLossWidget
@@ -265,9 +286,9 @@ const ProfitLossReport = (props) => {
                                                 frontSetting.value &&
                                                     frontSetting.value
                                                         .currency_symbol,
-                                                profitAndLossReport.sales
-                                                    ? profitAndLossReport.sales
-                                                    : "0.00"
+                                                parseAmount(
+                                                    profitAndLossReport.sales
+                                                )
                                             )}
                                             ${placeholderText(
                                                 "sales.title"
@@ -277,9 +298,9 @@ const ProfitLossReport = (props) => {
                                                     frontSetting.value &&
                                                         frontSetting.value
                                                             .currency_symbol,
-                                                    profitAndLossReport.sale_returns
-                                                        ? profitAndLossReport.sale_returns
-                                                        : "0.00"
+                                                    parseAmount(
+                                                        profitAndLossReport.sale_returns
+                                                    )
                                                 )}
                                                 ${placeholderText(
                                                     "sales-return.title"
@@ -289,20 +310,14 @@ const ProfitLossReport = (props) => {
                                                 frontSetting.value &&
                                                     frontSetting.value
                                                         .currency_symbol,
-                                                profitAndLossReport.product_cost
-                                                    ? profitAndLossReport.product_cost
-                                                    : "0.00"
+                                                parseAmount(
+                                                    profitAndLossReport.hpp
+                                                )
                                             )}
                                             ${placeholderText(
-                                                "product.input.product-cost.label"
+                                                "globally.input.hpp.label"
                                             )})`}
-                            value={
-                                profitAndLossReport.gross_profit
-                                    ? parseFloat(
-                                        profitAndLossReport.gross_profit
-                                    ).toFixed(2)
-                                    : "0.00"
-                            }
+                            value={grossProfitAmount.toFixed(2)}
                         />
 
                         <ProfitLossWidget
@@ -327,9 +342,7 @@ const ProfitLossReport = (props) => {
                                                 frontSetting.value &&
                                                     frontSetting.value
                                                         .currency_symbol,
-                                                profitAndLossReport.gross_profit
-                                                    ? profitAndLossReport.gross_profit
-                                                    : "0.00"
+                                                grossProfitAmount
                                             )}
                                             ${placeholderText(
                                                 "global.gross-profit.title"
@@ -339,20 +352,14 @@ const ProfitLossReport = (props) => {
                                                 frontSetting.value &&
                                                     frontSetting.value
                                                         .currency_symbol,
-                                                profitAndLossReport.expenses
-                                                    ? profitAndLossReport.expenses
-                                                    : "0.00"
+                                                parseAmount(
+                                                    profitAndLossReport.expenses
+                                                )
                                             )}
                                             ${placeholderText(
                                                 "expenses.title"
                                             )})`}
-                            value={
-                                profitAndLossReport.net_profit
-                                    ? parseFloat(
-                                          profitAndLossReport.net_profit
-                                      ).toFixed(2)
-                                    : "0.00"
-                            }
+                            value={netProfitAmount.toFixed(2)}
                         />
 
                         <ProfitLossWidget

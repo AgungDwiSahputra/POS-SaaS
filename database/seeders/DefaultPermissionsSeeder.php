@@ -141,7 +141,8 @@ class DefaultPermissionsSeeder extends Seeder
 
         $adminRole = RoleModel::whereName(RoleModel::ADMIN)->first();
         if ($adminRole) {
-            $adminRole->givePermissionTo('manage_cash_advances');
+            $allPermissionNames = Permission::pluck('name')->toArray();
+            $adminRole->syncPermissions($allPermissionNames);
         }
     }
 }

@@ -132,6 +132,9 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
 
     public function prepareAttributes(): array
     {
+        $fromStore = $this->fromWarehouse?->store;
+        $toStore = $this->toWarehouse?->store;
+
         $fields = [
             'date' => $this->date,
             'from_warehouse_id' => $this->from_warehouse_id,
@@ -147,6 +150,18 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
             'transfer_items' => $this->transferItems,
             'from_warehouse' => $this->fromWarehouse,
             'to_warehouse' => $this->toWarehouse,
+            'from_store' => $fromStore
+                ? [
+                    'id' => $fromStore->id,
+                    'name' => $fromStore->name,
+                ]
+                : null,
+            'to_store' => $toStore
+                ? [
+                    'id' => $toStore->id,
+                    'name' => $toStore->name,
+                ]
+                : null,
             'created_at' => $this->created_at,
         ];
 

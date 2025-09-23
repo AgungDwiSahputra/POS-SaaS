@@ -79,25 +79,27 @@ const Product = (props) => {
         currencySymbol &&
         purchases.length >= 0 &&
         purchases.map((purchase) => {
+            const attributes = purchase.attributes || {};
             return {
-                reference_code: purchase.attributes.reference_code,
-                supplier: purchase.attributes.supplier_name,
-                warehouse: purchase.attributes.warehouse_name,
-                status: purchase.attributes.status,
+                reference_code: attributes.reference_code,
+                supplier: attributes.supplier_name,
+                warehouse: attributes.warehouse_name,
+                store: attributes.store_name,
+                status: attributes.status,
                 paid: 0,
                 due: 0,
-                payment_status: purchase.attributes.payment_status ? purchase.attributes.payment_status : 2,
-                payment_type: purchase.attributes.payment_type,
+                payment_status: attributes.payment_status ? attributes.payment_status : 2,
+                payment_type: attributes.payment_type,
                 payment_type_name: {
-                    value: purchase.attributes.payment_type,
-                    label: paymentMethodName(paymentMethods, purchases && purchase.attributes)
+                    value: attributes.payment_type,
+                    label: paymentMethodName(paymentMethods, purchases && attributes)
                 },
-                date: moment(purchase.attributes.date).format("YYYY-MM-DD"),
-                time: moment(purchase.attributes.created_at).format("LT"),
-                grand_total: purchase.attributes.grand_total,
+                date: moment(attributes.date).format("YYYY-MM-DD"),
+                time: moment(attributes.created_at).format("LT"),
+                grand_total: attributes.grand_total,
                 currency: currencySymbol,
                 id: purchase.id,
-                is_return: purchase.attributes.is_return,
+                is_return: attributes.is_return,
             };
         });
 
@@ -177,6 +179,11 @@ const Product = (props) => {
             name: getFormattedMessage("warehouse.title"),
             selector: (row) => row.warehouse,
             sortField: "warehouse",
+            sortable: false,
+        },
+        {
+            name: getFormattedMessage("purchase.store.column"),
+            selector: (row) => row.store,
             sortable: false,
         },
         {

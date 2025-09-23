@@ -168,6 +168,19 @@ const PurchaseDetails = (props) => {
                                     <div className="pb-1">
                                         <span className="me-2">
                                             {getFormattedMessage(
+                                                "purchase.store.column"
+                                            )}{" "}
+                                            :
+                                        </span>
+                                        <span>
+                                            {purchaseDetails?.warehouse?.store?.name ||
+                                                purchaseDetails?.store?.name ||
+                                                "-"}
+                                        </span>
+                                    </div>
+                                    <div className="pb-1">
+                                        <span className="me-2">
+                                            {getFormattedMessage(
                                                 "globally.detail.status"
                                             )}{" "}
                                             :

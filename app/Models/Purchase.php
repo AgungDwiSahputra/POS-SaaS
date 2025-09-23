@@ -172,12 +172,21 @@ class Purchase extends BaseModel implements HasMedia, JsonResourceful
 
     public function prepareAttributes(): array
     {
+        $store = $this->warehouse?->store;
+
         $fields = [
             'date' => $this->date,
             'supplier_id' => $this->supplier_id,
             'supplier_name' => $this->supplier->name,
             'warehouse_id' => $this->warehouse_id,
             'warehouse_name' => $this->warehouse->name,
+            'store' => $store
+                ? [
+                    'id' => $store->id,
+                    'name' => $store->name,
+                ]
+                : null,
+            'store_name' => $store?->name,
             'tax_rate' => $this->tax_rate,
             'tax_amount' => $this->tax_amount,
             'discount' => $this->discount,
