@@ -29,6 +29,11 @@ import EditExpense from "./components/expense/EditExpense";
 import CashAdvances from "./components/cash-advance/CashAdvances";
 import CreateCashAdvance from "./components/cash-advance/CreateCashAdvance";
 import EditCashAdvance from "./components/cash-advance/EditCashAdvance";
+import CashAdvanceIdentities from "./components/cash-advance-identity/CashAdvanceIdentities";
+import CreateCashAdvanceIdentity from "./components/cash-advance-identity/CreateCashAdvanceIdentity";
+import EditCashAdvanceIdentity from "./components/cash-advance-identity/EditCashAdvanceIdentity";
+import CashAdvanceIdentityDetail from "./components/cash-advance-identity/CashAdvanceIdentityDetail";
+import CashAdvanceIdentityDashboard from "./components/cash-advance-identity/CashAdvanceIdentityDashboard";
 import Purchases from "./components/purchase/Purchases";
 import CreatePurchase from "./components/purchase/CreatePurchase";
 import EditPurchase from "./components/purchase/EditPurchase";
@@ -334,8 +339,33 @@ export const route = [
         permission: Permissions.EDIT_EXPENSES,
     },
     {
+        path: "cash-advance-identities",
+        ele: <CashAdvanceIdentityDashboard />,
+        permission: Permissions.MANAGE_CASH_ADVANCES,
+    },
+    {
+        path: "cash-advance-identities/list",
+        ele: <CashAdvanceIdentities />,
+        permission: Permissions.MANAGE_CASH_ADVANCES,
+    },
+    {
+        path: "cash-advance-identities/create",
+        ele: <CreateCashAdvanceIdentity />,
+        permission: Permissions.CREATE_CASH_ADVANCES,
+    },
+    {
+        path: "cash-advance-identities/edit/:id",
+        ele: <EditCashAdvanceIdentity />,
+        permission: Permissions.EDIT_CASH_ADVANCES,
+    },
+    {
+        path: "cash-advance-identities/:id",
+        ele: <CashAdvanceIdentityDetail />,
+        permission: Permissions.MANAGE_CASH_ADVANCES,
+    },
+    {
         path: "cash-advances",
-        ele: <CashAdvances />,
+        ele: <CashAdvanceIdentityDashboard />,
         permission: Permissions.MANAGE_CASH_ADVANCES,
     },
     {

@@ -93,8 +93,8 @@ const CashAdvanceReport = (props) => {
         report.data.map((cashAdvance) => ({
             date: getFormattedDate(cashAdvance.attributes.date, allConfigData),
             reference_code: cashAdvance.attributes.reference_code,
-            issued_to_name: cashAdvance.attributes.issued_to_name,
-            warehouse_name: cashAdvance.attributes.warehouse_name,
+            identity_name: cashAdvance.attributes.identity_name,
+            identity_employee_id: cashAdvance.attributes.identity_employee_id,
             amount: cashAdvance.attributes.amount,
             paid_amount: cashAdvance.attributes.paid_amount,
             outstanding_amount: cashAdvance.attributes.outstanding_amount,

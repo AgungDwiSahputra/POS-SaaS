@@ -35,10 +35,7 @@ class CashAdvance extends BaseModel
 
     protected $fillable = [
         'date',
-        'warehouse_id',
-        'issued_to_name',
-        'issued_to_phone',
-        'issued_to_email',
+        'identity_id',
         'amount',
         'paid_amount',
         'status',
@@ -49,10 +46,7 @@ class CashAdvance extends BaseModel
 
     public static $rules = [
         'date' => 'required|date',
-        'warehouse_id' => 'required|exists:warehouses,id',
-        'issued_to_name' => 'required|string|max:191',
-        'issued_to_phone' => 'nullable|string|max:191',
-        'issued_to_email' => 'nullable|email|max:191',
+        'identity_id' => 'required|exists:cash_advance_identities,id',
         'amount' => 'required|numeric',
         'notes' => 'nullable|string',
         'paid_amount' => 'nullable|numeric',
@@ -82,12 +76,11 @@ class CashAdvance extends BaseModel
         }
 
         return [
+            'id' => $this->id,
             'date' => $this->date,
-            'warehouse_id' => $this->warehouse_id,
-            'warehouse_name' => $this->warehouse?->name,
-            'issued_to_name' => $this->issued_to_name,
-            'issued_to_phone' => $this->issued_to_phone,
-            'issued_to_email' => $this->issued_to_email,
+            'identity_id' => $this->identity_id,
+            'identity_name' => $this->identity?->name,
+            'identity_employee_id' => $this->identity?->employee_id,
             'amount' => $this->amount,
             'paid_amount' => $this->paid_amount,
             'outstanding_amount' => max(0, ($this->amount - $this->paid_amount)),
@@ -104,14 +97,14 @@ class CashAdvance extends BaseModel
         ];
     }
 
-    public function warehouse(): BelongsTo
-    {
-        return $this->belongsTo(Warehouse::class, 'warehouse_id', 'id');
-    }
-
     public function recordedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by', 'id')->withoutGlobalScope('tenant');
+    }
+
+    public function identity(): BelongsTo
+    {
+        return $this->belongsTo(CashAdvanceIdentity::class, 'identity_id', 'id')->withoutGlobalScopes();
     }
 
     public function payments(): HasMany
@@ -123,7 +116,7 @@ class CashAdvance extends BaseModel
      * @var string[]
      */
     public static $availableRelations = [
-        'warehouse_id' => 'warehouse',
+        'identity_id' => 'identity',
         'recorded_by' => 'recordedBy',
         'payments' => 'payments',
     ];

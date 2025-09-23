@@ -36,6 +36,8 @@ abstract class BaseRepository extends PrettusBaseRepository
 
     public function getAllowedFields(): array
     {
-        return array_merge($this->allowedFields, ['id', 'uuid']);
+        // Use null coalescing to avoid undefined property notice
+        $allowedFields = $this->allowedFields ?? [];
+        return array_merge($allowedFields, ['id', 'uuid']);
     }
 }

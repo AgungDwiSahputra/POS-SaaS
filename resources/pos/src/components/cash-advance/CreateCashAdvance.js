@@ -5,17 +5,13 @@ import HeaderTitle from "../header/HeaderTitle";
 import { useNavigate } from "react-router-dom";
 import CashAdvanceForm from "./CashAdvanceForm";
 import { addCashAdvance } from "../../store/action/cashAdvanceAction";
-import { fetchAllWarehouses } from "../../store/action/warehouseAction";
+import { fetchActiveIdentitiesForSelect } from "../../store/action/cashAdvanceIdentityAction";
 import { getFormattedMessage } from "../../shared/sharedMethod";
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
 
 const CreateCashAdvance = (props) => {
-    const { addCashAdvance, warehouses, fetchAllWarehouses, frontSetting } = props;
+    const { addCashAdvance, frontSetting, activeIdentitiesForSelect, fetchActiveIdentitiesForSelect } = props;
     const navigate = useNavigate();
-
-    useEffect(() => {
-        fetchAllWarehouses();
-    }, []);
 
     const addCashAdvanceData = (formValue) => {
         addCashAdvance(formValue, navigate);
@@ -25,24 +21,28 @@ const CreateCashAdvance = (props) => {
         <MasterLayout>
             <TopProgressBar />
             <HeaderTitle
-                title={getFormattedMessage("cash-advance.create.title")}
-                to="/user/cash-advances"
+                title="Create Cash Advance"
+                to="/user/cash-advance-identities"
             />
             <CashAdvanceForm
                 addCashAdvanceData={addCashAdvanceData}
-                warehouses={warehouses}
                 frontSetting={frontSetting}
+                activeIdentitiesForSelect={activeIdentitiesForSelect}
+                fetchActiveIdentitiesForSelect={fetchActiveIdentitiesForSelect}
             />
         </MasterLayout>
     );
 };
 
 const mapStateToProps = (state) => {
-    const { warehouses, frontSetting } = state;
-    return { warehouses, frontSetting };
+    const { frontSetting, cashAdvanceIdentities } = state;
+    return { 
+        frontSetting,
+        activeIdentitiesForSelect: cashAdvanceIdentities.activeIdentitiesForSelect,
+    };
 };
 
 export default connect(mapStateToProps, {
     addCashAdvance,
-    fetchAllWarehouses,
+    fetchActiveIdentitiesForSelect,
 })(CreateCashAdvance);

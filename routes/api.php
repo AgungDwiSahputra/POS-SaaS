@@ -15,6 +15,7 @@ use App\Http\Controllers\PaypalPaymentController;
 use App\Http\Controllers\StripePaymentController;
 use App\Http\Controllers\API\ExpenseAPIController;
 use App\Http\Controllers\API\CashAdvanceAPIController;
+use App\Http\Controllers\API\CashAdvanceIdentityAPIController;
 use App\Http\Controllers\API\PaymentMethodAPIController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\ProductAPIController;
@@ -246,6 +247,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         //expense route
         Route::middleware('permission:manage_expenses|manage_reports')->group(function () {
             Route::resource('expenses', ExpenseAPIController::class);
+        });
+
+        //cash advance identity route
+        Route::middleware('permission:manage_cash_advances')->group(function () {
+            Route::resource('cash-advance-identities', CashAdvanceIdentityAPIController::class);
+            Route::get('cash-advance-identities-with-summary', [CashAdvanceIdentityAPIController::class, 'getIdentitiesWithSummary']);
+            Route::get('cash-advance-identities/{id}/history', [CashAdvanceIdentityAPIController::class, 'getIdentityWithHistory']);
+            Route::get('active-identities-for-select', [CashAdvanceIdentityAPIController::class, 'getActiveIdentitiesForSelect']);
         });
 
         //cash advance route

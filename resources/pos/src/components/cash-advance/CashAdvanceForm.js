@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import moment from "moment";
 import { InputGroup } from "react-bootstrap-v5";
 import {
@@ -11,6 +11,7 @@ import {
 import ModelFooter from "../../shared/components/modelFooter";
 import ReactSelect from "../../shared/select/reactSelect";
 import ReactDatePicker from "../../shared/datepicker/ReactDatePicker";
+import { fetchActiveIdentitiesForSelect } from "../../store/action/cashAdvanceIdentityAction";
 
 const CashAdvanceForm = (props) => {
     const {
@@ -20,45 +21,63 @@ const CashAdvanceForm = (props) => {
         singleCashAdvance,
         warehouses,
         frontSetting,
+        activeIdentitiesForSelect,
+        fetchActiveIdentitiesForSelect,
     } = props;
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const identityIdFromUrl = searchParams.get('identity_id');
+    
     const [cashAdvanceValue, setCashAdvanceValue] = useState({
         date: singleCashAdvance
             ? moment(singleCashAdvance[0].date).toDate()
             : new Date(),
-        warehouse_id: singleCashAdvance ? singleCashAdvance[0].warehouse_id : "",
-        issued_to_name: singleCashAdvance ? singleCashAdvance[0].issued_to_name : "",
-        issued_to_phone: singleCashAdvance ? singleCashAdvance[0].issued_to_phone : "",
-        issued_to_email: singleCashAdvance ? singleCashAdvance[0].issued_to_email : "",
+        identity_id: singleCashAdvance ? singleCashAdvance[0].identity_id : (identityIdFromUrl || ""),
         amount: singleCashAdvance ? singleCashAdvance[0].amount : "",
         notes: singleCashAdvance ? singleCashAdvance[0].notes : "",
     });
 
     const [errors, setErrors] = useState({
         date: "",
-        warehouse_id: "",
-        issued_to_name: "",
+        identity_id: "",
         amount: "",
     });
-    const [selectedWarehouse] = useState(
-        singleCashAdvance
+    const [selectedIdentity, setSelectedIdentity] = useState(
+        singleCashAdvance && singleCashAdvance[0].identity_id
             ? [
                 {
-                    label: singleCashAdvance[0].warehouse_id.label,
-                    value: singleCashAdvance[0].warehouse_id.value,
+                    label: singleCashAdvance[0].identity_name || singleCashAdvance[0].issued_to_name,
+                    value: singleCashAdvance[0].identity_id,
                 },
             ]
-            : null
+            : (identityIdFromUrl ? activeIdentitiesForSelect.find(
+                (identity) => identity.value === identityIdFromUrl
+            ) : null)
     );
+
+    useEffect(() => {
+        fetchActiveIdentitiesForSelect();
+    }, []);
+
+    useEffect(() => {
+        if (identityIdFromUrl && activeIdentitiesForSelect.length > 0) {
+            const identity = activeIdentitiesForSelect.find(
+                (identity) => identity.value === identityIdFromUrl
+            );
+            if (identity) {
+                setSelectedIdentity(identity);
+                setCashAdvanceValue(prev => ({
+                    ...prev,
+                    identity_id: identityIdFromUrl
+                }));
+            }
+        }
+    }, [identityIdFromUrl, activeIdentitiesForSelect]);
 
     const disabled =
         singleCashAdvance &&
         moment(singleCashAdvance[0].date).toDate().toString() ===
             cashAdvanceValue.date.toString() &&
-        singleCashAdvance[0].warehouse_id.value === cashAdvanceValue.warehouse_id.value &&
-        singleCashAdvance[0].issued_to_name === cashAdvanceValue.issued_to_name &&
-        (singleCashAdvance[0].issued_to_phone || "") === cashAdvanceValue.issued_to_phone &&
-        (singleCashAdvance[0].issued_to_email || "") === cashAdvanceValue.issued_to_email &&
         singleCashAdvance[0].amount === cashAdvanceValue.amount &&
         (singleCashAdvance[0].notes || "") === (cashAdvanceValue.notes || "");
 
@@ -66,22 +85,12 @@ const CashAdvanceForm = (props) => {
         let formErrors = {};
         let isValid = true;
 
-        if (!cashAdvanceValue["warehouse_id"]) {
-            formErrors["warehouse_id"] = getFormattedMessage(
-                "product.input.warehouse.validate.label"
-            );
-            isValid = false;
-        }
-        if (!cashAdvanceValue["issued_to_name"]) {
-            formErrors["issued_to_name"] = getFormattedMessage(
-                "cash-advance.input.recipient.validate.label"
-            );
+        if (!cashAdvanceValue["identity_id"]) {
+            formErrors["identity_id"] = "Cash Advance Identity is required";
             isValid = false;
         }
         if (!cashAdvanceValue["amount"]) {
-            formErrors["amount"] = getFormattedMessage(
-                "cash-advance.input.amount.validate.label"
-            );
+            formErrors["amount"] = "Amount is required";
             isValid = false;
         }
 
@@ -89,8 +98,8 @@ const CashAdvanceForm = (props) => {
         return isValid;
     };
 
-    const onWarehouseChange = (obj) => {
-        setCashAdvanceValue((inputs) => ({ ...inputs, warehouse_id: obj }));
+    const onIdentityChange = (obj) => {
+        setCashAdvanceValue((inputs) => ({ ...inputs, identity_id: obj }));
         setErrors("");
     };
 
@@ -107,10 +116,7 @@ const CashAdvanceForm = (props) => {
     const prepareData = (data) => {
         return {
             date: moment(data.date).toDate(),
-            warehouse_id: data.warehouse_id.value,
-            issued_to_name: data.issued_to_name,
-            issued_to_phone: data.issued_to_phone,
-            issued_to_email: data.issued_to_email,
+            identity_id: data.identity_id.value,
             amount: data.amount,
             notes: data.notes,
         };
@@ -151,72 +157,20 @@ const CashAdvanceForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <ReactSelect
-                                title={getFormattedMessage("warehouse.title")}
-                                placeholder={placeholderText(
-                                    "product.input.warehouse.placeholder.label"
-                                )}
-                                defaultValue={selectedWarehouse}
-                                errors={errors["warehouse_id"]}
-                                data={warehouses}
-                                onChange={onWarehouseChange}
+                                title="Cash Advance Identity"
+                                placeholder="Select identity..."
+                                defaultValue={selectedIdentity}
+                                errors={errors["identity_id"]}
+                                data={activeIdentitiesForSelect}
+                                onChange={onIdentityChange}
+                                isDisabled={!!identityIdFromUrl}
                             />
                         </div>
 
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label">
-                                {getFormattedMessage("cash-advance.input.recipient.label")}:
-                            </label>
-                            <span className="required" />
-                            <input
-                                type="text"
-                                name="issued_to_name"
-                                className="form-control"
-                                placeholder={placeholderText(
-                                    "cash-advance.input.recipient.placeholder.label"
-                                )}
-                                onChange={(e) => onChangeInput(e)}
-                                value={cashAdvanceValue.issued_to_name || ""}
-                            />
-                            <span className="text-danger d-block fw-400 fs-small mt-2">
-                                {errors["issued_to_name"] ? errors["issued_to_name"] : null}
-                            </span>
-                        </div>
 
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                {getFormattedMessage("cash-advance.input.phone.label")}:
-                            </label>
-                            <input
-                                type="text"
-                                name="issued_to_phone"
-                                className="form-control"
-                                placeholder={placeholderText(
-                                    "cash-advance.input.phone.placeholder.label"
-                                )}
-                                onChange={(e) => onChangeInput(e)}
-                                value={cashAdvanceValue.issued_to_phone || ""}
-                            />
-                        </div>
-
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label">
-                                {getFormattedMessage("cash-advance.input.email.label")}:
-                            </label>
-                            <input
-                                type="email"
-                                name="issued_to_email"
-                                className="form-control"
-                                placeholder={placeholderText(
-                                    "cash-advance.input.email.placeholder.label"
-                                )}
-                                onChange={(e) => onChangeInput(e)}
-                                value={cashAdvanceValue.issued_to_email || ""}
-                            />
-                        </div>
-
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label">
-                                {getFormattedMessage("amount.title")}:
+                                Amount:
                             </label>
                             <span className="required" />
                             <InputGroup>
@@ -224,9 +178,7 @@ const CashAdvanceForm = (props) => {
                                     type="text"
                                     name="amount"
                                     value={cashAdvanceValue.amount || ""}
-                                    placeholder={placeholderText(
-                                        "cash-advance.input.amount.placeholder.label"
-                                    )}
+                                    placeholder="Enter amount..."
                                     pattern="[0-9]*"
                                     min={0}
                                     className="form-control"
@@ -242,17 +194,15 @@ const CashAdvanceForm = (props) => {
                             </span>
                         </div>
 
-                        <div className="col-md-6 mb-3">
+                        <div className="col-12 mb-3">
                             <label className="form-label">
-                                {getFormattedMessage("cash-advance.input.notes.label")}: 
+                                Notes: 
                             </label>
                             <textarea
                                 name="notes"
                                 className="form-control"
                                 rows="3"
-                                placeholder={placeholderText(
-                                    "cash-advance.input.notes.placeholder.label"
-                                )}
+                                placeholder="Enter notes..."
                                 onChange={(e) => onChangeInput(e)}
                                 value={cashAdvanceValue.notes || ""}
                             />
@@ -262,10 +212,9 @@ const CashAdvanceForm = (props) => {
                             onEditRecord={singleCashAdvance}
                             onSubmit={onSubmit}
                             editDisabled={disabled}
-                            link="/user/cash-advances"
+                            link="/user/cash-advance-identities"
                             addDisabled={
-                                !cashAdvanceValue.warehouse_id ||
-                                !cashAdvanceValue.issued_to_name ||
+                                !cashAdvanceValue.identity_id ||
                                 !cashAdvanceValue.amount
                             }
                         />

@@ -19,7 +19,9 @@ trait HasJsonResourcefulData
 
     public function getResourceType()
     {
-        return defined('static::JSON_API_TYPE') ? static::JSON_API_TYPE : '';
+        return defined(static::class . '::JSON_API_TYPE') || defined('static::JSON_API_TYPE')
+            ? constant(static::class . '::JSON_API_TYPE')
+            : '';
     }
 
     public function prepareData()
@@ -68,7 +70,14 @@ trait HasJsonResourcefulData
             return;
         }
 
-        $allowedFields = explode(',', request()->get('fields')[self::JSON_API_TYPE]);
+        $fieldsParam = request()->get('fields');
+        $jsonApiType = method_exists($this, 'getResourceType') ? $this->getResourceType() : (defined(static::class . '::JSON_API_TYPE') ? constant(static::class . '::JSON_API_TYPE') : null);
+
+        if (!is_array($fieldsParam) || empty($jsonApiType) || !isset($fieldsParam[$jsonApiType])) {
+            return;
+        }
+
+        $allowedFields = explode(',', $fieldsParam[$jsonApiType]);
 
         $fields = [];
         foreach ($allowedFields as $field) {
@@ -148,7 +157,12 @@ trait HasJsonResourcefulData
                     $extraFields = $relationFields[$relationName];
                     $extraFields = is_array($extraFields) ? $extraFields : explode(',', $extraFields);
 
-                    $availableRelations = get_class($relationValue)::$availableRelations;
+                    $availableRelations = property_exists($relationValue, 'availableRelations') 
+                        ? $relationValue->availableRelations 
+                        : (property_exists(get_class($relationValue), 'availableRelations') 
+                            ? get_class($relationValue)::${'availableRelations'} 
+                            : []);
+
                     $newFields = [];
                     foreach ($extraFields as $field) {
                         if (array_key_exists($field, $availableRelations)) {
@@ -160,8 +174,22 @@ trait HasJsonResourcefulData
 
                 /** @var \Eloquent|JsonResourceful $relationValue */
                 $include = $relationValue->asJsonResource();
-                if (in_array('parent_id', array_keys($relationValue->getAttributes()))) {
-                    $include['attributes']['parent_id'] = $relationValue->parent->uuid ?? null;
+
+                // Use getAttributes() if available, otherwise fallback to toArray(), else empty array
+                $attributesArray = [];
+                try {
+                    if ($relationValue instanceof \Illuminate\Database\Eloquent\Model && method_exists($relationValue, 'getAttributes')) {
+                        $attributesArray = $relationValue->getAttributes();
+                    } elseif (is_object($relationValue) && method_exists($relationValue, 'toArray')) {
+                        /** @var mixed $relationValue */
+                        $attributesArray = $relationValue->toArray();
+                    }
+                } catch (\Exception $e) {
+                    $attributesArray = [];
+                }
+
+                if (array_key_exists('parent_id', $attributesArray)) {
+                    $include['attributes']['parent_id'] = optional($relationValue->parent)->uuid;
                 }
 
                 $include['attributes'] = array_merge($include['attributes'], $newFields);
