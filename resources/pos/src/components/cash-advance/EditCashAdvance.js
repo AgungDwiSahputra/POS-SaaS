@@ -30,13 +30,10 @@ const EditCashAdvance = (props) => {
         cashAdvances.length === 1 &&
         cashAdvances.map((cashAdvance) => ({
             date: cashAdvance.attributes.date,
-            warehouse_id: {
-                value: cashAdvance.attributes.warehouse_id,
-                label: cashAdvance.attributes.warehouse_name,
+            identity_id: {
+                value: cashAdvance.attributes.identity_id,
+                label: cashAdvance.attributes.identity_name,
             },
-            issued_to_name: cashAdvance.attributes.issued_to_name,
-            issued_to_phone: cashAdvance.attributes.issued_to_phone,
-            issued_to_email: cashAdvance.attributes.issued_to_email,
             amount: cashAdvance.attributes.amount,
             notes: cashAdvance.attributes.notes,
             id: cashAdvance.id,
@@ -63,12 +60,11 @@ const EditCashAdvance = (props) => {
 };
 
 const mapStateToProps = (state) => {
-    const { cashAdvances, warehouses, frontSetting } = state;
-    return { cashAdvances, warehouses, frontSetting };
+    const { cashAdvances, frontSetting } = state;
+    return { cashAdvances, frontSetting };
 };
 
 export default connect(mapStateToProps, {
     fetchCashAdvance,
-    fetchWarehouses,
     editCashAdvance,
 })(EditCashAdvance);

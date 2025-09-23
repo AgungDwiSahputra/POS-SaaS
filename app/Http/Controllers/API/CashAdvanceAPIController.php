@@ -27,10 +27,10 @@ class CashAdvanceAPIController extends AppBaseController
     public function index(Request $request): CashAdvanceCollection
     {
         $perPage = getPageSize($request);
-        $cashAdvances = CashAdvance::with(['warehouse', 'recordedBy'])->withCount('payments');
+        $cashAdvances = CashAdvance::withoutGlobalScopes()->with(['identity', 'recordedBy'])->withCount('payments');
 
-        if ($request->get('warehouse_id')) {
-            $cashAdvances->where('warehouse_id', $request->get('warehouse_id'));
+        if ($request->get('identity_id')) {
+            $cashAdvances->where('identity_id', $request->get('identity_id'));
         }
 
         if ($request->filled('recorded_by')) {
@@ -130,7 +130,7 @@ class CashAdvanceAPIController extends AppBaseController
         $cashAdvance->refresh();
 
         return $this->sendResponse([
-            'cash_advance' => new CashAdvanceResource($cashAdvance->load(['warehouse', 'recordedBy'])),
+            'cash_advance' => new CashAdvanceResource($cashAdvance->load(['identity', 'recordedBy'])),
             'payment' => new CashAdvancePaymentResource($payment->load('recordedBy')),
         ], 'Payment recorded successfully');
     }
@@ -139,7 +139,7 @@ class CashAdvanceAPIController extends AppBaseController
     {
         $perPage = getPageSize($request);
 
-        $cashAdvances = CashAdvance::with(['warehouse', 'recordedBy'])->withCount('payments');
+        $cashAdvances = CashAdvance::withoutGlobalScopes()->with(['identity', 'recordedBy'])->withCount('payments');
 
         if ($request->filled('recorded_by')) {
             $cashAdvances->where('recorded_by', $request->get('recorded_by'));
