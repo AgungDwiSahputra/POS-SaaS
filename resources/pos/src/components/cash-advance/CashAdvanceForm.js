@@ -19,7 +19,6 @@ const CashAdvanceForm = (props) => {
         id,
         editCashAdvance,
         singleCashAdvance,
-        warehouses,
         frontSetting,
     } = props;
     const navigate = useNavigate();
@@ -27,34 +26,21 @@ const CashAdvanceForm = (props) => {
         date: singleCashAdvance
             ? moment(singleCashAdvance[0].date).toDate()
             : new Date(),
-        warehouse_id: singleCashAdvance ? singleCashAdvance[0].warehouse_id : "",
-        issued_to_name: singleCashAdvance ? singleCashAdvance[0].issued_to_name : "",
-        issued_to_phone: singleCashAdvance ? singleCashAdvance[0].issued_to_phone : "",
-        issued_to_email: singleCashAdvance ? singleCashAdvance[0].issued_to_email : "",
+        identity_id: singleCashAdvance ? singleCashAdvance[0].identity_id : "",
         amount: singleCashAdvance ? singleCashAdvance[0].amount : "",
         notes: singleCashAdvance ? singleCashAdvance[0].notes : "",
-    }));
+    });
 
     const [errors, setErrors] = useState({
         date: "",
         identity_id: "",
         amount: "",
     });
-    const [selectedWarehouse] = useState(
-        singleCashAdvance
-            ? [
-                {
-                    label: singleCashAdvance[0].warehouse_id.label,
-                    value: singleCashAdvance[0].warehouse_id.value,
-                },
-            ]
-            : null
-    );
-
     const disabled =
         singleCashAdvance &&
         moment(singleCashAdvance[0].date).toDate().toString() ===
             cashAdvanceValue.date.toString() &&
+        singleCashAdvance[0].identity_id === cashAdvanceValue.identity_id &&
         singleCashAdvance[0].amount === cashAdvanceValue.amount &&
         (singleCashAdvance[0].notes || "") === (cashAdvanceValue.notes || "");
 

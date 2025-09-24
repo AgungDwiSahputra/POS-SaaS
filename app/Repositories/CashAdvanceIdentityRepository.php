@@ -82,7 +82,6 @@ class CashAdvanceIdentityRepository extends BaseRepository
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('employee_id', 'like', "%{$search}%")
                   ->orWhere('department', 'like', "%{$search}%");
             });
         }

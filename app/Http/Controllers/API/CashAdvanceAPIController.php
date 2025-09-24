@@ -46,12 +46,12 @@ class CashAdvanceAPIController extends AppBaseController
         $search = $request->filter['search'] ?? '';
         if (!empty($search)) {
             $cashAdvances->where(function (Builder $query) use ($search) {
-                $query->where('issued_to_name', 'LIKE', "%{$search}%")
-                    ->orWhere('issued_to_phone', 'LIKE', "%{$search}%")
-                    ->orWhere('issued_to_email', 'LIKE', "%{$search}%")
-                    ->orWhere('reference_code', 'LIKE', "%{$search}%")
-                    ->orWhereHas('warehouse', function (Builder $warehouseQuery) use ($search) {
-                        $warehouseQuery->where('name', 'LIKE', "%{$search}%");
+                $query->where('reference_code', 'LIKE', "%{$search}%")
+                    ->orWhere('notes', 'LIKE', "%{$search}%")
+                    ->orWhereHas('identity', function (Builder $identityQuery) use ($search) {
+                        $identityQuery->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('employee_id', 'LIKE', "%{$search}%")
+                            ->orWhere('department', 'LIKE', "%{$search}%");
                     });
             });
         }
@@ -158,8 +158,13 @@ class CashAdvanceAPIController extends AppBaseController
         $search = $request->filter['search'] ?? '';
         if (!empty($search)) {
             $cashAdvances->where(function (Builder $query) use ($search) {
-                $query->where('issued_to_name', 'LIKE', "%{$search}%")
-                    ->orWhere('reference_code', 'LIKE', "%{$search}%");
+                $query->where('reference_code', 'LIKE', "%{$search}%")
+                    ->orWhere('notes', 'LIKE', "%{$search}%")
+                    ->orWhereHas('identity', function (Builder $identityQuery) use ($search) {
+                        $identityQuery->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('employee_id', 'LIKE', "%{$search}%")
+                            ->orWhere('department', 'LIKE', "%{$search}%");
+                    });
             });
         }
 
