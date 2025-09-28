@@ -4,7 +4,8 @@ import MasterLayout from "../MasterLayout";
 import TabTitle from "../../shared/tab-title/TabTitle";
 import { fetchIdentitiesWithSummary } from "../../store/action/cashAdvanceIdentityAction";
 import { fetchCashAdvances } from "../../store/action/cashAdvanceAction";
-import { getFormattedMessage, currencySymbolHandling } from "../../shared/sharedMethod";
+import { getFormattedMessage, currencySymbolHandling, placeholderText } from "../../shared/sharedMethod";
+import { useIntl } from "react-intl";
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
 import { Button, Card, Row, Col, Badge, InputGroup, Form, Tabs, Tab, Table } from "react-bootstrap-v5";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,7 @@ const CashAdvanceIdentityDashboard = (props) => {
         isLoading,
     } = props;
     const navigate = useNavigate();
+    const intl = useIntl();
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("all");
     const [activeTab, setActiveTab] = useState("identities");
@@ -109,7 +111,7 @@ const CashAdvanceIdentityDashboard = (props) => {
     return (
         <MasterLayout>
             <TopProgressBar />
-            <TabTitle title="Cash Advances Management" />
+            <TabTitle title={placeholderText("cash-advance-identity.dashboard.title")} />
             
             {/* Tabs */}
             <Tabs
@@ -117,7 +119,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                 onSelect={(k) => setActiveTab(k)}
                 className="mb-3"
             >
-                <Tab eventKey="identities" title="Identities">
+                <Tab eventKey="identities" title={getFormattedMessage("cash-advance-identity.tab.identities")}>
                     {/* Summary Cards */}
             <Row className="mb-4">
                 <Col md={3}>
@@ -126,7 +128,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                             <FontAwesomeIcon icon={faUser} className="text-primary fs-1 mb-2" />
                             <h5 className="card-title">{totalIdentities}</h5>
                             <p className="card-text text-muted">
-                                Total Identities
+                                {getFormattedMessage("cash-advance-identity.summary.total_identities")}
                             </p>
                         </Card.Body>
                     </Card>
@@ -137,7 +139,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                             <FontAwesomeIcon icon={faUser} className="text-success fs-1 mb-2" />
                             <h5 className="card-title">{activeIdentities}</h5>
                             <p className="card-text text-muted">
-                                Active Identities
+                                {getFormattedMessage("cash-advance-identity.summary.active_identities")}
                             </p>
                         </Card.Body>
                     </Card>
@@ -150,7 +152,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                 {currencySymbolHandling(allConfigData, frontSetting?.value?.currency_symbol, totalAmount)}
                             </h5>
                             <p className="card-text text-muted">
-                                Total Amount
+                                {getFormattedMessage("cash-advance-identity.summary.total_amount")}
                             </p>
                         </Card.Body>
                     </Card>
@@ -163,7 +165,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                 {currencySymbolHandling(allConfigData, frontSetting?.value?.currency_symbol, totalOutstanding)}
                             </h5>
                             <p className="card-text text-muted">
-                                Outstanding
+                                {getFormattedMessage("cash-advance-identity.summary.outstanding")}
                             </p>
                         </Card.Body>
                     </Card>
@@ -176,7 +178,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                     <Card>
                         <Card.Body>
                             <div className="d-flex justify-content-between align-items-center">
-                                <h5 className="mb-0">Quick Actions</h5>
+                                <h5 className="mb-0">{getFormattedMessage("cash-advance-identity.dashboard.quick_actions")}</h5>
                                 <div>
                                     <Button
                                         variant="primary"
@@ -184,14 +186,14 @@ const CashAdvanceIdentityDashboard = (props) => {
                                         onClick={() => navigate("/user/cash-advance-identities/create")}
                                     >
                                         <FontAwesomeIcon icon={faPlus} className="me-2" />
-                                        Create Identity
+                                        {getFormattedMessage("cash-advance-identity.create.title")}
                                     </Button>
                                     <Button
                                         variant="success"
                                         onClick={() => navigate("/user/cash-advances/create")}
                                     >
                                         <FontAwesomeIcon icon={faMoneyBill} className="me-2" />
-                                        Create Cash Advance
+                                        {getFormattedMessage("cash-advance.create.title")}
                                     </Button>
                                 </div>
                             </div>
@@ -213,7 +215,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                         </InputGroup.Text>
                                         <Form.Control
                                             type="text"
-                                            placeholder="Search identities..."
+                                            placeholder={intl.formatMessage({ id: "cash-advance-identity.dashboard.search_placeholder" })}
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
@@ -224,15 +226,15 @@ const CashAdvanceIdentityDashboard = (props) => {
                                         value={filterType}
                                         onChange={(e) => setFilterType(e.target.value)}
                                     >
-                                        <option value="all">All Types</option>
-                                        <option value="employee">Employee</option>
-                                        <option value="contractor">Contractor</option>
-                                        <option value="other">Other</option>
+                                        <option value="all">{intl.formatMessage({ id: "cash-advance-identity.filter.all_types" })}</option>
+                                        <option value="employee">{intl.formatMessage({ id: "cash-advance-identity.input.type.employee" })}</option>
+                                        <option value="contractor">{intl.formatMessage({ id: "cash-advance-identity.input.type.contractor" })}</option>
+                                        <option value="other">{intl.formatMessage({ id: "cash-advance-identity.input.type.other" })}</option>
                                     </Form.Select>
                                 </Col>
                                 <Col xs={6} md={3}>
                                     <div className="text-muted text-center text-md-start">
-                                        Showing: {filteredIdentities.length} of {totalIdentities}
+                                        {intl.formatMessage({ id: "cash-advance-identity.dashboard.showing" })}: {filteredIdentities.length} {intl.formatMessage({ id: "cash-advance-identity.dashboard.of" })} {totalIdentities}
                                     </div>
                                 </Col>
                             </Row>
@@ -254,20 +256,20 @@ const CashAdvanceIdentityDashboard = (props) => {
                                     )}
                                 </div>
                                 <Badge bg={getTypeBadgeColor(identity.type)}>
-                                    {identity.type === 'employee' ? 'Employee' : 
-                                     identity.type === 'contractor' ? 'Contractor' : 'Other'}
+                                    {identity.type === 'employee' ? getFormattedMessage("cash-advance-identity.input.type.employee") : 
+                                     identity.type === 'contractor' ? getFormattedMessage("cash-advance-identity.input.type.contractor") : getFormattedMessage("cash-advance-identity.input.type.other")}
                                 </Badge>
                             </Card.Header>
                             <Card.Body>
                                 <div className="mb-3">
                                     {identity.department && (
                                         <div className="text-muted">
-                                            <strong>Department:</strong> {identity.department}
+                                            <strong>{getFormattedMessage("cash-advance-identity.input.department.label")}:</strong> {identity.department}
                                         </div>
                                     )}
                                     {identity.phone && (
                                         <div className="text-muted">
-                                            <strong>Phone:</strong> {identity.phone}
+                                            <strong>{getFormattedMessage("cash-advance-identity.input.phone.label")}:</strong> {identity.phone}
                                         </div>
                                     )}
                                 </div>
@@ -275,7 +277,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                 <div className="row text-center">
                                     <div className="col-4">
                                         <div className="fw-bold text-primary">{identity.total_advances || 0}</div>
-                                        <small className="text-muted">Total Advances</small>
+                                        <small className="text-muted">{getFormattedMessage("cash-advance-identity.summary.total_advances")}</small>
                                     </div>
                                     <div className="col-4">
                                         <div className="fw-bold text-info">
@@ -284,7 +286,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                 return isNaN(value) ? 0 : value;
                                             })())}
                                         </div>
-                                        <small className="text-muted">Total Amount</small>
+                                        <small className="text-muted">{getFormattedMessage("cash-advance-identity.summary.total_amount")}</small>
                                     </div>
                                     <div className="col-4">
                                         <div className={`fw-bold ${(() => {
@@ -296,7 +298,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                 return isNaN(value) ? 0 : value;
                                             })())}
                                         </div>
-                                        <small className="text-muted">Outstanding</small>
+                                        <small className="text-muted">{getFormattedMessage("cash-advance-identity.summary.outstanding")}</small>
                                     </div>
                                 </div>
                             </Card.Body>
@@ -307,7 +309,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                     onClick={() => handleIdentitySelect(identity)}
                                 >
                                     <FontAwesomeIcon icon={faList} className="me-1" />
-                                    View Cash Advances
+                                    {getFormattedMessage("cash-advance-identity.dashboard.view_cash_advances")}
                                 </Button>
                                 <Button
                                     variant="outline-success"
@@ -315,7 +317,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                     onClick={() => navigate(`/user/cash-advances/create?identity_id=${identity.id}`)}
                                 >
                                     <FontAwesomeIcon icon={faPlus} className="me-1" />
-                                    Create Cash Advance
+                                    {getFormattedMessage("cash-advance.create.title")}
                                 </Button>
                             </Card.Footer>
                         </Card>
@@ -330,17 +332,17 @@ const CashAdvanceIdentityDashboard = (props) => {
                             <Card.Body className="text-center py-5">
                                 <FontAwesomeIcon icon={faUser} className="text-muted fs-1 mb-3" />
                                 <h5 className="text-muted">
-                                    No Identities Found
+                                    {getFormattedMessage("cash-advance-identity.dashboard.no_identities")}
                                 </h5>
                                 <p className="text-muted">
-                                    Start by creating your first identity to manage cash advances.
+                                    {getFormattedMessage("cash-advance-identity.dashboard.no_identities_description")}
                                 </p>
                                 <Button
                                     variant="primary"
                                     onClick={() => navigate("/user/cash-advance-identities/create")}
                                 >
                                     <FontAwesomeIcon icon={faPlus} className="me-2" />
-                                    Create Identity
+                                    {getFormattedMessage("cash-advance-identity.create.title")}
                                 </Button>
                             </Card.Body>
                         </Card>
@@ -349,7 +351,7 @@ const CashAdvanceIdentityDashboard = (props) => {
             )}
                 </Tab>
                 
-                <Tab eventKey="cash-advances" title="Cash Advances">
+                <Tab eventKey="cash-advances" title={getFormattedMessage("cash-advance-identity.tab.cash-advances")}>
                     {selectedIdentity ? (
                         <div>
                             {filteredCashAdvances.length > 0 ? (
@@ -358,7 +360,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                         <Card>
                                             <Card.Header className="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center">
                                                 <div className="mb-2 mb-lg-0">
-                                                    <h5 className="mb-1">Cash Advances for {selectedIdentity.name}</h5>
+                                                    <h5 className="mb-1">{getFormattedMessage("cash-advance-identity.dashboard.cash_advances_for")} {selectedIdentity.name}</h5>
                                                     <small className="text-muted">
                                                         {selectedIdentity.employee_id && `ID: ${selectedIdentity.employee_id}`}
                                                         {selectedIdentity.department && ` • ${selectedIdentity.department}`}
@@ -371,16 +373,16 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                         onClick={() => navigate(`/user/cash-advances/create?identity_id=${selectedIdentity.id}`)}
                                                     >
                                                         <FontAwesomeIcon icon={faPlus} className="me-1" />
-                                                        <span className="d-none d-sm-inline">Create Cash Advance</span>
-                                                        <span className="d-inline d-sm-none">Create</span>
+                                                        <span className="d-none d-sm-inline">{getFormattedMessage("cash-advance.create.title")}</span>
+                                                        <span className="d-inline d-sm-none">{getFormattedMessage("cash-advance.create.short")}</span>
                                                     </Button>
                                                     <Button
                                                         variant="outline-secondary"
                                                         size="sm"
                                                         onClick={() => setActiveTab("identities")}
                                                     >
-                                                        <span className="d-none d-sm-inline">Back to Identities</span>
-                                                        <span className="d-inline d-sm-none">Back</span>
+                                                        <span className="d-none d-sm-inline">{getFormattedMessage("cash-advance-identity.dashboard.back_to_identities")}</span>
+                                                        <span className="d-inline d-sm-none">{getFormattedMessage("cash-advance-identity.dashboard.back")}</span>
                                                     </Button>
                                                 </div>
                                             </Card.Header>
@@ -399,7 +401,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         borderColor: '#495057 !important'
                                                                     }}
                                                                 >
-                                                                    Reference
+                                                                    {getFormattedMessage("globally.detail.reference")}
                                                                 </th>
                                                                 <th 
                                                                     className="text-nowrap" 
@@ -411,7 +413,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         borderColor: '#495057 !important'
                                                                     }}
                                                                 >
-                                                                    Amount
+                                                                    {getFormattedMessage("amount.title")}
                                                                 </th>
                                                                 <th 
                                                                     className="text-nowrap d-none d-lg-table-cell" 
@@ -423,7 +425,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         borderColor: '#495057 !important'
                                                                     }}
                                                                 >
-                                                                    Paid Amount
+                                                                    {getFormattedMessage("cash-advance.table.paid-amount")}
                                                                 </th>
                                                                 <th 
                                                                     className="text-nowrap" 
@@ -435,7 +437,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         borderColor: '#495057 !important'
                                                                     }}
                                                                 >
-                                                                    Outstanding
+                                                                    {getFormattedMessage("cash-advance.table.outstanding")}
                                                                 </th>
                                                                 <th 
                                                                     className="text-nowrap d-none d-sm-table-cell" 
@@ -447,7 +449,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         borderColor: '#495057 !important'
                                                                     }}
                                                                 >
-                                                                    Status
+                                                                    {getFormattedMessage("globally.detail.status")}
                                                                 </th>
                                                                 <th 
                                                                     className="text-nowrap d-none d-md-table-cell" 
@@ -459,7 +461,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         borderColor: '#495057 !important'
                                                                     }}
                                                                 >
-                                                                    Date
+                                                                    {intl.formatMessage({ id: "globally.detail.date" })}
                                                                 </th>
                                                                 <th 
                                                                     className="text-nowrap text-center" 
@@ -471,7 +473,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         borderColor: '#495057 !important'
                                                                     }}
                                                                 >
-                                                                    Actions
+                                                                    {getFormattedMessage("react-data-table.action.column.label")}
                                                                 </th>
                                                             </tr>
                                                         </thead>
@@ -481,7 +483,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                             const paidAmount = parseFloat(cashAdvance.paid_amount) || 0;
                                                             const outstanding = amount - paidAmount;
                                                             const isPaid = cashAdvance.status === 1;
-                                                            const statusText = isPaid ? 'Paid' : 'Pending';
+                                                            const statusText = isPaid ? "Lunas" : "Belum Lunas";
                                                             const formattedDate = cashAdvance.date ? new Date(cashAdvance.date).toLocaleDateString() : 'N/A';
                                                             
                                                             return (
@@ -527,12 +529,12 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                                 variant="outline-success"
                                                                                 size="sm"
                                                                                 onClick={() => handlePaymentClick(cashAdvance)}
-                                                                                title="Make Payment"
+                                                                                title={getFormattedMessage("cash-advance.payment.make_payment")}
                                                                                 className="d-flex align-items-center justify-content-center"
                                                                                 style={{ minWidth: '40px', minHeight: '40px' }}
                                                                             >
                                                                                 <FontAwesomeIcon icon={faCreditCard} />
-                                                                                <span className="d-none d-lg-inline ms-1">Pay</span>
+                                                                                <span className="d-none d-lg-inline ms-1">{getFormattedMessage("cash-advance.payment.pay")}</span>
                                                                             </Button>
                                                                         )}
                                                                         {!isPaid && (
@@ -540,7 +542,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                                 variant="outline-warning"
                                                                                 size="sm"
                                                                                 onClick={() => navigate(`/user/cash-advances/edit/${cashAdvance.id}`)}
-                                                                                title="Edit"
+                                                                                title={getFormattedMessage("globally.edit.label")}
                                                                                 className="d-none d-sm-inline-flex align-items-center justify-content-center"
                                                                                 style={{ minWidth: '40px', minHeight: '40px' }}
                                                                             >
@@ -552,7 +554,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                                 variant="outline-danger"
                                                                                 size="sm"
                                                                                 onClick={() => navigate(`/user/cash-advances/delete/${cashAdvance.id}`)}
-                                                                                title="Delete"
+                                                                                title={getFormattedMessage("globally.delete.label")}
                                                                                 className="d-none d-sm-inline-flex align-items-center justify-content-center"
                                                                                 style={{ minWidth: '40px', minHeight: '40px' }}
                                                                             >
@@ -562,7 +564,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         {isPaid && (
                                                                             <span className="text-muted small d-flex align-items-center">
                                                                                 <FontAwesomeIcon icon={faCheck} className="me-1 text-success" />
-                                                                                Paid
+                                                                                Lunas
                                                                             </span>
                                                                         )}
                                                                     </div>
@@ -583,16 +585,16 @@ const CashAdvanceIdentityDashboard = (props) => {
                                         <Card>
                                             <Card.Body className="text-center py-5">
                                                 <FontAwesomeIcon icon={faMoneyBill} className="text-muted fs-1 mb-3" />
-                                                <h5 className="text-muted">No Cash Advances Found</h5>
+                                                <h5 className="text-muted">{getFormattedMessage("cash-advance-identity.dashboard.no_cash_advances_found")}</h5>
                                                 <p className="text-muted">
-                                                    This identity doesn't have any cash advances yet.
+                                                    {getFormattedMessage("cash-advance-identity.dashboard.no_cash_advances_description")}
                                                 </p>
                                                 <Button
                                                     variant="primary"
                                                     onClick={() => navigate(`/user/cash-advances/create?identity_id=${selectedIdentity.id}`)}
                                                 >
                                                     <FontAwesomeIcon icon={faPlus} className="me-2" />
-                                                    Create First Cash Advance
+                                                    {getFormattedMessage("cash-advance.create.first")}
                                                 </Button>
                                             </Card.Body>
                                         </Card>
@@ -606,15 +608,15 @@ const CashAdvanceIdentityDashboard = (props) => {
                                 <Card>
                                     <Card.Body className="text-center py-5">
                                         <FontAwesomeIcon icon={faUser} className="text-muted fs-1 mb-3" />
-                                        <h5 className="text-muted">Select an Identity</h5>
+                                        <h5 className="text-muted">{getFormattedMessage("cash-advance-identity.dashboard.select_identity")}</h5>
                                         <p className="text-muted">
-                                            Please go to the Identities tab and select an identity to view their cash advances.
+                                            {getFormattedMessage("cash-advance-identity.dashboard.select_identity_description")}
                                         </p>
                                         <Button
                                             variant="primary"
                                             onClick={() => setActiveTab("identities")}
                                         >
-                                            Go to Identities
+                                            {getFormattedMessage("cash-advance-identity.dashboard.go_to_identities")}
                                         </Button>
                                     </Card.Body>
                                 </Card>

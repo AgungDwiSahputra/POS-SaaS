@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { useParams } from "react-router-dom";
 import { fetchWarehouses } from "../../store/action/warehouseAction";
+import { fetchActiveIdentitiesForSelect } from "../../store/action/cashAdvanceIdentityAction";
 import HeaderTitle from "../header/HeaderTitle";
 import MasterLayout from "../MasterLayout";
 import CashAdvanceForm from "./CashAdvanceForm";
@@ -17,12 +18,15 @@ const EditCashAdvance = (props) => {
         warehouses,
         fetchWarehouses,
         frontSetting,
+        activeIdentitiesForSelect,
+        fetchActiveIdentitiesForSelect,
     } = props;
     const { id } = useParams();
 
     useEffect(() => {
         fetchCashAdvance(id);
         fetchWarehouses();
+        fetchActiveIdentitiesForSelect();
     }, []);
 
     const itemsValue =
@@ -53,6 +57,8 @@ const EditCashAdvance = (props) => {
                     warehouses={warehouses}
                     editCashAdvance={editCashAdvance}
                     frontSetting={frontSetting}
+                    activeIdentitiesForSelect={activeIdentitiesForSelect}
+                    fetchActiveIdentitiesForSelect={fetchActiveIdentitiesForSelect}
                 />
             )}
         </MasterLayout>
@@ -60,11 +66,16 @@ const EditCashAdvance = (props) => {
 };
 
 const mapStateToProps = (state) => {
-    const { cashAdvances, frontSetting } = state;
-    return { cashAdvances, frontSetting };
+    const { cashAdvances, frontSetting, cashAdvanceIdentities } = state;
+    return { 
+        cashAdvances, 
+        frontSetting,
+        activeIdentitiesForSelect: cashAdvanceIdentities.activeIdentitiesForSelect,
+    };
 };
 
 export default connect(mapStateToProps, {
     fetchCashAdvance,
     editCashAdvance,
+    fetchActiveIdentitiesForSelect,
 })(EditCashAdvance);

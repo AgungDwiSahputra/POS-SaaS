@@ -75,7 +75,7 @@ class AuthController extends AppBaseController
         $password = $request->get('password');
 
         if (empty($email) or empty($password)) {
-            return $this->sendError('username and password required', 422);
+            return $this->sendError(__('messages.error.username_password_required'), 422);
         }
         $user = User::whereRaw('lower(email) = ?', [$email])->first();
         
@@ -179,7 +179,7 @@ class AuthController extends AppBaseController
 
         auth()->user()->tokens()->where('id', Auth::user()->currentAccessToken()->id)->delete();
 
-        return $this->sendSuccess('Logout Successfully');
+        return $this->sendSuccess(__('messages.success.logout_successfully'));
     }
 
     public function sendPasswordResetLinkEmail(Request $request): JsonResponse

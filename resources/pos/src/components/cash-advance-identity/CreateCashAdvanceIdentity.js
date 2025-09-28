@@ -20,7 +20,7 @@ const CreateCashAdvanceIdentity = (props) => {
         <MasterLayout>
             <TopProgressBar />
             <HeaderTitle
-                title="Create Cash Advance Identity"
+                title={getFormattedMessage("cash-advance-identity.create.title")}
                 to="/user/cash-advance-identities"
             />
             <CashAdvanceIdentityForm

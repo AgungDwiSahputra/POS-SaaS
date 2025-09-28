@@ -21,7 +21,7 @@ class CashAdvanceResource extends BaseJsonResource
             'paid_amount' => $this->paid_amount,
             'outstanding_amount' => max(0, ($this->amount - $this->paid_amount)),
             'status' => $this->status,
-            'status_label' => $this->status === 1 ? 'Paid' : 'Pending',
+            'status_label' => $this->status === 1 ? __('messages.cash_advance.status.paid') : __('messages.cash_advance.status.pending'),
             'reference_code' => $this->reference_code,
             'notes' => $this->notes,
             'recorded_by' => $this->recorded_by,

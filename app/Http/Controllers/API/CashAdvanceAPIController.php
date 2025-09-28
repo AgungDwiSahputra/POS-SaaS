@@ -106,7 +106,7 @@ class CashAdvanceAPIController extends AppBaseController
     {
         $this->cashAdvanceRepository->delete($id);
 
-        return $this->sendSuccess('Cash advance deleted successfully');
+        return $this->sendSuccess(__('messages.cash_advance.success.delete.message'));
     }
 
     public function payments(CashAdvance $cashAdvance): CashAdvancePaymentCollection
@@ -132,7 +132,7 @@ class CashAdvanceAPIController extends AppBaseController
         return $this->sendResponse([
             'cash_advance' => new CashAdvanceResource($cashAdvance->load(['identity', 'recordedBy'])),
             'payment' => new CashAdvancePaymentResource($payment->load('recordedBy')),
-        ], 'Payment recorded successfully');
+        ], __('messages.cash_advance.payment.success'));
     }
 
     public function report(Request $request): CashAdvanceCollection

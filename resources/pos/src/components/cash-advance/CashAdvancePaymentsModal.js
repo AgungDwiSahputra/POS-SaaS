@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Table } from "react-bootstrap";
 import moment from "moment";
 import ReactDatePicker from "../../shared/datepicker/ReactDatePicker";
-import { getFormattedMessage, placeholderText, currencySymbolHandling } from "../../shared/sharedMethod";
+import { getFormattedMessage, currencySymbolHandling } from "../../shared/sharedMethod";
+import { useIntl } from "react-intl";
 import apiConfig from "../../config/apiConfig";
 import { apiBaseURL, toastType } from "../../constants";
 import { addToast } from "../../store/action/toastAction";
@@ -19,6 +20,7 @@ const CashAdvancePaymentsModal = (props) => {
         allConfigData,
         onPaymentSuccess,
     } = props;
+    const intl = useIntl();
 
     const [payments, setPayments] = useState([]);
     const [summary, setSummary] = useState({ total_paid: 0, outstanding: 0 });
@@ -198,7 +200,7 @@ const CashAdvancePaymentsModal = (props) => {
                                     min="0"
                                     step="0.01"
                                     className="form-control"
-                                    placeholder={placeholderText("cash-advance.payment.amount.placeholder")}
+                                    placeholder={intl.formatMessage({ id: "cash-advance.payment.amount.placeholder" })}
                                     onChange={onInputChange}
                                     required
                                 />
@@ -214,7 +216,7 @@ const CashAdvancePaymentsModal = (props) => {
                                 name="notes"
                                 value={form.notes}
                                 className="form-control"
-                                placeholder={placeholderText("cash-advance.payment.note.placeholder")}
+                                placeholder={intl.formatMessage({ id: "cash-advance.payment.note.placeholder" })}
                                 onChange={onInputChange}
                             />
                         </div>

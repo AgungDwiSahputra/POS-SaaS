@@ -88,6 +88,6 @@ class HomeController extends AppBaseController
     {
         Session::put('locale', $request->input('languageCode'));
 
-        return $this->sendSuccess('Language changed successfully.');
+        return $this->sendSuccess(__('messages.success.language_changed_successfully'));
     }
 }

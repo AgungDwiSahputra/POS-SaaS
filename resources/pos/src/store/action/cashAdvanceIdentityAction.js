@@ -8,6 +8,7 @@ import {
     setTotalRecord,
 } from "./totalRecordAction";
 import { setLoading } from "./loadingAction";
+import { getFormattedMessage } from "../../shared/sharedMethod";
 
 const notifyAndStopLoading = (dispatch, error, isLoading) => {
     if (isLoading) {
@@ -59,7 +60,7 @@ export const addCashAdvanceIdentity = (formValue, navigate) => {
                 dispatch(
                     addToast({
                         type: toastType.SUCCESS,
-                        message: "Identity created successfully",
+                        message: getFormattedMessage("cash-advance-identity.success.create.message"),
                     })
                 );
                 navigate("/user/cash-advance-identities");
@@ -83,7 +84,7 @@ export const editCashAdvanceIdentity = (id, formValue, navigate) => {
                 dispatch(
                     addToast({
                         type: toastType.SUCCESS,
-                        message: "Identity updated successfully",
+                        message: getFormattedMessage("cash-advance-identity.success.edit.message"),
                     })
                 );
                 navigate("/user/cash-advance-identities");
@@ -108,7 +109,7 @@ export const deleteCashAdvanceIdentity = (id, onDeleteModel) => {
                 dispatch(
                     addToast({
                         type: toastType.SUCCESS,
-                        message: "Identity deleted successfully",
+                        message: getFormattedMessage("cash-advance-identity.success.delete.message"),
                     })
                 );
                 onDeleteModel();

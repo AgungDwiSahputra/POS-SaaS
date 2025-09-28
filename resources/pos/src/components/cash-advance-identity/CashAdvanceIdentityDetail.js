@@ -5,14 +5,16 @@ import HeaderTitle from "../header/HeaderTitle";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchCashAdvanceIdentityWithHistory } from "../../store/action/cashAdvanceIdentityAction";
 import { getFormattedMessage, currencySymbolHandling } from "../../shared/sharedMethod";
+import { useIntl } from "react-intl";
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
 import { Button } from "react-bootstrap-v5";
 import moment from "moment";
 
 const CashAdvanceIdentityDetail = (props) => {
-    const { fetchCashAdvanceIdentityWithHistory, singleCashAdvanceIdentity, frontSetting } = props;
+    const { fetchCashAdvanceIdentityWithHistory, singleCashAdvanceIdentity, frontSetting     } = props;
     const navigate = useNavigate();
     const { id } = useParams();
+    const intl = useIntl();
 
     useEffect(() => {
         fetchCashAdvanceIdentityWithHistory(id);
@@ -255,10 +257,7 @@ const CashAdvanceIdentityDetail = (props) => {
                                             </td>
                                             <td>
                                                 <span className={`badge bg-${advance.status === 1 ? 'success' : 'warning'}`}>
-                                                    {advance.status === 1 
-                                                        ? getFormattedMessage("cash-advance.status.paid")
-                                                        : getFormattedMessage("cash-advance.status.pending")
-                                                    }
+                                                    {advance.status === 1 ? "Lunas" : "Belum Lunas"}
                                                 </span>
                                             </td>
                                             <td>

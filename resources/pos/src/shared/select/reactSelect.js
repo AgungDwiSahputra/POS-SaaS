@@ -44,7 +44,7 @@ const ReactSelect = ( props ) => {
             {title ? <Form.Label htmlFor={generatedId}>{title}:</Form.Label> : ''}
             {isRequired ? '' : <span className='required' />}
             <Select
-                placeholder={placeholder}
+                placeholder={typeof placeholder === 'string' ? placeholder : placeholder}
                 value={value}
                 defaultValue={defaultValue}
                 onChange={onChange}

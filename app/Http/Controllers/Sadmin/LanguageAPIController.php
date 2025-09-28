@@ -177,7 +177,7 @@ class LanguageAPIController extends AppBaseController
                 $fileExists = $this->languageRepository->checkPhpDirectoryExistOrNot($isoCode);
 
                 if (! $fileExists) {
-                    return $this->sendError('Directory not found.');
+                    return $this->sendError(__('messages.error.directory_not_found'));
                 }
 
                 if (! empty($isoCode)) {
@@ -186,7 +186,7 @@ class LanguageAPIController extends AppBaseController
                 }
             }
 
-            return $this->sendSuccess('Language updated successfully');
+            return $this->sendSuccess(__('messages.success.language_updated_successfully'));
         } catch (\Exception $e) {
             throw new UnprocessableEntityHttpException($e->getMessage());
         }

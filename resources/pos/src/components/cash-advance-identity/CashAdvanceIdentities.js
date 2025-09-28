@@ -213,7 +213,7 @@ const CashAdvanceIdentities = (props) => {
     return (
         <MasterLayout>
             <TopProgressBar />
-            <TabTitle title={getFormattedMessage("cash-advance-identity.title")} />
+            <TabTitle title={placeholderText("cash-advance-identity.title")} />
             <div className="card">
                 <div className="card-body">
                     <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-3">

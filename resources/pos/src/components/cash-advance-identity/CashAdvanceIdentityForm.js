@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import {
     getFormattedMessage,
-    placeholderText,
 } from "../../shared/sharedMethod";
+import { useIntl } from "react-intl";
 import ModelFooter from "../../shared/components/modelFooter";
 import ReactSelect from "../../shared/select/reactSelect";
 import ReactDatePicker from "../../shared/datepicker/ReactDatePicker";
@@ -18,6 +18,7 @@ const CashAdvanceIdentityForm = (props) => {
         singleCashAdvanceIdentity,
     } = props;
     const navigate = useNavigate();
+    const intl = useIntl();
     const [identityValue, setIdentityValue] = useState({
         name: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].name : "",
         email: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].email : "",
@@ -38,9 +39,9 @@ const CashAdvanceIdentityForm = (props) => {
     });
 
     const typeOptions = [
-        { value: "employee", label: "Employee" },
-        { value: "contractor", label: "Contractor" },
-        { value: "other", label: "Other" },
+        { value: "employee", label: getFormattedMessage("cash-advance-identity.input.type.employee") },
+        { value: "contractor", label: getFormattedMessage("cash-advance-identity.input.type.contractor") },
+        { value: "other", label: getFormattedMessage("cash-advance-identity.input.type.other") },
     ];
 
     const [selectedType] = useState(
@@ -65,11 +66,11 @@ const CashAdvanceIdentityForm = (props) => {
         let isValid = true;
 
         if (!identityValue["name"]) {
-            formErrors["name"] = "Name is required";
+            formErrors["name"] = getFormattedMessage("cash-advance-identity.input.name.validate.label");
             isValid = false;
         }
         if (!identityValue["type"]) {
-            formErrors["type"] = "Type is required";
+            formErrors["type"] = getFormattedMessage("cash-advance-identity.input.type.validate.label");
             isValid = false;
         }
 
@@ -130,16 +131,14 @@ const CashAdvanceIdentityForm = (props) => {
                     <div className="row">
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                Name:
+                                {getFormattedMessage("cash-advance-identity.input.name.label")}:
                             </label>
                             <span className="required" />
                             <input
                                 type="text"
                                 name="name"
                                 className="form-control"
-                                placeholder={placeholderText(
-                                    "cash-advance-identity.input.name.placeholder.label"
-                                )}
+                                placeholder={intl.formatMessage({ id: "cash-advance-identity.input.name.placeholder.label" })}
                                 onChange={(e) => onChangeInput(e)}
                                 value={identityValue.name || ""}
                             />
@@ -150,12 +149,12 @@ const CashAdvanceIdentityForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                Type:
+                                {getFormattedMessage("cash-advance-identity.input.type.label")}:
                             </label>
                             <span className="required" />
                             <ReactSelect
                                 title=""
-                                placeholder="Select type..."
+                                placeholder={intl.formatMessage({ id: "cash-advance-identity.input.type.placeholder.label" })}
                                 defaultValue={selectedType}
                                 errors={errors["type"]}
                                 data={typeOptions}
@@ -166,7 +165,7 @@ const CashAdvanceIdentityForm = (props) => {
                         {singleCashAdvanceIdentity && singleCashAdvanceIdentity[0].employee_id && (
                             <div className="col-md-6 mb-3">
                                 <label className="form-label">
-                                    Employee ID:
+                                    {getFormattedMessage("cash-advance-identity.input.employee_id.label")}:
                                 </label>
                                 <input
                                     type="text"
@@ -175,19 +174,19 @@ const CashAdvanceIdentityForm = (props) => {
                                     readOnly
                                     style={{ backgroundColor: '#f8f9fa' }}
                                 />
-                                <small className="text-muted">Auto-generated</small>
+                                <small className="text-muted">{getFormattedMessage("cash-advance-identity.input.employee_id.auto_generated")}</small>
                             </div>
                         )}
 
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                Email:
+                                {getFormattedMessage("cash-advance-identity.input.email.label")}:
                             </label>
                             <input
                                 type="email"
                                 name="email"
                                 className="form-control"
-                                placeholder="Enter email address..."
+                                placeholder={intl.formatMessage({ id: "cash-advance-identity.input.email.placeholder.label" })}
                                 onChange={(e) => onChangeInput(e)}
                                 value={identityValue.email || ""}
                             />
@@ -195,13 +194,13 @@ const CashAdvanceIdentityForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                Phone:
+                                {getFormattedMessage("cash-advance-identity.input.phone.label")}:
                             </label>
                             <input
                                 type="text"
                                 name="phone"
                                 className="form-control"
-                                placeholder="Enter phone number..."
+                                placeholder={intl.formatMessage({ id: "cash-advance-identity.input.phone.placeholder.label" })}
                                 onChange={(e) => onChangeInput(e)}
                                 value={identityValue.phone || ""}
                             />
@@ -209,13 +208,13 @@ const CashAdvanceIdentityForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                Department:
+                                {getFormattedMessage("cash-advance-identity.input.department.label")}:
                             </label>
                             <input
                                 type="text"
                                 name="department"
                                 className="form-control"
-                                placeholder="Enter department..."
+                                placeholder={intl.formatMessage({ id: "cash-advance-identity.input.department.placeholder.label" })}
                                 onChange={(e) => onChangeInput(e)}
                                 value={identityValue.department || ""}
                             />
@@ -223,7 +222,7 @@ const CashAdvanceIdentityForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                Date of Birth:
+                                {getFormattedMessage("cash-advance-identity.input.date_of_birth.label")}:
                             </label>
                             <div className="position-relative">
                                 <ReactDatePicker
@@ -235,7 +234,7 @@ const CashAdvanceIdentityForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                Status:
+                                {getFormattedMessage("cash-advance-identity.input.status.label")}:
                             </label>
                             <div className="form-check form-switch">
                                 <input
@@ -246,20 +245,20 @@ const CashAdvanceIdentityForm = (props) => {
                                     onChange={(e) => onChangeInput(e)}
                                 />
                                 <label className="form-check-label">
-                                    Active
+                                    {getFormattedMessage("cash-advance-identity.input.status.active")}
                                 </label>
                             </div>
                         </div>
 
                         <div className="col-12 mb-3">
                             <label className="form-label">
-                                Address:
+                                {getFormattedMessage("cash-advance-identity.input.address.label")}:
                             </label>
                             <textarea
                                 name="address"
                                 className="form-control"
                                 rows="3"
-                                placeholder="Enter address..."
+                                placeholder={intl.formatMessage({ id: "cash-advance-identity.input.address.placeholder.label" })}
                                 onChange={(e) => onChangeInput(e)}
                                 value={identityValue.address || ""}
                             />
@@ -267,13 +266,13 @@ const CashAdvanceIdentityForm = (props) => {
 
                         <div className="col-12 mb-3">
                             <label className="form-label">
-                                Notes:
+                                {getFormattedMessage("globally.input.note.label")}:
                             </label>
                             <textarea
                                 name="notes"
                                 className="form-control"
                                 rows="3"
-                                placeholder="Enter notes..."
+                                placeholder={intl.formatMessage({ id: "globally.input.note.placeholder.label" })}
                                 onChange={(e) => onChangeInput(e)}
                                 value={identityValue.notes || ""}
                             />

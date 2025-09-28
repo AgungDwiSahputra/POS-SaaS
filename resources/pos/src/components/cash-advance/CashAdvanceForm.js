@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import moment from "moment";
@@ -6,8 +6,8 @@ import { InputGroup } from "react-bootstrap-v5";
 import {
     decimalValidate,
     getFormattedMessage,
-    placeholderText,
 } from "../../shared/sharedMethod";
+import { useIntl } from "react-intl";
 import ModelFooter from "../../shared/components/modelFooter";
 import ReactSelect from "../../shared/select/reactSelect";
 import ReactDatePicker from "../../shared/datepicker/ReactDatePicker";
@@ -20,15 +20,18 @@ const CashAdvanceForm = (props) => {
         editCashAdvance,
         singleCashAdvance,
         frontSetting,
+        activeIdentitiesForSelect,
+        fetchActiveIdentitiesForSelect,
     } = props;
     const navigate = useNavigate();
+    const intl = useIntl();
     const [cashAdvanceValue, setCashAdvanceValue] = useState({
         date: singleCashAdvance
             ? moment(singleCashAdvance[0].date).toDate()
             : new Date(),
         identity_id: singleCashAdvance ? singleCashAdvance[0].identity_id : "",
-        amount: singleCashAdvance ? singleCashAdvance[0].amount : "",
-        notes: singleCashAdvance ? singleCashAdvance[0].notes : "",
+        amount: singleCashAdvance ? String(singleCashAdvance[0].amount || "") : "",
+        notes: singleCashAdvance ? String(singleCashAdvance[0].notes || "") : "",
     });
 
     const [errors, setErrors] = useState({
@@ -36,6 +39,24 @@ const CashAdvanceForm = (props) => {
         identity_id: "",
         amount: "",
     });
+
+    // Get identity ID from URL if present
+    const [searchParams] = useSearchParams();
+    const identityIdFromUrl = searchParams.get('identity_id');
+
+    // Set selected identity based on singleCashAdvance or URL parameter
+    const selectedIdentity = singleCashAdvance && singleCashAdvance[0]?.identity_id 
+        ? { 
+            value: singleCashAdvance[0].identity_id, 
+            label: singleCashAdvance[0].identity_name || singleCashAdvance[0].identity_id 
+          }
+        : identityIdFromUrl && activeIdentitiesForSelect?.find(id => id.value == identityIdFromUrl);
+
+    useEffect(() => {
+        if (!activeIdentitiesForSelect && fetchActiveIdentitiesForSelect) {
+            fetchActiveIdentitiesForSelect();
+        }
+    }, [activeIdentitiesForSelect, fetchActiveIdentitiesForSelect]);
     const disabled =
         singleCashAdvance &&
         moment(singleCashAdvance[0].date).toDate().toString() ===
@@ -49,11 +70,11 @@ const CashAdvanceForm = (props) => {
         let isValid = true;
 
         if (!cashAdvanceValue["identity_id"]) {
-            formErrors["identity_id"] = "Cash Advance Identity is required";
+            formErrors["identity_id"] = getFormattedMessage("cash-advance-identity.input.identity_id.validate.label");
             isValid = false;
         }
         if (!cashAdvanceValue["amount"]) {
-            formErrors["amount"] = "Amount is required";
+            formErrors["amount"] = getFormattedMessage("cash-advance.input.amount.validate.label");
             isValid = false;
         }
 
@@ -62,7 +83,7 @@ const CashAdvanceForm = (props) => {
     };
 
     const onIdentityChange = (obj) => {
-        setCashAdvanceValue((inputs) => ({ ...inputs, identity_id: obj }));
+        setCashAdvanceValue((inputs) => ({ ...inputs, identity_id: obj?.value || obj }));
         setErrors("");
     };
 
@@ -79,9 +100,9 @@ const CashAdvanceForm = (props) => {
     const prepareData = (data) => {
         return {
             date: moment(data.date).toDate(),
-            identity_id: data.identity_id.value,
-            amount: data.amount,
-            notes: data.notes,
+            identity_id: typeof data.identity_id === 'object' ? data.identity_id.value : data.identity_id,
+            amount: String(data.amount || ""),
+            notes: String(data.notes || ""),
         };
     };
 
@@ -120,8 +141,8 @@ const CashAdvanceForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <ReactSelect
-                                title="Cash Advance Identity"
-                                placeholder="Select identity..."
+                                title={getFormattedMessage("cash-advance-identity.title")}
+                                placeholder={intl.formatMessage({ id: "cash-advance-identity.input.identity_id.placeholder.label" })}
                                 defaultValue={selectedIdentity}
                                 errors={errors["identity_id"]}
                                 data={activeIdentitiesForSelect}
@@ -133,7 +154,7 @@ const CashAdvanceForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                Amount:
+                                {getFormattedMessage("amount.title")}:
                             </label>
                             <span className="required" />
                             <InputGroup>
@@ -141,7 +162,7 @@ const CashAdvanceForm = (props) => {
                                     type="text"
                                     name="amount"
                                     value={cashAdvanceValue.amount || ""}
-                                    placeholder="Enter amount..."
+                                    placeholder={intl.formatMessage({ id: "cash-advance.input.amount.placeholder.label" })}
                                     pattern="[0-9]*"
                                     min={0}
                                     className="form-control"
@@ -159,13 +180,13 @@ const CashAdvanceForm = (props) => {
 
                         <div className="col-12 mb-3">
                             <label className="form-label">
-                                Notes: 
+                                {getFormattedMessage("globally.input.note.label")}: 
                             </label>
                             <textarea
                                 name="notes"
                                 className="form-control"
                                 rows="3"
-                                placeholder="Enter notes..."
+                                placeholder={intl.formatMessage({ id: "globally.input.note.placeholder.label" })}
                                 onChange={(e) => onChangeInput(e)}
                                 value={cashAdvanceValue.notes || ""}
                             />

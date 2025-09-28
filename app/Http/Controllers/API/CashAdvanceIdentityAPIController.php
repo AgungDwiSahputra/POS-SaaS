@@ -25,7 +25,7 @@ class CashAdvanceIdentityAPIController extends AppBaseController
 
         return $this->sendResponse(
             $cashAdvanceIdentities->toArray(),
-            'Cash Advance Identities retrieved successfully.'
+            __('messages.cash_advance_identity.success.retrieved.message')
         );
     }
 
@@ -37,7 +37,7 @@ class CashAdvanceIdentityAPIController extends AppBaseController
 
         return $this->sendResponse(
             $cashAdvanceIdentity->toArray(),
-            'Cash Advance Identity saved successfully.'
+            __('messages.cash_advance_identity.success.create.message')
         );
     }
 
@@ -46,12 +46,12 @@ class CashAdvanceIdentityAPIController extends AppBaseController
         $cashAdvanceIdentity = $this->cashAdvanceIdentityRepository->find($id);
 
         if (empty($cashAdvanceIdentity)) {
-            return $this->sendError('Cash Advance Identity not found');
+            return $this->sendError(__('messages.cash_advance_identity.not.found'));
         }
 
         return $this->sendResponse(
             $cashAdvanceIdentity->toArray(),
-            'Cash Advance Identity retrieved successfully.'
+            __('messages.cash_advance_identity.success.retrieved.message')
         );
     }
 
@@ -60,7 +60,7 @@ class CashAdvanceIdentityAPIController extends AppBaseController
         $cashAdvanceIdentity = $this->cashAdvanceIdentityRepository->find($id);
 
         if (empty($cashAdvanceIdentity)) {
-            return $this->sendError('Cash Advance Identity not found');
+            return $this->sendError(__('messages.cash_advance_identity.not.found'));
         }
 
         $input = $request->all();
@@ -69,7 +69,7 @@ class CashAdvanceIdentityAPIController extends AppBaseController
 
         return $this->sendResponse(
             $cashAdvanceIdentity->toArray(),
-            'Cash Advance Identity updated successfully.'
+            __('messages.cash_advance_identity.success.edit.message')
         );
     }
 
@@ -78,12 +78,12 @@ class CashAdvanceIdentityAPIController extends AppBaseController
         $cashAdvanceIdentity = $this->cashAdvanceIdentityRepository->find($id);
 
         if (empty($cashAdvanceIdentity)) {
-            return $this->sendError('Cash Advance Identity not found');
+            return $this->sendError(__('messages.cash_advance_identity.not.found'));
         }
 
         $cashAdvanceIdentity->delete();
 
-        return $this->sendSuccess('Cash Advance Identity deleted successfully.');
+        return $this->sendSuccess(__('messages.cash_advance_identity.success.delete.message'));
     }
 
     public function getIdentitiesWithSummary(Request $request): JsonResponse
@@ -93,10 +93,10 @@ class CashAdvanceIdentityAPIController extends AppBaseController
 
             return $this->sendResponse(
                 $identities->toArray(),
-                'Cash Advance Identities with summary retrieved successfully.'
+                __('messages.cash_advance_identity.success.summary_retrieved.message')
             );
         } catch (\Exception $e) {
-            return $this->sendError('Error retrieving identities: ' . $e->getMessage());
+            return $this->sendError(__('messages.cash_advance_identity.error.retrieving') . ': ' . $e->getMessage());
         }
     }
 
@@ -106,7 +106,7 @@ class CashAdvanceIdentityAPIController extends AppBaseController
 
         return $this->sendResponse(
             $identity->toArray(),
-            'Cash Advance Identity with history retrieved successfully.'
+            __('messages.cash_advance_identity.success.history_retrieved.message')
         );
     }
 
@@ -116,7 +116,7 @@ class CashAdvanceIdentityAPIController extends AppBaseController
 
         return $this->sendResponse(
             $identities->toArray(),
-            'Active identities for select retrieved successfully.'
+            __('messages.cash_advance_identity.success.active_retrieved.message')
         );
     }
 }
