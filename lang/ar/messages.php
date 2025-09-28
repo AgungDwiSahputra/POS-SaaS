@@ -176,6 +176,60 @@ return [
         'pos_settings_updated' => 'تم تحديث إعدادات نقاط البيع بنجاح.',
         'dual_screen_settings_updated' => 'تم تحديث إعدادات الشاشة المزدوجة بنجاح.',
         'payment_method_status_updated' => 'تم تحديث حالة طريقة الدفع بنجاح.',
+        'logout_successfully' => 'تم تسجيل الخروج بنجاح.',
+        'language_changed_successfully' => 'تم تغيير اللغة بنجاح.',
+        'language_updated_successfully' => 'تم تحديث اللغة بنجاح.',
+        'cash_advance' => [
+            'success' => [
+                'create' => [
+                    'message' => 'تم إنشاء السلفة النقدية بنجاح.',
+                ],
+                'edit' => [
+                    'message' => 'تم تحديث السلفة النقدية بنجاح.',
+                ],
+                'delete' => [
+                    'message' => 'تم حذف السلفة النقدية بنجاح.',
+                ],
+            ],
+            'status' => [
+                'paid' => 'مدفوعة بالكامل',
+                'pending' => 'مستحقة',
+            ],
+            'payment' => [
+                'success' => 'تم تسجيل الدفع بنجاح.',
+            ],
+        ],
+        'cash_advance_identity' => [
+            'success' => [
+                'create' => [
+                    'message' => 'تم إنشاء الهوية بنجاح.',
+                ],
+                'edit' => [
+                    'message' => 'تم تحديث الهوية بنجاح.',
+                ],
+                'delete' => [
+                    'message' => 'تم حذف الهوية بنجاح.',
+                ],
+                'retrieved' => [
+                    'message' => 'تم استرداد الهوية بنجاح.',
+                ],
+                'summary_retrieved' => [
+                    'message' => 'تم استرداد الهوية مع الملخص بنجاح.',
+                ],
+                'history_retrieved' => [
+                    'message' => 'تم استرداد الهوية مع السجل بنجاح.',
+                ],
+                'active_retrieved' => [
+                    'message' => 'تم استرداد الهوية النشطة بنجاح.',
+                ],
+            ],
+            'not' => [
+                'found' => 'الهوية غير موجودة.',
+            ],
+            'error' => [
+                'retrieving' => 'خطأ في استرداد الهوية',
+            ],
+        ],
     ],
 
     'cash_advance' => [

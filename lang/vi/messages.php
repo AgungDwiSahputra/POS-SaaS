@@ -174,6 +174,61 @@ return [
         'tax_status_changed' => "Trạng thái thuế đã được thay đổi thành công.",
         'pos_settings_updated' => 'Cài đặt POS đã được cập nhật thành công.',
         'dual_screen_settings_updated' => 'Cài đặt màn hình kép đã được cập nhật thành công.',
+        'payment_method_status_updated' => 'Trạng thái phương thức thanh toán đã được cập nhật thành công.',
+        'logout_successfully' => 'Đăng xuất thành công.',
+        'language_changed_successfully' => 'Thay đổi ngôn ngữ thành công.',
+        'language_updated_successfully' => 'Cập nhật ngôn ngữ thành công.',
+        'cash_advance' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Tạm ứng đã được tạo thành công.',
+                ],
+                'edit' => [
+                    'message' => 'Tạm ứng đã được cập nhật thành công.',
+                ],
+                'delete' => [
+                    'message' => 'Tạm ứng đã được xóa thành công.',
+                ],
+            ],
+            'status' => [
+                'paid' => 'Đã thanh toán',
+                'pending' => 'Chờ xử lý',
+            ],
+            'payment' => [
+                'success' => 'Thanh toán đã được ghi nhận thành công.',
+            ],
+        ],
+        'cash_advance_identity' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Định danh đã được tạo thành công.',
+                ],
+                'edit' => [
+                    'message' => 'Định danh đã được cập nhật thành công.',
+                ],
+                'delete' => [
+                    'message' => 'Định danh đã được xóa thành công.',
+                ],
+                'retrieved' => [
+                    'message' => 'Định danh đã được truy xuất thành công.',
+                ],
+                'summary_retrieved' => [
+                    'message' => 'Định danh với tóm tắt đã được truy xuất thành công.',
+                ],
+                'history_retrieved' => [
+                    'message' => 'Định danh với lịch sử đã được truy xuất thành công.',
+                ],
+                'active_retrieved' => [
+                    'message' => 'Định danh đang hoạt động đã được truy xuất thành công.',
+                ],
+            ],
+            'not' => [
+                'found' => 'Không tìm thấy định danh.',
+            ],
+            'error' => [
+                'retrieving' => 'Lỗi khi truy xuất định danh',
+            ],
+        ],
     ],
 
     'cash_advance' => [

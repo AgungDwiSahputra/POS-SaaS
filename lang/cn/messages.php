@@ -174,6 +174,61 @@ return [
         'tax_status_changed' => "税务状态更改成功。",
         'pos_settings_updated' => 'POS 设置已成功更新。',
         'dual_screen_settings_updated' => '双屏设置已成功更新。',
+        'payment_method_status_updated' => '支付方式状态已成功更新。',
+        'logout_successfully' => '已成功登出。',
+        'language_changed_successfully' => '语言更改成功。',
+        'language_updated_successfully' => '语言更新成功。',
+        'cash_advance' => [
+            'success' => [
+                'create' => [
+                    'message' => '预付现金创建成功。',
+                ],
+                'edit' => [
+                    'message' => '预付现金更新成功。',
+                ],
+                'delete' => [
+                    'message' => '预付现金删除成功。',
+                ],
+            ],
+            'status' => [
+                'paid' => '已付清',
+                'pending' => '未付清',
+            ],
+            'payment' => [
+                'success' => '付款记录成功。',
+            ],
+        ],
+        'cash_advance_identity' => [
+            'success' => [
+                'create' => [
+                    'message' => '身份创建成功。',
+                ],
+                'edit' => [
+                    'message' => '身份更新成功。',
+                ],
+                'delete' => [
+                    'message' => '身份删除成功。',
+                ],
+                'retrieved' => [
+                    'message' => '身份检索成功。',
+                ],
+                'summary_retrieved' => [
+                    'message' => '身份与摘要检索成功。',
+                ],
+                'history_retrieved' => [
+                    'message' => '身份与历史记录检索成功。',
+                ],
+                'active_retrieved' => [
+                    'message' => '活动身份检索成功。',
+                ],
+            ],
+            'not' => [
+                'found' => '未找到身份。',
+            ],
+            'error' => [
+                'retrieving' => '检索身份时出错',
+            ],
+        ],
     ],
 
     'cash_advance' => [

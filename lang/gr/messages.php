@@ -174,6 +174,61 @@ return [
         'tax_status_changed' => "Steuerstatus erfolgreich geändert.",
         'pos_settings_updated' => 'POS-Einstellungen wurden erfolgreich aktualisiert.',
         'dual_screen_settings_updated' => 'Doppelte Bildschirmeinstellungen wurden erfolgreich aktualisiert.',
+        'payment_method_status_updated' => 'Zahlungsmethodenstatus erfolgreich aktualisiert.',
+        'logout_successfully' => 'Erfolgreich abgemeldet.',
+        'language_changed_successfully' => 'Sprache erfolgreich geändert.',
+        'language_updated_successfully' => 'Sprache erfolgreich aktualisiert.',
+        'cash_advance' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Vorschuss erfolgreich erstellt.',
+                ],
+                'edit' => [
+                    'message' => 'Vorschuss erfolgreich aktualisiert.',
+                ],
+                'delete' => [
+                    'message' => 'Vorschuss erfolgreich gelöscht.',
+                ],
+            ],
+            'status' => [
+                'paid' => 'Bezahlt',
+                'pending' => 'Ausstehend',
+            ],
+            'payment' => [
+                'success' => 'Zahlung erfolgreich erfasst.',
+            ],
+        ],
+        'cash_advance_identity' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Identität erfolgreich erstellt.',
+                ],
+                'edit' => [
+                    'message' => 'Identität erfolgreich aktualisiert.',
+                ],
+                'delete' => [
+                    'message' => 'Identität erfolgreich gelöscht.',
+                ],
+                'retrieved' => [
+                    'message' => 'Identität erfolgreich abgerufen.',
+                ],
+                'summary_retrieved' => [
+                    'message' => 'Identität mit Zusammenfassung erfolgreich abgerufen.',
+                ],
+                'history_retrieved' => [
+                    'message' => 'Identität mit Verlauf erfolgreich abgerufen.',
+                ],
+                'active_retrieved' => [
+                    'message' => 'Aktive Identität erfolgreich abgerufen.',
+                ],
+            ],
+            'not' => [
+                'found' => 'Identität nicht gefunden.',
+            ],
+            'error' => [
+                'retrieving' => 'Fehler beim Abrufen der Identität',
+            ],
+        ],
     ],
 
     'cash_advance' => [

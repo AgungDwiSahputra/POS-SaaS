@@ -174,6 +174,61 @@ return [
         'tax_status_changed' => "Statut de la taxe modifié avec succès.",
         'pos_settings_updated' => 'Paramètres du point de vente mis à jour avec succès.',
         'dual_screen_settings_updated' => 'Paramètres d\'écran double mis à jour avec succès.',
+        'payment_method_status_updated' => 'Statut du mode de paiement mis à jour avec succès.',
+        'logout_successfully' => 'Déconnexion réussie.',
+        'language_changed_successfully' => 'Langue changée avec succès.',
+        'language_updated_successfully' => 'Langue mise à jour avec succès.',
+        'cash_advance' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Avance de fonds créée avec succès.',
+                ],
+                'edit' => [
+                    'message' => 'Avance de fonds mise à jour avec succès.',
+                ],
+                'delete' => [
+                    'message' => 'Avance de fonds supprimée avec succès.',
+                ],
+            ],
+            'status' => [
+                'paid' => 'Payé',
+                'pending' => 'En attente',
+            ],
+            'payment' => [
+                'success' => 'Paiement enregistré avec succès.',
+            ],
+        ],
+        'cash_advance_identity' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Identité créée avec succès.',
+                ],
+                'edit' => [
+                    'message' => 'Identité mise à jour avec succès.',
+                ],
+                'delete' => [
+                    'message' => 'Identité supprimée avec succès.',
+                ],
+                'retrieved' => [
+                    'message' => 'Identité récupérée avec succès.',
+                ],
+                'summary_retrieved' => [
+                    'message' => 'Identité avec résumé récupérée avec succès.',
+                ],
+                'history_retrieved' => [
+                    'message' => 'Identité avec historique récupérée avec succès.',
+                ],
+                'active_retrieved' => [
+                    'message' => 'Identité active récupérée avec succès.',
+                ],
+            ],
+            'not' => [
+                'found' => 'Identité introuvable.',
+            ],
+            'error' => [
+                'retrieving' => 'Erreur lors de la récupération de l\'identité',
+            ],
+        ],
     ],
 
     'cash_advance' => [

@@ -174,6 +174,61 @@ return [
         'tax_status_changed' => "Vergi durumu başarıyla değiştirildi.",
         'pos_settings_updated' => 'POS ayarları başarıyla güncellendi.',
         'dual_screen_settings_updated' => 'Çift ekran ayarları başarıyla güncellendi.',
+        'payment_method_status_updated' => 'Ödeme yöntemi durumu başarıyla güncellendi.',
+        'logout_successfully' => 'Başarıyla çıkış yapıldı.',
+        'language_changed_successfully' => 'Dil başarıyla değiştirildi.',
+        'language_updated_successfully' => 'Dil başarıyla güncellendi.',
+        'cash_advance' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Peşinat başarıyla oluşturuldu.',
+                ],
+                'edit' => [
+                    'message' => 'Peşinat başarıyla güncellendi.',
+                ],
+                'delete' => [
+                    'message' => 'Peşinat başarıyla silindi.',
+                ],
+            ],
+            'status' => [
+                'paid' => 'Ödendi',
+                'pending' => 'Beklemede',
+            ],
+            'payment' => [
+                'success' => 'Ödeme başarıyla kaydedildi.',
+            ],
+        ],
+        'cash_advance_identity' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Kimlik başarıyla oluşturuldu.',
+                ],
+                'edit' => [
+                    'message' => 'Kimlik başarıyla güncellendi.',
+                ],
+                'delete' => [
+                    'message' => 'Kimlik başarıyla silindi.',
+                ],
+                'retrieved' => [
+                    'message' => 'Kimlik başarıyla alındı.',
+                ],
+                'summary_retrieved' => [
+                    'message' => 'Özet ile kimlik başarıyla alındı.',
+                ],
+                'history_retrieved' => [
+                    'message' => 'Geçmiş ile kimlik başarıyla alındı.',
+                ],
+                'active_retrieved' => [
+                    'message' => 'Aktif kimlik başarıyla alındı.',
+                ],
+            ],
+            'not' => [
+                'found' => 'Kimlik bulunamadı.',
+            ],
+            'error' => [
+                'retrieving' => 'Kimlik alınırken hata oluştu',
+            ],
+        ],
     ],
 
     'cash_advance' => [

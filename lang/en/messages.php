@@ -177,7 +177,61 @@ return [
         'tax_status_changed' => 'Tax status changed successfully.',
         'pos_settings_updated' => 'POS Settings updated successfully.',
         'dual_screen_settings_updated' => 'Dual Screen Settings updated successfully.',
-        'payment_method_status_updated' => 'Payment method status updated successfully.'
+        'payment_method_status_updated' => 'Payment method status updated successfully.',
+        'logout_successfully' => 'Logged out successfully.',
+        'language_changed_successfully' => 'Language changed successfully.',
+        'language_updated_successfully' => 'Language updated successfully.',
+        'cash_advance' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Cash advance created successfully.',
+                ],
+                'edit' => [
+                    'message' => 'Cash advance updated successfully.',
+                ],
+                'delete' => [
+                    'message' => 'Cash advance deleted successfully.',
+                ],
+            ],
+            'status' => [
+                'paid' => 'Paid',
+                'pending' => 'Outstanding',
+            ],
+            'payment' => [
+                'success' => 'Payment recorded successfully.',
+            ],
+        ],
+        'cash_advance_identity' => [
+            'success' => [
+                'create' => [
+                    'message' => 'Identity created successfully.',
+                ],
+                'edit' => [
+                    'message' => 'Identity updated successfully.',
+                ],
+                'delete' => [
+                    'message' => 'Identity deleted successfully.',
+                ],
+                'retrieved' => [
+                    'message' => 'Identity retrieved successfully.',
+                ],
+                'summary_retrieved' => [
+                    'message' => 'Identity with summary retrieved successfully.',
+                ],
+                'history_retrieved' => [
+                    'message' => 'Identity with history retrieved successfully.',
+                ],
+                'active_retrieved' => [
+                    'message' => 'Active identity retrieved successfully.',
+                ],
+            ],
+            'not' => [
+                'found' => 'Identity not found.',
+            ],
+            'error' => [
+                'retrieving' => 'Error retrieving identity',
+            ],
+        ],
     ],
 
     'cash_advance' => [
