@@ -75,25 +75,39 @@ class ManageStock extends BaseModel implements JsonResourceful
         parent::boot();
 
         static::updating(function ($model) {
-            $product = Product::find($model->product_id);
-            Log::info('Updating '.$model->quantity);
-            Log::info('Updating 1 '.$product->stock_alert);
+            $product = Product::withoutGlobalScope('tenant')->find($model->product_id);
+            
+            if ($product) {
+                Log::info('Updating '.$model->quantity);
+                Log::info('Updating 1 '.($product->stock_alert ?? 'null'));
 
-            if ($model->quantity <= $product->stock_alert) {
-                $model->alert = true;
+                $stockAlert = $product->stock_alert ? (float)$product->stock_alert : 0;
+                if ($model->quantity <= $stockAlert) {
+                    $model->alert = true;
+                } else {
+                    $model->alert = false;
+                }
             } else {
+                Log::warning('Product not found for ManageStock update: product_id='.$model->product_id);
                 $model->alert = false;
             }
         });
 
         static::creating(function ($model) {
-            $product = Product::find($model->product_id);
-            Log::info('Creating '.$model->quantity);
-            Log::info('Creating 1 '.$product->stock_alert);
+            $product = Product::withoutGlobalScope('tenant')->find($model->product_id);
+            
+            if ($product) {
+                Log::info('Creating '.$model->quantity);
+                Log::info('Creating 1 '.($product->stock_alert ?? 'null'));
 
-            if ($model->quantity <= $product->stock_alert) {
-                $model->alert = true;
+                $stockAlert = $product->stock_alert ? (float)$product->stock_alert : 0;
+                if ($model->quantity <= $stockAlert) {
+                    $model->alert = true;
+                } else {
+                    $model->alert = false;
+                }
             } else {
+                Log::warning('Product not found for ManageStock creation: product_id='.$model->product_id);
                 $model->alert = false;
             }
         });

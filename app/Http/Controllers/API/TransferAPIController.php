@@ -9,10 +9,15 @@ use App\Http\Resources\TransferCollection;
 use App\Http\Resources\TransferResource;
 use App\Models\ManageStock;
 use App\Models\Product;
+use App\Models\Store;
 use App\Models\Transfer;
 use App\Models\TransferItem;
+use App\Models\Warehouse;
 use App\Repositories\TransferRepository;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -31,8 +36,10 @@ class TransferAPIController extends AppBaseController
         $perPage = getPageSize($request);
 
         $transfers = $this->transferRepository->with([
-            'fromWarehouse.store',
-            'toWarehouse.store',
+            'fromWarehouse',
+            'toWarehouse',
+            'fromStore',
+            'toStore',
         ]);
 
         if ($request->get('status') && $request->get('status') != 'null') {
@@ -60,14 +67,28 @@ class TransferAPIController extends AppBaseController
     {
         $input = $request->all();
         $transfer = $this->transferRepository->storeTransfer($input);
-        $transfer->load(['transferItems.product', 'fromWarehouse.store', 'toWarehouse.store']);
+        $transfer->load([
+            'transferItems.product', 
+            'transferItems.destinationProduct',
+            'fromWarehouse', 
+            'toWarehouse', 
+            'fromStore', 
+            'toStore'
+        ]);
 
         return new TransferResource($transfer);
     }
 
     public function show(Transfer $transfer)
     {
-        $transfer = $transfer->load('transferItems.product', 'fromWarehouse.store', 'toWarehouse.store');
+        $transfer = $transfer->load(
+            'transferItems.product',
+            'transferItems.destinationProduct', 
+            'fromWarehouse', 
+            'toWarehouse', 
+            'fromStore', 
+            'toStore'
+        );
 
         return new TransferResource($transfer);
     }
@@ -76,8 +97,11 @@ class TransferAPIController extends AppBaseController
     {
         $transfer = $transfer->load(
             'transferItems.product.stocks',
-            'fromWarehouse.store',
-            'toWarehouse.store'
+            'transferItems.destinationProduct',
+            'fromWarehouse',
+            'toWarehouse',
+            'fromStore',
+            'toStore'
         );
 
         return new TransferResource($transfer);
@@ -87,9 +111,63 @@ class TransferAPIController extends AppBaseController
     {
         $input = $request->all();
         $transfer = $this->transferRepository->updateTransfer($input, $id);
-        $transfer->load(['transferItems.product', 'fromWarehouse.store', 'toWarehouse.store']);
+        $transfer->load([
+            'transferItems.product',
+            'transferItems.destinationProduct', 
+            'fromWarehouse', 
+            'toWarehouse', 
+            'fromStore', 
+            'toStore'
+        ]);
 
         return new TransferResource($transfer);
+    }
+
+    /**
+     * Get available stores for transfer (owned by current user and active)
+     */
+    public function getAvailableStores(): JsonResponse
+    {
+        $userId = Auth::id();
+        $stores = Store::where('user_id', $userId)
+            ->where('status', true)
+            ->select('id', 'name', 'tenant_id')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $stores,
+        ]);
+    }
+
+    /**
+     * Get warehouses by store
+     */
+    public function getWarehousesByStore($storeId): JsonResponse
+    {
+        try {
+            $store = Store::where('id', $storeId)
+                ->where('user_id', Auth::id())
+                ->where('status', true)
+                ->firstOrFail();
+
+            // Use withoutGlobalScope to bypass Multitenantable filtering
+            // This allows getting warehouses from different stores owned by same user
+            $warehouses = Warehouse::withoutGlobalScope('tenant')
+                ->where('tenant_id', $store->tenant_id)
+                ->select('id', 'name')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $warehouses,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.transfer.store_not_found'),
+            ], 404);
+        }
     }
 
     /**

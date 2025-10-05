@@ -138,6 +138,28 @@ return [
         'you_can_not_enable_more_than_4_taxes' => "Bạn không thể kích hoạt nhiều hơn 4 loại thuế.",
     ],
 
+'transfer' => [
+        'same_store_error' => 'Cửa hàng nguồn và cửa hàng đích không thể giống nhau.',
+        'store_not_found' => 'Không tìm thấy cửa hàng.',
+        'store_not_owned' => 'Bạn không có quyền truy cập cửa hàng này.',
+        'store_inactive' => 'Cửa hàng này không hoạt động.',
+        'from_store' => 'Từ cửa hàng',
+        'to_store' => 'Đến cửa hàng',
+        'select_store' => 'Chọn cửa hàng',
+        'store_required' => 'Cửa hàng là bắt buộc.',
+        'transfer_success' => 'Chuyển kho thành công.',
+        'transfer_updated' => 'Cập nhật chuyển kho thành công.',
+        'transfer_deleted' => 'Xóa chuyển kho thành công.',
+        'transfer_between_stores' => 'Chuyển kho giữa các cửa hàng',
+        'available_stores' => 'Cửa hàng có sẵn',
+        'no_stores_available' => 'Không có cửa hàng nào để chuyển kho.',
+        'product_sync_failed' => 'Đồng bộ sản phẩm thất bại',
+        'product_code_conflict' => 'Mã sản phẩm :code (:name) đã tồn tại với thông tin khác tại cửa hàng đích',
+        'cross_tenant_transfer_info' => 'Chuyển kho giữa các cửa hàng sẽ tự động đồng bộ sản phẩm',
+        'product_synced_to_store' => 'Sản phẩm đã được đồng bộ thành công đến :store',
+        'product_will_be_synced' => 'Sản phẩm sẽ được đồng bộ vào danh mục cửa hàng đích',
+    ],
+
 'success' => [
         'cache_clear_successfully' => 'Xóa bộ nhớ đệm thành công.',
         'product_category_delete' => 'Danh mục sản phẩm đã được xóa thành công.',

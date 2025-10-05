@@ -138,6 +138,28 @@ return [
         'you_can_not_enable_more_than_4_taxes' => "Vous ne pouvez pas activer plus de 4 taxes.",
     ],
 
+'transfer' => [
+        'same_store_error' => 'Le magasin source et le magasin de destination ne peuvent pas être identiques.',
+        'store_not_found' => 'Magasin introuvable.',
+        'store_not_owned' => 'Vous n\'avez pas accès à ce magasin.',
+        'store_inactive' => 'Ce magasin est inactif.',
+        'from_store' => 'Du magasin',
+        'to_store' => 'Au magasin',
+        'select_store' => 'Sélectionner un magasin',
+        'store_required' => 'Le magasin est obligatoire.',
+        'transfer_success' => 'Transfert effectué avec succès.',
+        'transfer_updated' => 'Transfert mis à jour avec succès.',
+        'transfer_deleted' => 'Transfert supprimé avec succès.',
+        'transfer_between_stores' => 'Transfert entre magasins',
+        'available_stores' => 'Magasins disponibles',
+        'no_stores_available' => 'Aucun magasin disponible pour le transfert.',
+        'product_sync_failed' => 'Échec de la synchronisation du produit',
+        'product_code_conflict' => 'Le code produit :code (:name) existe déjà avec des détails différents dans le magasin de destination',
+        'cross_tenant_transfer_info' => 'Le transfert entre magasins synchronisera automatiquement les produits',
+        'product_synced_to_store' => 'Produit synchronisé avec succès vers :store',
+        'product_will_be_synced' => 'Les produits seront synchronisés dans le catalogue du magasin de destination',
+    ],
+
 'success' => [
         'cache_clear_successfully' => 'Cache vidé avec succès',
         'product_category_delete' => 'Catégorie de produit supprimée avec succès.',

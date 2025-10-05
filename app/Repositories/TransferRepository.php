@@ -4,11 +4,14 @@ namespace App\Repositories;
 
 use App\Models\ManageStock;
 use App\Models\Product;
+use App\Models\Store;
 use App\Models\Transfer;
 use App\Models\TransferItem;
+use App\Services\ProductSyncService;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -71,7 +74,7 @@ class TransferRepository extends BaseRepository
 
             $input['date'] = $input['date'] ?? date('Y/m/d');
             $TransferInputArray = Arr::only($input, [
-                'from_warehouse_id', 'to_warehouse_id', 'tax_rate', 'tax_amount', 'discount', 'shipping', 'grand_total',
+                'from_warehouse_id', 'from_store_id', 'to_warehouse_id', 'to_store_id', 'tax_rate', 'tax_amount', 'discount', 'shipping', 'grand_total',
                 'note', 'date', 'status',
             ]);
 
@@ -146,27 +149,80 @@ class TransferRepository extends BaseRepository
      */
     public function storeTransferItems($transfer, $input)
     {
+        // Get stores untuk detect cross-tenant
+        $fromStore = Store::find($input['from_store_id']);
+        $toStore = Store::find($input['to_store_id']);
+        $isCrossTenant = $fromStore->tenant_id !== $toStore->tenant_id;
+        
+        $productSyncService = app(ProductSyncService::class);
+        
         foreach ($input['transfer_items'] as $transferItem) {
-            $product = ManageStock::whereWarehouseId($input['from_warehouse_id'])->whereProductId($transferItem['product_id'])->first();
+            $sourceProductId = $transferItem['product_id'];
+            $destinationProductId = $sourceProductId; // Default: same (same tenant)
+            $isSynced = false;
+            
+            // 1. Validate stock di warehouse asal
+            $stockCheck = ManageStock::whereWarehouseId($input['from_warehouse_id'])
+                ->whereProductId($sourceProductId)
+                ->first();
 
-            if ($product) {
-                if ($transferItem['quantity'] > $product->quantity) {
-                    throw new UnprocessableEntityHttpException('Quantity should not be greater than available quantity.');
-                } else {
-                    if ((int) ($transfer->status ?? 0) == Transfer::COMPLETED) {
-                        // Tambah ke gudang tujuan
-                        manageStock($input['to_warehouse_id'], $transferItem['product_id'], $transferItem['quantity']);
-                        // Kurangi dari gudang asal (gunakan helper untuk konsistensi & guard terhadap negatif)
-                        manageStock($input['from_warehouse_id'], $transferItem['product_id'], -$transferItem['quantity']);
-                    }
-                }
-            } else {
+            if (!$stockCheck) {
                 throw new UnprocessableEntityHttpException('Product stock is not available in selected warehouse.');
             }
+            
+            if ($transferItem['quantity'] > $stockCheck->quantity) {
+                throw new UnprocessableEntityHttpException('Quantity should not be greater than available quantity.');
+            }
+            
+            // 2. CROSS-TENANT PRODUCT SYNC
+            if ($isCrossTenant) {
+                $sourceProduct = Product::find($sourceProductId);
+                
+                try {
+                    $syncResult = $productSyncService->syncProduct(
+                        $sourceProduct, 
+                        $toStore->tenant_id
+                    );
+                    
+                    $destinationProductId = $syncResult['product_id'];
+                    $isSynced = true;
+                    
+                    Log::info("Product synced for transfer: source={$sourceProductId}, destination={$destinationProductId}, created={$syncResult['was_created']}");
+                    
+                } catch (\Exception $e) {
+                    Log::error("Product sync failed: " . $e->getMessage());
+                    throw new UnprocessableEntityHttpException(
+                        __('messages.transfer.product_sync_failed') . ': ' . $e->getMessage()
+                    );
+                }
+            }
+            
+            // 3. STOCK MOVEMENT (only if status = COMPLETED)
+            if ((int) ($transfer->status ?? 0) == Transfer::COMPLETED) {
+                // 4. HPP CALCULATION untuk destination product (cross-tenant only)
+                // HARUS SEBELUM stock movement untuk dapat qty yang benar
+                if ($isCrossTenant) {
+                    $this->updateHPPCrossTenant(
+                        $destinationProductId, 
+                        $transferItem['quantity'],
+                        $transferItem['net_unit_price'] ?? $transferItem['product_price']
+                    );
+                }
+                
+                // Kurangi dari gudang asal (source product)
+                manageStock($input['from_warehouse_id'], $sourceProductId, -$transferItem['quantity']);
+                
+                // Tambah ke gudang tujuan (destination product)
+                manageStock($input['to_warehouse_id'], $destinationProductId, $transferItem['quantity']);
+            }
 
+            // 5. SAVE TRANSFER ITEM dengan destination info
             $item = $this->calculationTransferItems($transferItem);
-            $transferItem = new TransferItem($item);
-            $transfer->transferItems()->save($transferItem);
+            $item['destination_product_id'] = $destinationProductId;
+            $item['is_synced'] = $isSynced;
+            
+            $transferItemModel = new TransferItem($item);
+            $transfer->transferItems()->save($transferItemModel);
         }
 
         $subTotalAmount = $transfer->transferItems()->sum('sub_total');
@@ -531,11 +587,63 @@ class TransferRepository extends BaseRepository
         $input['grand_total'] += $input['shipping'];
 
         $transferInputArray = Arr::only($input, [
-            'from_warehouse_id', 'to_warehouse_id', 'tax_rate', 'tax_amount', 'discount', 'shipping', 'grand_total',
+            'from_warehouse_id', 'from_store_id', 'to_warehouse_id', 'to_store_id', 'tax_rate', 'tax_amount', 'discount', 'shipping', 'grand_total',
             'note', 'date', 'status',
         ]);
         $transfer->update($transferInputArray);
 
         return $transfer;
+    }
+
+    /**
+     * Update HPP untuk cross-tenant transfer menggunakan Weighted Average Cost
+     * Formula: HPP Baru = (Total Nilai Lama + Nilai Masuk) / (Qty Lama + Qty Masuk)
+     * 
+     * Contoh:
+     * - Existing: 5 @ 10.000 = 50.000
+     * - Incoming: 5 @ 6.000 = 30.000
+     * - New HPP: (50.000 + 30.000) / (5 + 5) = 8.000
+     */
+    protected function updateHPPCrossTenant($destinationProductId, $incomingQty, $incomingUnitPrice): void
+    {
+        try {
+            $product = Product::withoutGlobalScope('tenant')->find($destinationProductId);
+            
+            if (!$product) {
+                Log::warning("Product not found for HPP calculation: {$destinationProductId}");
+                return;
+            }
+            
+            // Get current total stock (across all warehouses for this product in destination tenant)
+            $currentTotalQty = (float) ManageStock::withoutGlobalScope('tenant')
+                ->where('product_id', $destinationProductId)
+                ->sum('quantity');
+            
+            // Current HPP and total value
+            $currentHPP = (float) ($product->hpp ?? 0);
+            $currentTotalValue = $currentHPP * $currentTotalQty;
+            
+            // Incoming values
+            $incomingQty = (float) $incomingQty;
+            $incomingUnitPrice = (float) $incomingUnitPrice;
+            $incomingValue = $incomingQty * $incomingUnitPrice;
+            
+            // Calculate new HPP using Weighted Average
+            $newTotalQty = $currentTotalQty + $incomingQty;
+            
+            if ($newTotalQty > 0) {
+                $newHPP = ($currentTotalValue + $incomingValue) / $newTotalQty;
+                $product->update(['hpp' => (int) round($newHPP)]);
+                
+                Log::info("HPP updated for product {$destinationProductId}: " .
+                    "old_hpp={$currentHPP}, old_qty={$currentTotalQty}, " .
+                    "incoming_qty={$incomingQty}, incoming_price={$incomingUnitPrice}, " .
+                    "new_hpp=" . round($newHPP));
+            }
+            
+        } catch (\Exception $e) {
+            Log::error("HPP calculation failed: " . $e->getMessage());
+            // Don't throw, just log (HPP calculation failure shouldn't block transfer)
+        }
     }
 }

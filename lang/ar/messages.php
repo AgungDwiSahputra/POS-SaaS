@@ -139,6 +139,28 @@ return [
         'cannot_change_status_used_payment_method' => 'لا يمكن تغيير حالة طريقة الدفع لأنها مستخدمة في :module.',
     ],
 
+'transfer' => [
+        'same_store_error' => 'لا يمكن أن يكون المتجر المصدر والمتجر الوجهة نفس الشيء.',
+        'store_not_found' => 'المتجر غير موجود.',
+        'store_not_owned' => 'ليس لديك حق الوصول إلى هذا المتجر.',
+        'store_inactive' => 'هذا المتجر غير نشط.',
+        'from_store' => 'من المتجر',
+        'to_store' => 'إلى المتجر',
+        'select_store' => 'اختر المتجر',
+        'store_required' => 'المتجر مطلوب.',
+        'transfer_success' => 'تم النقل بنجاح.',
+        'transfer_updated' => 'تم تحديث النقل بنجاح.',
+        'transfer_deleted' => 'تم حذف النقل بنجاح.',
+        'transfer_between_stores' => 'النقل بين المتاجر',
+        'available_stores' => 'المتاجر المتاحة',
+        'no_stores_available' => 'لا توجد متاجر متاحة للنقل.',
+        'product_sync_failed' => 'فشل مزامنة المنتج',
+        'product_code_conflict' => 'رمز المنتج :code (:name) موجود بالفعل مع تفاصيل مختلفة في المتجر الوجهة',
+        'cross_tenant_transfer_info' => 'سيتم مزامنة المنتجات تلقائيًا عند النقل بين المتاجر',
+        'product_synced_to_store' => 'تمت مزامنة المنتج بنجاح إلى :store',
+        'product_will_be_synced' => 'سيتم مزامنة المنتجات إلى كتالوج المتجر الوجهة',
+    ],
+
 'success' => [
         'cache_clear_successfully' => 'تم مسح ذاكرة التخزين المؤقت بنجاح',
         'product_category_delete' => 'تم حذف فئة المنتج بنجاح.',

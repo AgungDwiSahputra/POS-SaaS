@@ -141,6 +141,28 @@ return [
         'cannot_change_status_used_payment_method' => "Payment method status can't be changed because it is used in :module.",
     ],
 
+'transfer' => [
+        'same_store_error' => 'Source store and destination store cannot be the same.',
+        'store_not_found' => 'Store not found.',
+        'store_not_owned' => 'You do not have access to this store.',
+        'store_inactive' => 'This store is inactive.',
+        'from_store' => 'From Store',
+        'to_store' => 'To Store',
+        'select_store' => 'Select Store',
+        'store_required' => 'Store is required.',
+        'transfer_success' => 'Transfer completed successfully.',
+        'transfer_updated' => 'Transfer updated successfully.',
+        'transfer_deleted' => 'Transfer deleted successfully.',
+        'transfer_between_stores' => 'Transfer Between Stores',
+        'available_stores' => 'Available Stores',
+        'no_stores_available' => 'No stores available for transfer.',
+        'product_sync_failed' => 'Failed to sync product',
+        'product_code_conflict' => 'Product code :code (:name) already exists with different details in destination store',
+        'cross_tenant_transfer_info' => 'Cross-store transfer will automatically sync products',
+        'product_synced_to_store' => 'Product successfully synced to :store',
+        'product_will_be_synced' => 'Products will be synced to destination store catalog',
+    ],
+
 'success' => [
         'cache_clear_successfully' => 'Cache cleared Successfully',
         'product_category_delete' => 'Product category deleted successfully.',

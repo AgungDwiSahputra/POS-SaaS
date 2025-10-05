@@ -138,6 +138,28 @@ return [
         'you_can_not_enable_more_than_4_taxes' => "您最多只能启用4个税项。",
     ],
 
+'transfer' => [
+        'same_store_error' => '源商店和目标商店不能相同。',
+        'store_not_found' => '未找到商店。',
+        'store_not_owned' => '您无权访问此商店。',
+        'store_inactive' => '此商店未激活。',
+        'from_store' => '从商店',
+        'to_store' => '到商店',
+        'select_store' => '选择商店',
+        'store_required' => '商店为必填项。',
+        'transfer_success' => '转移成功完成。',
+        'transfer_updated' => '转移更新成功。',
+        'transfer_deleted' => '转移删除成功。',
+        'transfer_between_stores' => '商店间转移',
+        'available_stores' => '可用商店',
+        'no_stores_available' => '没有可用于转移的商店。',
+        'product_sync_failed' => '产品同步失败',
+        'product_code_conflict' => '产品代码 :code (:name) 已存在于目标商店中但详细信息不同',
+        'cross_tenant_transfer_info' => '跨商店转移将自动同步产品',
+        'product_synced_to_store' => '产品已成功同步到 :store',
+        'product_will_be_synced' => '产品将同步到目标商店目录',
+    ],
+
 'success' => [
         'cache_clear_successfully' => '缓存清除成功',
         'product_category_delete' => '产品类别删除成功。',

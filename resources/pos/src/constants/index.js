@@ -29,6 +29,8 @@ export const apiBaseURL = {
     IMPORT_CUSTOMERS: "/import-customers",
     PURCHASES: "/purchases",
     TRANSFERS: "/transfers",
+    TRANSFERS_AVAILABLE_STORES: "/transfers/available-stores/list",
+    TRANSFERS_WAREHOUSES_BY_STORE: "/transfers/warehouses-by-store",
     SALES: "/sales",
     QUOTATIONS: "/quotations",
     QUOTATIONS_DETAILS: "quotation-info",

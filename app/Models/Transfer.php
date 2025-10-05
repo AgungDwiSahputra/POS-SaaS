@@ -87,9 +87,10 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
     protected $fillable = [
         'tenant_id',
         'date',
-        'date',
         'from_warehouse_id',
+        'from_store_id',
         'to_warehouse_id',
+        'to_store_id',
         'tax_rate',
         'tax_amount',
         'discount',
@@ -103,7 +104,9 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
     public static $rules = [
         'date' => 'date|required',
         'from_warehouse_id' => 'required|exists:warehouses,id',
+        'from_store_id' => 'required|exists:stores,id',
         'to_warehouse_id' => 'required|exists:warehouses,id',
+        'to_store_id' => 'required|exists:stores,id',
         'tax_rate' => 'nullable|numeric',
         'tax_amount' => 'nullable|numeric',
         'discount' => 'nullable|numeric',
@@ -132,13 +135,15 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
 
     public function prepareAttributes(): array
     {
-        $fromStore = $this->fromWarehouse?->store;
-        $toStore = $this->toWarehouse?->store;
+        $fromStore = $this->fromStore;
+        $toStore = $this->toStore;
 
         $fields = [
             'date' => $this->date,
             'from_warehouse_id' => $this->from_warehouse_id,
+            'from_store_id' => $this->from_store_id,
             'to_warehouse_id' => $this->to_warehouse_id,
+            'to_store_id' => $this->to_store_id,
             'tax_rate' => $this->tax_rate,
             'tax_amount' => $this->tax_amount,
             'discount' => $this->discount,
@@ -176,6 +181,16 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
     public function toWarehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class, 'to_warehouse_id', 'id');
+    }
+
+    public function fromStore(): BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'from_store_id', 'id');
+    }
+
+    public function toStore(): BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'to_store_id', 'id');
     }
 
     public function transferItems(): HasMany

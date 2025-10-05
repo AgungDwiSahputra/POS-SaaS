@@ -58,6 +58,8 @@ class TransferItem extends BaseModel implements JsonResourceful
 
     protected $fillable = [
         'product_id',
+        'destination_product_id',
+        'is_synced',
         'product_price',
         'net_unit_price',
         'tax_type',
@@ -91,6 +93,7 @@ class TransferItem extends BaseModel implements JsonResourceful
         'discount_amount' => 'double',
         'quantity' => 'double',
         'sub_total' => 'double',
+        'is_synced' => 'boolean',
     ];
 
     public function prepareLinks(): array
@@ -104,6 +107,8 @@ class TransferItem extends BaseModel implements JsonResourceful
     {
         $fields = [
             'product_id' => $this->product_id,
+            'destination_product_id' => $this->destination_product_id,
+            'is_synced' => $this->is_synced,
             'net_unit_price' => $this->net_unit_price,
             'product_price' => $this->product_price,
             'tax_type' => $this->tax_type,
@@ -122,5 +127,11 @@ class TransferItem extends BaseModel implements JsonResourceful
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
+
+    public function destinationProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'destination_product_id', 'id')
+            ->withoutGlobalScope('tenant');
     }
 }

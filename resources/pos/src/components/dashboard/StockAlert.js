@@ -36,17 +36,17 @@ const StockAlert = ( props ) => {
                                             <tr key={index}>
                                                 <td className='py-4'>{alert.code}</td>
                                                 <td className='py-4'>{alert.name}</td>
-                                                <td className='py-4'>{alert.stock.warehouse.name}</td>
+                                                <td className='py-4'>{alert.stock?.warehouse?.name || '-'}</td>
                                                 <td className='py-4'>
                                                     <div>
-                                                        <div className='badge bg-light-info me-2'><span>{alert.stock.quantity}</span></div>
-                                                        <span className='badge bg-light-success me-2'><span>{alert.stock.product_unit_name}</span></span>
+                                                        <div className='badge bg-light-info me-2'><span>{alert.stock?.quantity || 0}</span></div>
+                                                        <span className='badge bg-light-success me-2'><span>{alert.stock?.product_unit_name || '-'}</span></span>
                                                     </div>
                                                 </td>
                                                 <td className='py-4'>
                                                     <div>
                                                         <div className="badge bg-light-danger me-2">{alert.stock_alert !== 'null' && alert.stock_alert !== null ? alert.stock_alert : 0}</div>
-                                                        <span className='badge bg-light-success me-2'><span>{alert.stock.product_unit_name}</span></span>
+                                                        <span className='badge bg-light-success me-2'><span>{alert.stock?.product_unit_name || '-'}</span></span>
                                                      </div>
                                                 </td>
                                             </tr>

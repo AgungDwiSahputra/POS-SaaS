@@ -138,6 +138,28 @@ return [
         'you_can_not_enable_more_than_4_taxes' => "4'ten fazla vergi etkinleştirilemez.",
     ],
 
+'transfer' => [
+        'same_store_error' => 'Kaynak mağaza ve hedef mağaza aynı olamaz.',
+        'store_not_found' => 'Mağaza bulunamadı.',
+        'store_not_owned' => 'Bu mağazaya erişiminiz yok.',
+        'store_inactive' => 'Bu mağaza aktif değil.',
+        'from_store' => 'Mağazadan',
+        'to_store' => 'Mağazaya',
+        'select_store' => 'Mağaza seçin',
+        'store_required' => 'Mağaza gereklidir.',
+        'transfer_success' => 'Transfer başarıyla tamamlandı.',
+        'transfer_updated' => 'Transfer başarıyla güncellendi.',
+        'transfer_deleted' => 'Transfer başarıyla silindi.',
+        'transfer_between_stores' => 'Mağazalar arası transfer',
+        'available_stores' => 'Mevcut mağazalar',
+        'no_stores_available' => 'Transfer için mevcut mağaza yok.',
+        'product_sync_failed' => 'Ürün senkronizasyonu başarısız',
+        'product_code_conflict' => 'Ürün kodu :code (:name) hedef mağazada farklı detaylarla zaten mevcut',
+        'cross_tenant_transfer_info' => 'Mağazalar arası transfer ürünleri otomatik olarak senkronize edecek',
+        'product_synced_to_store' => 'Ürün başarıyla :store ile senkronize edildi',
+        'product_will_be_synced' => 'Ürünler hedef mağaza kataloğu ile senkronize edilecek',
+    ],
+
 'success' => [
         'cache_clear_successfully' => 'Önbellek başarıyla temizlendi.',
         'product_category_delete' => 'Ürün kategorisi başarıyla silindi.',

@@ -37,10 +37,11 @@ const StockReport = (props) => {
         frontSetting.value.currency_symbol;
     const array = warehouses && warehouses;
     const selectWarehouseArray =
-        frontSetting &&
-        array.filter(
-            (item) => item.id === Number(frontSetting?.value?.default_warehouse)
-        );
+        frontSetting && array
+            ? array.filter(
+                  (item) => item.id === Number(frontSetting?.value?.default_warehouse)
+              )
+            : [];
 
     useEffect(() => {
         stockReportAction(
@@ -53,6 +54,28 @@ const StockReport = (props) => {
     useEffect(() => {
         fetchAllWarehouses();
     }, []);
+
+    useEffect(() => {
+        // Set warehouse value when warehouses loaded
+        if (warehouses && warehouses.length > 0 && !warehouseValue.value) {
+            const defaultWh = warehouses.find(
+                (w) => w.id === Number(frontSetting?.value?.default_warehouse)
+            );
+            
+            if (defaultWh) {
+                setWarehouseValue({
+                    label: defaultWh.attributes.name,
+                    value: defaultWh.id,
+                });
+            } else {
+                // Use first warehouse if no default match
+                setWarehouseValue({
+                    label: warehouses[0].attributes.name,
+                    value: warehouses[0].id,
+                });
+            }
+        }
+    }, [warehouses, frontSetting]);
 
     useEffect(() => {
         if (isWarehouseValue === true) {
@@ -327,16 +350,21 @@ const StockReport = (props) => {
             <TopProgressBar />
             <TabTitle title={placeholderText("stock.reports.title")} />
             <div className="mx-auto mb-md-5 col-12 col-md-4">
-                {selectWarehouseArray[0] ? (
+                {array && array.length > 0 && (
                     <ReactSelect
                         data={array}
                         onChange={onWarehouseChange}
                         defaultValue={
-                            selectWarehouseArray[0]
+                            selectWarehouseArray && selectWarehouseArray[0]
                                 ? {
                                       label: selectWarehouseArray[0].attributes
                                           .name,
                                       value: selectWarehouseArray[0].id,
+                                  }
+                                : array[0]
+                                ? {
+                                      label: array[0].attributes.name,
+                                      value: array[0].id,
                                   }
                                 : ""
                         }
@@ -347,7 +375,7 @@ const StockReport = (props) => {
                             "product.input.warehouse.placeholder.label"
                         )}
                     />
-                ) : null}
+                )}
             </div>
             <div className="pt-md-7">
                 <ReactDataTable

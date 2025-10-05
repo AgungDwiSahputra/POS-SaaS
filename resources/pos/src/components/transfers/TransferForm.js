@@ -16,6 +16,8 @@ import ReactDatePicker from '../../shared/datepicker/ReactDatePicker';
 import ProductMainCalculation from '../sales/ProductMainCalculation';
 import ReactSelect from '../../shared/select/reactSelect';
 import { fetchProductsByWarehouse } from "../../store/action/productAction";
+import { apiBaseURL } from "../../constants";
+import apiConfig from "../../config/apiConfig";
 
 const TransferForm = ( props ) => {
     const {
@@ -38,11 +40,16 @@ const TransferForm = ( props ) => {
     const [ updateProducts, setUpdateProducts ] = useState( [] );
     const [ quantity, setQuantity ] = useState( 0 );
     const [transferValueUpdated, setTransferValueUpdated] = useState(false);
+    const [ stores, setStores ] = useState([]);
+    const [ fromWarehouses, setFromWarehouses ] = useState([]);
+    const [ toWarehouses, setToWarehouses ] = useState([]);
 
     const [transferValue, setTransferValue] = useState({
         date: new Date(),
         from_warehouse_id: '',
+        from_store_id: '',
         to_warehouse_id: '',
+        to_store_id: '',
         warehouse_id: undefined,
         supplier_id: '',
         tax_rate: '0.00',
@@ -60,7 +67,9 @@ const TransferForm = ( props ) => {
     const [ errors, setErrors ] = useState( {
         date: '',
         from_warehouse_id: '',
+        from_store_id: '',
         to_warehouse_id: '',
+        to_store_id: '',
         supplier_id: '',
         details: '',
         tax_rate: '',
@@ -69,15 +78,47 @@ const TransferForm = ( props ) => {
         status_id: ''
     } );
 
+    // Fetch available stores
+    useEffect(() => {
+        const fetchAvailableStores = async () => {
+            try {
+                const response = await apiConfig.get(apiBaseURL.TRANSFERS_AVAILABLE_STORES);
+                console.log('Stores Response:', response.data);
+                if (response.data && response.data.success && response.data.data) {
+                    const formattedStores = response.data.data.map(store => ({
+                        label: store.name,
+                        value: store.id,
+                        tenant_id: store.tenant_id
+                    }));
+                    console.log('Stores formatted:', formattedStores);
+                    setStores(formattedStores);
+                }
+            } catch (error) {
+                console.error('Error fetching stores:', error);
+            }
+        };
+        fetchAvailableStores();
+    }, []);
+
     useEffect(() => {
         if (singleTransfer && !transferValueUpdated) {
             const statusOption = transferStatusFilterOptions
                 ?.map((option) => ({ value: option.id, label: option.name }))
                 ?.find((option) => option.value === singleTransfer.status);
+            
+            // Set transfer value with store objects
             setTransferValue({
                 date: moment(singleTransfer.date).toDate(),
                 from_warehouse_id: singleTransfer.from_warehouse_id,
+                from_store_id: singleTransfer.from_store ? {
+                    label: singleTransfer.from_store.name,
+                    value: singleTransfer.from_store.id
+                } : singleTransfer.from_store_id,
                 to_warehouse_id: singleTransfer.to_warehouse_id,
+                to_store_id: singleTransfer.to_store ? {
+                    label: singleTransfer.to_store.name,
+                    value: singleTransfer.to_store.id
+                } : singleTransfer.to_store_id,
                 warehouse_id: undefined,
                 supplier_id: singleTransfer.supplier_id,
                 tax_rate: singleTransfer.tax_rate.toFixed(2),
@@ -116,18 +157,84 @@ const TransferForm = ( props ) => {
         transferValue.from_warehouse_id.value ? setTransferValue( inputs => ( { ...inputs, warehouse_id: transferValue.from_warehouse_id } ) ) : null
     }, [ transferValue.from_warehouse_id ] )
 
+    // Fetch warehouses when from store changes
+    useEffect(() => {
+        const fetchFromWarehouses = async () => {
+            if (transferValue.from_store_id && transferValue.from_store_id.value) {
+                try {
+                    const response = await apiConfig.get(
+                        `${apiBaseURL.TRANSFERS_WAREHOUSES_BY_STORE}/${transferValue.from_store_id.value}`
+                    );
+                    console.log('From Warehouses Response:', response.data);
+                    if (response.data && response.data.success && response.data.data) {
+                        const formattedWarehouses = response.data.data.map(warehouse => ({
+                            label: warehouse.name,
+                            value: warehouse.id
+                        }));
+                        console.log('From Warehouses formatted:', formattedWarehouses);
+                        setFromWarehouses(formattedWarehouses);
+                    } else {
+                        setFromWarehouses([]);
+                    }
+                } catch (error) {
+                    console.error('Error fetching from warehouses:', error);
+                    setFromWarehouses([]);
+                }
+            } else {
+                setFromWarehouses([]);
+            }
+        };
+        fetchFromWarehouses();
+    }, [transferValue.from_store_id]);
+
+    // Fetch warehouses when to store changes
+    useEffect(() => {
+        const fetchToWarehouses = async () => {
+            if (transferValue.to_store_id && transferValue.to_store_id.value) {
+                try {
+                    const response = await apiConfig.get(
+                        `${apiBaseURL.TRANSFERS_WAREHOUSES_BY_STORE}/${transferValue.to_store_id.value}`
+                    );
+                    console.log('To Warehouses Response:', response.data);
+                    if (response.data && response.data.success && response.data.data) {
+                        const formattedWarehouses = response.data.data.map(warehouse => ({
+                            label: warehouse.name,
+                            value: warehouse.id
+                        }));
+                        console.log('To Warehouses formatted:', formattedWarehouses);
+                        setToWarehouses(formattedWarehouses);
+                    } else {
+                        setToWarehouses([]);
+                    }
+                } catch (error) {
+                    console.error('Error fetching to warehouses:', error);
+                    setToWarehouses([]);
+                }
+            } else {
+                setToWarehouses([]);
+            }
+        };
+        fetchToWarehouses();
+    }, [transferValue.to_store_id]);
+
     const handleValidation = () => {
         let errorss = {};
         let isValid = false;
         const qtyCart = updateProducts.filter( ( a ) => a.quantity === 0 );
         if ( !transferValue.date ) {
-            error[ 'date' ] = getFormattedMessage( 'globally.date.validate.label' );
+            errorss[ 'date' ] = getFormattedMessage( 'globally.date.validate.label' );
         } else if ( !transferValue.from_warehouse_id ) {
             errorss[ 'from_warehouse_id' ] = getFormattedMessage( 'product.input.warehouse.validate.label' )
+        } else if ( !transferValue.from_store_id ) {
+            errorss[ 'from_store_id' ] = getFormattedMessage( 'transfer.select.store.validate.message' )
         } else if ( !transferValue.to_warehouse_id ) {
             errorss[ 'to_warehouse_id' ] = getFormattedMessage( 'product.input.warehouse.validate.label' )
+        } else if ( !transferValue.to_store_id ) {
+            errorss[ 'to_store_id' ] = getFormattedMessage( 'transfer.select.store.validate.message' )
         } else if ( transferValue.from_warehouse_id.value === transferValue.to_warehouse_id.value ) {
             errorss[ 'to_warehouse_id' ] = getFormattedMessage( "transfer.select.warehouse.validate.message" )
+        } else if ( transferValue.from_store_id.value === transferValue.to_store_id.value ) {
+            errorss[ 'to_store_id' ] = getFormattedMessage( "transfer.store.same.error" )
         } else if ( qtyCart.length > 0 ) {
             dispatch( addToast( {
                 text: getFormattedMessage( 'globally.product-quantity.validate.message' ),
@@ -154,6 +261,26 @@ const TransferForm = ( props ) => {
 
     const onWarehouseChangeTow = ( obj ) => {
         setTransferValue( inputs => ( { ...inputs, to_warehouse_id: obj } ) )
+        setErrors( '' )
+    };
+
+    const onFromStoreChange = ( obj ) => {
+        // Reset warehouse selection when store changes
+        setTransferValue( inputs => ( { 
+            ...inputs, 
+            from_store_id: obj,
+            from_warehouse_id: '' 
+        } ) )
+        setErrors( '' )
+    };
+
+    const onToStoreChange = ( obj ) => {
+        // Reset warehouse selection when store changes
+        setTransferValue( inputs => ( { 
+            ...inputs, 
+            to_store_id: obj,
+            to_warehouse_id: '' 
+        } ) )
         setErrors( '' )
     };
 
@@ -217,7 +344,9 @@ const TransferForm = ( props ) => {
     const prepareData = ( prepareData ) => {
         const formValue = {
             from_warehouse_id: prepareData.from_warehouse_id.value ? prepareData.from_warehouse_id.value : prepareData.from_warehouse_id,
+            from_store_id: prepareData.from_store_id.value ? prepareData.from_store_id.value : prepareData.from_store_id,
             to_warehouse_id: prepareData.to_warehouse_id.value ? prepareData.to_warehouse_id.value : prepareData.to_warehouse_id,
+            to_store_id: prepareData.to_store_id.value ? prepareData.to_store_id.value : prepareData.to_store_id,
             date: moment( prepareData.date ).toDate(),
             transfer_items: updateProducts,
             note: prepareData.notes,
@@ -268,7 +397,7 @@ const TransferForm = ( props ) => {
         <div className='card'>
             <div className='card-body'>
                 <div className='row'>
-                    <div className='col-md-4'>
+                    <div className='col-md-12 mb-3'>
                         <label className='form-label'>
                             {getFormattedMessage( 'react-data-table.date.column.label' )}:
                         </label>
@@ -278,22 +407,49 @@ const TransferForm = ( props ) => {
                         </div>
                         <span className='text-danger d-block fw-400 fs-small mt-2'>{errors[ 'date' ] ? errors[ 'date' ] : null}</span>
                     </div>
-                    <div className='col-md-4 mb-3'>
-                        <ReactSelect data={warehouses} onChange={onWarehouseChangeOne}
+                    <div className='col-md-3 mb-3'>
+                        <ReactSelect data={stores} onChange={onFromStoreChange}
+                            value={transferValue.from_store_id}
+                            defaultValue={transferValue.from_store_id}
+                            title={getFormattedMessage( 'transfer.from-store.title' )} errors={errors[ 'from_store_id' ]}
+                            placeholder={placeholderText( 'transfer.select.store.placeholder' )} />
+                    </div>
+                    <div className='col-md-3 mb-3'>
+                        <ReactSelect data={fromWarehouses} onChange={onWarehouseChangeOne}
                             value={transferValue.from_warehouse_id}
-                            defaultValue={transferValue.from_warehouse_id} addSearchItems={singleTransfer}
-                            isWarehouseDisable={true}
+                            defaultValue={transferValue.from_warehouse_id}
                             title={getFormattedMessage( 'transfer.from-warehouse.title' )} errors={errors[ 'from_warehouse_id' ]}
-                            placeholder={placeholderText( 'product.input.warehouse.placeholder.label' )} />
+                            placeholder={placeholderText( 'product.input.warehouse.placeholder.label' )}
+                            isDisabled={!transferValue.from_store_id} />
                     </div>
-                    <div className='col-md-4 mb-3'>
-                        <ReactSelect data={warehouses} onChange={onWarehouseChangeTow}
+                    <div className='col-md-3 mb-3'>
+                        <ReactSelect data={stores} onChange={onToStoreChange}
+                            value={transferValue.to_store_id}
+                            defaultValue={transferValue.to_store_id}
+                            title={getFormattedMessage( 'transfer.to-store.title' )} errors={errors[ 'to_store_id' ]}
+                            placeholder={placeholderText( 'transfer.select.store.placeholder' )} />
+                    </div>
+                    <div className='col-md-3 mb-3'>
+                        <ReactSelect data={toWarehouses} onChange={onWarehouseChangeTow}
                             value={transferValue.to_warehouse_id}
-                            defaultValue={transferValue.to_warehouse_id} addSearchItems={singleTransfer}
-                            isWarehouseDisable={true}
+                            defaultValue={transferValue.to_warehouse_id}
                             title={getFormattedMessage( 'transfer.to-warehouse.title' )} errors={errors[ 'to_warehouse_id' ]}
-                            placeholder={placeholderText( 'product.input.warehouse.placeholder.label' )} />
+                            placeholder={placeholderText( 'product.input.warehouse.placeholder.label' )}
+                            isDisabled={!transferValue.to_store_id} />
                     </div>
+                    {transferValue.from_store_id && transferValue.to_store_id && 
+                     stores.find(s => s.value === transferValue.from_store_id.value)?.tenant_id !== 
+                     stores.find(s => s.value === transferValue.to_store_id.value)?.tenant_id && (
+                        <div className='col-md-12 mb-3'>
+                            <div className='alert alert-info'>
+                                <i className='bi bi-info-circle me-2'></i>
+                                <strong>{getFormattedMessage('transfer.cross.tenant.warning')}</strong>
+                                <p className='mb-0 mt-2 small'>
+                                    {getFormattedMessage('transfer.product.will.sync')}
+                                </p>
+                            </div>
+                        </div>
+                    )}
                     <div className='col-md-12 mb-3'>
                         <label className='form-label'>
                             {getFormattedMessage( 'product.title' )}:
@@ -411,6 +567,7 @@ const TransferForm = ( props ) => {
                             {getFormattedMessage( 'globally.input.note.label' )}:
                         </label>
                         <textarea name='notes' className='form-control'
+                            value={transferValue.notes}
                             placeholder={placeholderText( 'globally.input.note.placeholder.label' )}
                             onChange={( e ) => onNotesChangeInput( e )}
                         />

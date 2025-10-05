@@ -160,6 +160,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::resource('variations', VariationAPIController::class);
 
         Route::middleware('permission:manage_transfers')->group(function () {
+            Route::get('transfers/available-stores/list', [TransferAPIController::class, 'getAvailableStores']);
+            Route::get('transfers/warehouses-by-store/{storeId}', [TransferAPIController::class, 'getWarehousesByStore']);
             Route::resource('transfers', TransferAPIController::class);
         });
 
