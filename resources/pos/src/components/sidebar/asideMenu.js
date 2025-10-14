@@ -37,6 +37,7 @@ const AsideMenu = (props) => {
     const intl = useIntl();
     const { id } = useParams();
     const [searchTerm, setSearchTerm] = useState("");
+
     const updatedLanguage = localStorage.getItem(Tokens.UPDATED_LANGUAGE);
     const { loginUser, stores } = useSelector(state => state)
     const [selectedStore, setSelectedStore] = useState(null);
@@ -357,9 +358,7 @@ const AsideMenu = (props) => {
                                 return mainItems.newRoute ? (
                                     <SubMenu
                                         key={index}
-                                        title={intl.formatMessage({
-                                            id: `${mainItems.title}`,
-                                        })}
+                                        title={mainItems.name === "digital" ? mainItems.title : getFormattedMessage(mainItems.title)}
                                         className={
                                             location.pathname ===
                                                 mainItems?.subPath
@@ -464,11 +463,7 @@ const AsideMenu = (props) => {
                                                         <Link
                                                             to={subMainItems.to}
                                                         >
-                                                            {intl.formatMessage(
-                                                                {
-                                                                    id: `${subMainItems.title}`,
-                                                                }
-                                                            )}
+                                                            {mainItems.name === "digital" ? subMainItems.title : getFormattedMessage(subMainItems.title)}
                                                         </Link>
                                                     </MenuItem>
                                                 );
@@ -558,9 +553,7 @@ const AsideMenu = (props) => {
                                             }
                                         >
                                             <Link to={mainItems.to}>
-                                                {intl.formatMessage({
-                                                    id: `${mainItems.title}`,
-                                                })}
+                                                {mainItems.name === "digital" ? mainItems.title : getFormattedMessage(mainItems.title)}
                                             </Link>
                                         </MenuItem>
                                     )

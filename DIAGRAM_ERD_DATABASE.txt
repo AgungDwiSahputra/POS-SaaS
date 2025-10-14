@@ -1,0 +1,190 @@
+# Entity Relationship Diagram (ERD) - POS.ezakses
+# Representasi Text-Based
+
+```
+================================================================================
+                    ENTITY RELATIONSHIP DIAGRAM (ERD)
+                    Sistem POS.ezakses
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              CENTRAL SYSTEM                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│  │   users     │    │   roles     │    │ permissions │    │  tenants    │   │
+│  │             │    │             │    │             │    │             │   │
+│  │ • id        │    │ • id        │    │ • id        │    │ • id        │   │
+│  │ • name      │◄───┤ • name      │    │ • name      │    │ • store_id  │   │
+│  │ • email     │    │ • tenant_id │    │ • guard_name│    │ • data      │   │
+│  │ • tenant_id │    │ • display   │    │ • display   │    │             │   │
+│  │ • language  │    │   name      │    │   name      │    │             │   │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘   │
+│         │                   │                   │                │           │
+│         │                   │                   │                │           │
+│         ▼                   ▼                   ▼                ▼           │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│  │model_has_   │    │model_has_   │    │   domains   │    │   stores    │   │
+│  │   roles     │    │permissions  │    │             │    │             │   │
+│  │             │    │             │    │ • id        │    │ • id        │   │
+│  │ • role_id   │    │ • permission│    │ • domain    │    │ • name      │   │
+│  │ • model_id  │    │   _id       │    │ • tenant_id │    │ • tenant_id │   │
+│  │ • model_type│    │ • model_id  │    │             │    │ • user_id   │   │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            TENANT SYSTEM                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│  │ warehouses  │    │product_     │    │   brands    │    │ customers   │   │
+│  │             │    │categories   │    │             │    │             │   │
+│  │ • id        │    │ • id        │    │ • id        │    │ • id        │   │
+│  │ • name      │    │ • name      │    │ • name      │    │ • name      │   │
+│  │ • phone     │    │ • tenant_id │    │ • description│    │ • email     │   │
+│  │ • country   │    │             │    │ • tenant_id │    │ • phone     │   │
+│  │ • city      │    │             │    │             │    │ • country   │   │
+│  │ • email     │    │             │    │             │    │ • city      │   │
+│  │ • zip_code  │    │             │    │             │    │ • address   │   │
+│  │ • tenant_id │    │             │    │             │    │ • tenant_id │   │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘   │
+│         │                   │                │                │           │
+│         │                   │                │                │           │
+│         ▼                   ▼                ▼                ▼           │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│  │   products  │    │   units     │    │   settings  │    │ suppliers   │   │
+│  │             │    │             │    │             │    │             │   │
+│  │ • id        │    │ • id        │    │ • id        │    │ • id        │   │
+│  │ • name      │◄───┤ • name      │    │ • key       │    │ • name      │   │
+│  │ • code      │    │ • short_name│    │ • value     │    │ • email     │   │
+│  │ • product_  │    │ • base_unit │    │ • tenant_id │    │ • phone     │   │
+│  │   code      │    │ • tenant_id │    │             │    │ • country   │   │
+│  │ • category_ │    │             │    │             │    │ • city      │   │
+│  │   id        │    │             │    │             │    │ • address   │   │
+│  │ • brand_id  │    │             │    │             │    │ • tenant_id │   │
+│  │ • cost      │    │             │    │             │    │             │   │
+│  │ • price     │    │             │    │             │    │             │   │
+│  │ • unit      │    │             │    │             │    │             │   │
+│  │ • stock_    │    │             │    │             │    │             │   │
+│  │   alert     │    │             │    │             │    │             │   │
+│  │ • tenant_id │    │             │    │             │    │             │   │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          TRANSACTION SYSTEM                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│  │   sales     │    │ purchases   │    │   expenses  │    │ transfers   │   │
+│  │             │    │             │    │             │    │             │   │
+│  │ • id        │    │ • id        │    │ • id        │    │ • id        │   │
+│  │ • date      │    │ • date      │    │ • date      │    │ • date      │   │
+│  │ • customer_ │    │ • supplier_ │    │ • warehouse_│    │ • from_     │   │
+│  │   id        │    │   id        │    │   id        │    │   warehouse_│   │
+│  │ • warehouse_│    │ • warehouse_│    │ • category_ │    │   id        │   │
+│  │   id        │    │   id        │    │   id        │    │ • to_       │   │
+│  │ • tax_rate  │    │ • tax_rate  │    │ • amount    │    │   warehouse_│   │
+│  │ • discount  │    │ • discount  │    │ • reference │    │   id        │   │
+│  │ • grand_    │    │ • grand_    │    │ • details   │    │ • tax_rate  │   │
+│  │   total     │    │   total     │    │ • user_id   │    │ • discount  │   │
+│  │ • payment_  │    │ • payment_  │    │ • tenant_id │    │ • shipping  │   │
+│  │   type      │    │   type      │    │             │    │ • grand_    │   │
+│  │ • status    │    │ • status    │    │             │    │   total     │   │
+│  │ • tenant_id │    │ • tenant_id │    │             │    │ • status    │   │
+│  │ • user_id   │    │             │    │             │    │ • tenant_id │   │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘   │
+│         │                   │                │                │           │
+│         │                   │                │                │           │
+│         ▼                   ▼                ▼                ▼           │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│  │ sale_items  │    │purchase_    │    │expense_     │    │transfer_    │   │
+│  │             │    │  items      │    │categories   │    │  items      │   │
+│  │ • id        │    │ • id        │    │             │    │ • id        │   │
+│  │ • sale_id   │◄───┤ • purchase_ │    │ • id        │    │ • transfer_ │   │
+│  │ • product_id│    │   id        │    │ • name      │    │   id        │   │
+│  │ • quantity  │    │ • product_id│    │ • description│    │ • product_id│   │
+│  │ • price     │    │ • quantity  │    │ • tenant_id │    │ • quantity  │   │
+│  │ • tax_      │    │ • cost      │    │             │    │ • price     │   │
+│  │   amount    │    │ • tax_      │    │             │    │ • tax_      │   │
+│  │ • discount  │    │   amount    │    │             │    │   amount    │   │
+│  │ • sub_total │    │ • discount  │    │             │    │ • sub_total │   │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          INVENTORY SYSTEM                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│  │manage_stocks│    │adjustments  │    │   holds     │    │quotations   │   │
+│  │             │    │             │    │             │    │             │   │
+│  │ • id        │    │ • id        │    │ • id        │    │ • id        │   │
+│  │ • warehouse_│    │ • date      │    │ • reference_│    │ • date      │   │
+│  │   id        │    │ • reference_│    │   code      │    │ • customer_ │   │
+│  │ • product_id│    │   code      │    │ • customer_ │    │   id        │   │
+│  │ • quantity  │    │ • warehouse_│    │   id        │    │ • warehouse_│   │
+│  │ • alert     │    │   id        │    │ • warehouse_│    │   id        │   │
+│  └─────────────┘    │ • total_    │    │   id        │    │ • tax_rate  │   │
+│                    │   products  │    │ • tax_rate  │    │ • discount  │   │
+│                    │ • tenant_id │    │ • discount  │    │ • grand_    │   │
+│                    └─────────────┘    │ • shipping  │    │   total     │   │
+│                                       │ • grand_    │    │ • status    │   │
+│                                       │   total     │    │ • tenant_id │   │
+│                                       └─────────────┘    └─────────────┘   │
+│                                               │                │           │
+│                                               ▼                ▼           │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│  │adjustment_  │    │  hold_items │    │quotation_   │    │payment_     │   │
+│  │   items     │    │             │    │   items     │    │  methods    │   │
+│  │             │    │ • id        │    │ • id        │    │             │   │
+│  │ • id        │    │ • hold_id   │    │ • quotation_│    │ • id        │   │
+│  │ • adjustment│◄───┤ • product_id│    │   id        │    │ • name      │   │
+│  │   _id       │    │ • quantity  │    │ • product_id│    │ • status    │   │
+│  │ • product_id│    │ • price     │    │ • quantity  │    │ • tenant_id │   │
+│  │ • quantity  │    │ • tax_      │    │ • price     │    │             │   │
+│  │ • method_   │    │   amount    │    │ • tax_      │    │             │   │
+│  │   type      │    │ • discount  │    │   amount    │    │             │   │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+                              LEGEND
+================================================================================
+
+→ One to One Relationship
+→ One to Many Relationship
+→ Many to One Relationship
+◄──► Many to Many Relationship
+• Field in table
+┌─────────────┐ Entity/Table
+================================================================================
+
+================================================================================
+                          CARDINALITY EXAMPLES
+================================================================================
+
+1. USER MANAGEMENT:
+   - 1 User can have 1 Tenant (users.tenant_id → tenants.id)
+   - 1 User can have many Roles (model_has_roles)
+   - 1 Role can have many Permissions (role_has_permissions)
+
+2. PRODUCT MANAGEMENT:
+   - 1 Product belongs to 1 Category (products.product_category_id → product_categories.id)
+   - 1 Product belongs to 1 Brand (products.brand_id → brands.id)
+   - 1 Product can have many Sale Items (sale_items.product_id → products.id)
+
+3. SALES TRANSACTIONS:
+   - 1 Sale can have many Sale Items (sale_items.sale_id → sales.id)
+   - 1 Sale belongs to 1 Customer (sales.customer_id → customers.id)
+   - 1 Sale belongs to 1 Warehouse (sales.warehouse_id → warehouses.id)
+
+4. INVENTORY MANAGEMENT:
+   - 1 Warehouse can have many Products Stock (manage_stocks.warehouse_id → warehouses.id)
+   - 1 Product can have Stock in many Warehouses (manage_stocks.product_id → products.id)
+   - 1 Transfer moves Products from 1 Warehouse to another Warehouse
+
+5. FINANCIAL TRANSACTIONS:
+   - 1 Sale can have many Payments (sales_payments.sale_id → sales.id)
+   - 1 Expense belongs to 1 Expense Category (expenses.expense_category_id → expense_categories.id)
+   - 1 Payment uses 1 Payment Method (sales_payments.payment_type → payment_methods.id)
+
+================================================================================

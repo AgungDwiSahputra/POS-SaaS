@@ -220,15 +220,15 @@ const DateRangePicker = ( props ) => {
                     <Form.Control type='search' name='date'
                         className='form-control pe-10 date-input font-weight-normal'
                         placeholder={placeholderText( 'date-picker.filter.placeholder.label' )} readOnly={true}
-                        onFocus={dateColor === 'custom' ? () => setPopoverOpen( true ) : null}
-                        value={date}
+                        onFocus={dateColor === 'custom' ? () => setPopoverOpen( true ) : undefined}
+                        value={date || ''}
                     />
                     <FontAwesomeIcon icon={faCalendarAlt} className='input-icon' />
                 </Form.Group>
             </div>
             <div className={`${popoverOpen === true ? 'custom-overlay' : ''}`}>
                 <Popover trigger='click' placement='bottom' isOpen={popoverOpen}
-                    target='Popover1' toggle={toggle} >
+                    target='Popover1' toggle={toggle} hideArrow={false} delay={0}>
                     <PopoverBody className='date-picker-popover'>
                         <ListGroup>
                             <ListGroupItem className={`${dateColor === 'today' ? 'bg-primary text-white' : null} border-0 rounded`}
@@ -256,7 +256,8 @@ const DateRangePicker = ( props ) => {
                                     {getFormattedMessage( 'date-picker.filter.Custom-Range.label' )}
                                 </span>
                                 <Popover trigger='legacy' placement='left' className='date-picker__child-popover'
-                                    isOpen={childPopoverOpen} target='Popover2' toggle={toggleChild} >
+                                    isOpen={childPopoverOpen} target='Popover2' toggle={toggleChild} hideArrow={false}
+                                    transition={{ timeout: 150 }} >
                                     <PopoverBody>
                                         <Row>
                                             <Col md={6} xs={12}>

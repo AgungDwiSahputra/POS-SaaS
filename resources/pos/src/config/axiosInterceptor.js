@@ -40,10 +40,12 @@ export default {
                 localStorage.removeItem(Tokens.USER);
                 localStorage.removeItem(Tokens.GET_PERMISSIONS);
                 window.location.href = environment.URL + '/app/#/login';
-            }else if(error.response.status === 403 || error.response.status === 404) {
+                return Promise.reject(error);
+            } else if (error?.response && (error.response.status === 403 || error.response.status === 404)) {
                 window.location.href = environment.URL + '/app/#/user/dashboard';
-            }else {
-                return Promise.reject({...error})
+                return Promise.reject(error);
+            } else {
+                return Promise.reject({ ...error });
             }
         };
         const successHandler = (response) => {

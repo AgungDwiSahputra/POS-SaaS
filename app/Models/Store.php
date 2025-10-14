@@ -48,4 +48,67 @@ class Store extends BaseModel implements JsonResourceful
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Get digital providers for this store
+     */
+    public function digitalProviders()
+    {
+        return $this->hasMany(StoreDigitalProvider::class);
+    }
+
+    /**
+     * Get active digital providers for this store
+     */
+    public function activeDigitalProviders()
+    {
+        return $this->hasMany(StoreDigitalProvider::class)->where('is_active', true);
+    }
+
+    /**
+     * Get digital sales for this store
+     */
+    public function digitalSales()
+    {
+        return $this->hasMany(DigitalSale::class);
+    }
+
+    /**
+     * Get topup requests for this store
+     */
+    public function topupRequests()
+    {
+        return $this->hasMany(DigitalTopupRequest::class);
+    }
+
+    /**
+     * Get withdrawals for this store
+     */
+    public function withdrawals()
+    {
+        return $this->hasMany(DigitalWithdrawal::class);
+    }
+
+    /**
+     * Get total balance across all providers for this store
+     */
+    public function getTotalDigitalBalanceAttribute(): float
+    {
+        return $this->digitalProviders()
+                    ->where('is_active', true)
+                    ->sum('balance');
+    }
+
+    /**
+     * Get balance for specific provider in this store
+     */
+    public function getProviderBalance($providerId): float
+    {
+        $storeProvider = $this->digitalProviders()
+                             ->where('digital_provider_id', $providerId)
+                             ->where('is_active', true)
+                             ->first();
+
+        return $storeProvider ? $storeProvider->balance : 0;
+    }
 }

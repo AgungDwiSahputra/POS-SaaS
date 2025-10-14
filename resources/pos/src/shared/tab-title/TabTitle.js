@@ -6,9 +6,14 @@ const TabTitle = (props) => {
     const { title } = props;
     const {frontSetting} = useSelector(state => state)
 
+    const normalizedTitle = typeof title === 'string' ? title : '';
+
     return (
         <Helmet>
-            <title>{title + ' '} {frontSetting ? ` | ${frontSetting?.value?.app_name || "POS-Saas"}` : ""}</title>
+            <title>
+                {normalizedTitle}
+                {frontSetting + ' | ' ? ` ${frontSetting?.value?.app_name || "POS-Saas"}` : ""}
+            </title>
             {frontSetting && <link rel="icon" type="image/png" href={frontSetting ? frontSetting?.value?.app_favicon : "./../../../public/favicon.ico"}  sizes="16x16" />}
         </Helmet>
     )

@@ -136,6 +136,27 @@ import PaymentMethod from "./components/paymentMethod/PaymentMethod";
 import CustomerDisplay from "./components/customerDisplay/customerDisplay";
 import DualScreenSetting from "./components/dualScreenSetting/DualScreenSetting";
 
+// Digital Product Components
+import DigitalDashboard from "./components/digital/DigitalDashboard";
+import DigitalProviders from "./components/digital/digitalProviders/DigitalProviders";
+import CreateDigitalProvider from "./components/digital/digitalProviders/CreateDigitalProvider";
+import EditDigitalProvider from "./components/digital/digitalProviders/EditDigitalProvider";
+import DigitalProducts from "./components/digital/digitalProducts/DigitalProducts";
+import CreateDigitalProduct from "./components/digital/digitalProducts/CreateDigitalProduct";
+import EditDigitalProduct from "./components/digital/digitalProducts/EditDigitalProduct";
+import DigitalSales from "./components/digital/digitalSales/DigitalSales";
+import CreateDigitalSale from "./components/digital/digitalSales/CreateDigitalSale";
+import EditDigitalSale from "./components/digital/digitalSales/EditDigitalSale";
+import DigitalBalance from "./components/digital/digitalBalance/DigitalBalance";
+import TopupRequests from "./components/digital/digitalTopupRequests/TopupRequests";
+import CreateTopupRequest from "./components/digital/digitalTopupRequests/CreateTopupRequest";
+import EditTopupRequest from "./components/digital/digitalTopupRequests/EditTopupRequest";
+import ApproveTopupRequest from "./components/digital/digitalTopupRequests/ApproveTopupRequest";
+import DigitalWithdrawals from "./components/digital/digitalWithdrawals/DigitalWithdrawals";
+import CreateDigitalWithdrawal from "./components/digital/digitalWithdrawals/CreateDigitalWithdrawal";
+import EditDigitalWithdrawal from "./components/digital/digitalWithdrawals/EditDigitalWithdrawal";
+import DigitalReports from "./components/digital/digitalReports/DigitalReports";
+
 export const route = [
     {
         path: "dashboard",
@@ -693,6 +714,97 @@ export const route = [
         ele: <CustomerDisplay />,
         permission: "",
     },
+    // Digital Product Routes
+    {
+        path: "digital/digital-providers",
+        ele: <DigitalProviders />,
+        permission: Permissions.MANAGE_DIGITAL_PROVIDERS,
+    },
+    {
+        path: "digital/digital-providers/create",
+        ele: <CreateDigitalProvider />,
+        permission: Permissions.CREATE_DIGITAL_PROVIDERS,
+    },
+    {
+        path: "digital/digital-providers/edit/:id",
+        ele: <EditDigitalProvider />,
+        permission: Permissions.EDIT_DIGITAL_PROVIDERS,
+    },
+    {
+        path: "digital/digital-products",
+        ele: <DigitalProducts />,
+        permission: Permissions.MANAGE_DIGITAL_PRODUCTS,
+    },
+    {
+        path: "digital/digital-products/create",
+        ele: <CreateDigitalProduct />,
+        permission: Permissions.CREATE_DIGITAL_PRODUCTS,
+    },
+    {
+        path: "digital/digital-products/edit/:id",
+        ele: <EditDigitalProduct />,
+        permission: Permissions.EDIT_DIGITAL_PRODUCTS,
+    },
+    {
+        path: "digital/digital-sales",
+        ele: <DigitalSales />,
+        permission: Permissions.MANAGE_DIGITAL_SALES,
+    },
+    {
+        path: "digital/digital-sales/create",
+        ele: <CreateDigitalSale />,
+        permission: Permissions.CREATE_DIGITAL_SALES,
+    },
+    {
+        path: "digital/digital-sales/edit/:id",
+        ele: <EditDigitalSale />,
+        permission: Permissions.EDIT_DIGITAL_SALES,
+    },
+    {
+        path: "digital/digital-balance",
+        ele: <DigitalBalance />,
+        permission: Permissions.MANAGE_DIGITAL_PROVIDERS,
+    },
+    {
+        path: "digital/digital-topup-requests",
+        ele: <TopupRequests />,
+        permission: Permissions.MANAGE_DIGITAL_TOPUP,
+    },
+    {
+        path: "digital/digital-topup-requests/create",
+        ele: <CreateTopupRequest />,
+        permission: Permissions.CREATE_DIGITAL_TOPUP,
+    },
+    {
+        path: "digital/digital-topup-requests/edit/:id",
+        ele: <EditTopupRequest />,
+        permission: Permissions.MANAGE_DIGITAL_TOPUP,
+    },
+    {
+        path: "digital/digital-topup-requests/approve/:id",
+        ele: <ApproveTopupRequest />,
+        permission: Permissions.APPROVE_DIGITAL_TOPUP,
+    },
+    {
+        path: "digital/digital-withdrawals",
+        ele: <DigitalWithdrawals />,
+        permission: Permissions.MANAGE_DIGITAL_WITHDRAWAL,
+    },
+    {
+        path: "digital/digital-withdrawals/create",
+        ele: <CreateDigitalWithdrawal />,
+        permission: Permissions.CREATE_DIGITAL_WITHDRAWAL,
+    },
+    {
+        path: "digital/digital-withdrawals/edit/:id",
+        ele: <EditDigitalWithdrawal />,
+        permission: Permissions.EDIT_DIGITAL_WITHDRAWAL,
+    },
+    {
+        path: "digital/digital-reports",
+        ele: <DigitalReports />,
+        permission: Permissions.MANAGE_DIGITAL_SALES,
+    }
 ];
 
 export const adminRoute = [

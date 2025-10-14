@@ -47,6 +47,12 @@ use App\Http\Controllers\API\SubscriptionAPIController;
 use App\Http\Controllers\API\PurchaseReturnAPIController;
 use App\Http\Controllers\API\ExpenseCategoryAPIController;
 use App\Http\Controllers\API\ProductCategoryAPIController;
+use App\Http\Controllers\DigitalProviderController;
+use App\Http\Controllers\StoreDigitalProviderController;
+use App\Http\Controllers\DigitalProductController;
+use App\Http\Controllers\DigitalSaleController;
+use App\Http\Controllers\DigitalTopupRequestController;
+use App\Http\Controllers\DigitalWithdrawalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -453,6 +459,48 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         // Coupon Code Routes
         Route::resource('coupon-codes', CouponCodeAPIController::class);
         Route::get('front-setting', [SettingAPIController::class, 'getFrontSettingsValue'])->name('front-settings');
+
+        // Digital Product Routes
+        // Public endpoint for active providers (used in forms) - must be before resource route
+        Route::get('digital-providers/active', [DigitalProviderController::class, 'getActiveProviders']);
+        
+        Route::middleware('permission:manage_digital_providers')->group(function () {
+            Route::resource('digital-providers', DigitalProviderController::class);
+        });
+
+        Route::middleware('permission:manage_digital_products')->group(function () {
+            Route::resource('digital-products', DigitalProductController::class);
+            Route::get('digital-products/category/{category}', [DigitalProductController::class, 'getByCategory']);
+            Route::get('digital-products/active', [DigitalProductController::class, 'getActiveProducts']);
+        });
+
+        Route::middleware('permission:manage_digital_sales|manage_pos_screen')->group(function () {
+            Route::resource('digital-sales', DigitalSaleController::class);
+            Route::get('digital-sales/store/{storeId}', [DigitalSaleController::class, 'getByStore']);
+            Route::get('digital-sales/summary', [DigitalSaleController::class, 'getSummary']);
+        });
+
+        Route::middleware('permission:manage_digital_topup')->group(function () {
+            Route::get('digital-topup-requests/pending', [DigitalTopupRequestController::class, 'getPendingRequests']);
+            Route::resource('digital-topup-requests', DigitalTopupRequestController::class);
+            Route::post('digital-topup-requests/{id}/approve', [DigitalTopupRequestController::class, 'approve']);
+            Route::post('digital-topup-requests/{id}/reject', [DigitalTopupRequestController::class, 'reject']);
+            Route::post('digital-topup-requests/{id}/complete', [DigitalTopupRequestController::class, 'complete']);
+        });
+
+        Route::middleware('permission:manage_digital_withdrawal')->group(function () {
+            Route::resource('digital-withdrawals', DigitalWithdrawalController::class);
+            Route::get('digital-withdrawals/store/{storeId}', [DigitalWithdrawalController::class, 'getByStore']);
+            Route::get('digital-withdrawals/summary', [DigitalWithdrawalController::class, 'getSummary']);
+        });
+
+        // Store Digital Provider Routes (untuk manajemen saldo)
+        Route::middleware('permission:manage_digital_providers')->group(function () {
+            Route::resource('store-digital-providers', StoreDigitalProviderController::class);
+            Route::get('store-digital-providers/store/{storeId}', [StoreDigitalProviderController::class, 'getProvidersByStore']);
+            Route::post('store-digital-providers/{id}/add-balance', [StoreDigitalProviderController::class, 'addBalance']);
+            Route::get('store-digital-providers/balance', [StoreDigitalProviderController::class, 'getBalance']);
+        });
     });
 });
 

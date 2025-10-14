@@ -122,6 +122,12 @@ import { cartReducer } from "./cartReducer";
 import dualScreenReducer from "./dualScreenReducer";
 import paymentMethodReducer from "./paymentMethodReducer";
 import totalProductRecordReducer from "./totalProductRecordReducer";
+import digitalProductReducer from "./digitalProductReducer";
+import digitalProviderReducer from "./digitalProviderReducer";
+import digitalSaleReducer from "./digitalSaleReducer";
+import digitalTopupRequestReducer from "./digitalTopupRequestReducer";
+import digitalWithdrawalReducer from "./digitalWithdrawalReducer";
+import storeDigitalProviderReducer from "./storeDigitalProviderReducer";
 
 export default combineReducers({
     loginUser: loginReducers,
@@ -246,5 +252,11 @@ export default combineReducers({
     cart: cartReducer,
     dualScreenSetting: dualScreenReducer,
     paymentMethods: paymentMethodReducer,
-    totalProductRecord: totalProductRecordReducer
+    totalProductRecord: totalProductRecordReducer,
+    digitalProducts: digitalProductReducer,
+    digitalProviders: digitalProviderReducer,
+    digitalSales: digitalSaleReducer,
+    digitalTopupRequests: digitalTopupRequestReducer,
+    digitalWithdrawals: digitalWithdrawalReducer,
+    storeDigitalProviders: storeDigitalProviderReducer
 });

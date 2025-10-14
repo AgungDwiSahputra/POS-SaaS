@@ -9,7 +9,10 @@
         "prod": "npm run production",
         "production": "mix --production",
         "rtl": "webpack --config webpack-rtl.config.js",
-        "build": "react-scripts --max_old_space_size=4096 build"
+        "build": "react-scripts --max_old_space_size=4096 build",
+        "test": "cd resources/pos && npm test",
+        "test:watch": "cd resources/pos && npm test --watch",
+        "test:coverage": "cd resources/pos && npm test --coverage"
     },
     "devDependencies": {
         "@babel/preset-react": "^7.27.1",
@@ -45,6 +48,7 @@
         "echarts-for-react": "^3.0.2",
         "email-validator": "^2.0.4",
         "faker": "^5.5.3",
+        "formik": "^2.4.6",
         "fortawesome": "^0.0.1-security",
         "history": "^5.0.0",
         "js-cookie": "^3.0.5",
@@ -81,7 +85,8 @@
         "redux-persist": "^6.0.0",
         "redux-thunk": "^2.4.1",
         "rtlcss-webpack-plugin": "^4.0.7",
-        "swiper": "^6.8.4"
+        "swiper": "^6.8.4",
+        "yup": "^1.7.1"
     },
     "lint-staged": {
         "src/**/*.{js,jsx,ts,tsx}": "eslint --fix"

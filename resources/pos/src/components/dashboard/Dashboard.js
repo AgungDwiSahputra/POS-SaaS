@@ -5,6 +5,7 @@ import TabTitle from '../../shared/tab-title/TabTitle';
 import TodaySalePurchaseCount from './TodaySalePurchaseCount';
 import RecentSale from './RecentSale';
 import TopSellingProduct from './TopSellingProduct';
+import DigitalProductSummary from './DigitalProductSummary';
 import { getPermission, placeholderText } from '../../shared/sharedMethod';
 import ThisWeekSalePurchaseChart from "./ThisWeekSalePurchaseChart";
 import StockAlert from "./StockAlert";
@@ -23,6 +24,13 @@ const Dashboard = () => {
             <TopSellingProduct frontSetting={frontSetting} />
             {getPermission(allConfigData?.permissions, Permissions.MANAGE_SALE) && <RecentSale frontSetting={frontSetting} />}
             <StockAlert frontSetting={frontSetting} />
+
+            {/* Digital Product Summary - hanya tampil jika user memiliki permission digital product */}
+            {(getPermission(allConfigData?.permissions, Permissions.MANAGE_DIGITAL_PROVIDERS) ||
+              getPermission(allConfigData?.permissions, Permissions.MANAGE_DIGITAL_PRODUCTS) ||
+              getPermission(allConfigData?.permissions, Permissions.MANAGE_DIGITAL_SALES)) && (
+                <DigitalProductSummary />
+            )}
         </MasterLayout>
     )
 }

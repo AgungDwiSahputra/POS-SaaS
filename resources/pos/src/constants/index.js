@@ -818,6 +818,27 @@ export const Permissions = {
     VIEW_QUOTATIONS: "view_quotations",
     EDIT_QUOTATIONS: "edit_quotations",
     DELETE_QUOTATIONS: "delete_quotations",
+    // Digital Product Permissions
+    MANAGE_DIGITAL_PROVIDERS: "manage_digital_providers",
+    MANAGE_DIGITAL_PRODUCTS: "manage_digital_products",
+    MANAGE_DIGITAL_SALES: "manage_digital_sales",
+    MANAGE_DIGITAL_TOPUP: "manage_digital_topup",
+    MANAGE_DIGITAL_WITHDRAWAL: "manage_digital_withdrawal",
+    CREATE_DIGITAL_PROVIDERS: "create_digital_providers",
+    CREATE_DIGITAL_PRODUCTS: "create_digital_products",
+    CREATE_DIGITAL_SALES: "create_digital_sales",
+    CREATE_DIGITAL_TOPUP: "create_digital_topup",
+    CREATE_DIGITAL_WITHDRAWAL: "create_digital_withdrawal",
+    EDIT_DIGITAL_PROVIDERS: "edit_digital_providers",
+    EDIT_DIGITAL_PRODUCTS: "edit_digital_products",
+    EDIT_DIGITAL_SALES: "edit_digital_sales",
+    EDIT_DIGITAL_WITHDRAWAL: "edit_digital_withdrawal",
+    DELETE_DIGITAL_PROVIDERS: "delete_digital_providers",
+    DELETE_DIGITAL_PRODUCTS: "delete_digital_products",
+    DELETE_DIGITAL_SALES: "delete_digital_sales",
+    DELETE_DIGITAL_WITHDRAWAL: "delete_digital_withdrawal",
+    APPROVE_DIGITAL_TOPUP: "approve_digital_topup",
+    VIEW_DIGITAL_TOPUP: "view_digital_topup",
 };
 
 //POS Screen Constants
@@ -1143,6 +1164,12 @@ export const permissionMappings = {
     manage_sms_templates: "/user/sms-templates",
     manage_email_templates: "/user/email-templates",
     manage_store: "/user/store",
+    // Digital Product Permission Mappings
+    manage_digital_providers: "/user/digital/digital-providers",
+    manage_digital_products: "/user/digital/digital-products",
+    manage_digital_sales: "/user/digital/digital-sales",
+    manage_digital_topup: "/user/digital/digital-topup-requests",
+    manage_digital_withdrawal: "/user/digital/digital-withdrawals",
 };
 
 export const paymentOptions = {

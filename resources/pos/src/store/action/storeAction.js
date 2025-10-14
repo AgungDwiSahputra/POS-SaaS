@@ -17,15 +17,29 @@ export const fetchStore =
             apiConfig
                 .get(url)
                 .then((response) => {
+                    console.log('fetchStore - response:', response);
+                    console.log('fetchStore - response.data:', response.data);
+
+                    // Handle different response structures
+                    let storesData = [];
+                    if (response.data && response.data.data) {
+                        storesData = Array.isArray(response.data.data) ? response.data.data : [];
+                    } else if (Array.isArray(response.data)) {
+                        storesData = response.data;
+                    }
+
+                    console.log('fetchStore - final stores data:', storesData);
+
                     dispatch({
                         type: storeActionType.FETCH_STORE,
-                        payload: response.data.data,
+                        payload: storesData,
                     });
                     if (isLoading) {
                         dispatch(setLoading(false));
                     }
                 })
                 .catch(({ response }) => {
+                    console.error('fetchStore - error:', response);
                     dispatch(
                         addToast({
                             text: response?.data?.message,

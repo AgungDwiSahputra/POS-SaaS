@@ -67,6 +67,8 @@ const TodaySalePurchaseCount = (props) => {
             config.filter((item) => item === permission).length !== 0
         ) {
             navigate(`/${redirect}`);
+        } else {
+            console.warn(`Permission denied: ${permission} for redirect: ${redirect}`);
         }
     };
 

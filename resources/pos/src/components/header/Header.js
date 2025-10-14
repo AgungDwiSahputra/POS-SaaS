@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Nav, Navbar } from 'react-bootstrap-v5';
-import { connect, useSelector } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { ROLES, Tokens } from '../../constants/index'
+import { Permissions, ROLES, Tokens } from '../../constants/index'
 import { logoutAction } from '../../store/action/authAction';
 import ChangePassword from '../auth/change-password/ChangePassword';
 import { getAvatarName } from '../../shared/sharedMethod';
@@ -18,18 +18,21 @@ import {
     faRightFromBracket,
     faAngleDown,
     faLanguage,
-    faMoneyBill
+    faMoneyBill,
+    faBell
 } from '@fortawesome/free-solid-svg-icons';
-import { Dropdown } from "react-bootstrap";
+import { Dropdown, Badge } from "react-bootstrap";
 import { productQuantityReportAction } from '../../store/action/paymentQuantityReport';
 import LanguageModel from "../user-profile/LanguageModel";
 import PosRegisterModel from '../posRegister/PosRegisterModel.js';
 import StoreWarningModal from './StoreWarningModal.jsx';
 import SubscriptionWarningModal from './SubscriptionWarningModal.jsx';
+import { fetchPendingDigitalTopupRequests } from '../../store/action/digitalTopupRequestAction';
 
 const Header = (props) => {
     const { logoutAction, newRoutes } = props;
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const users = localStorage.getItem(Tokens.USER);
     const firstName = localStorage.getItem(Tokens.FIRST_NAME);
     const lastName = localStorage.getItem(Tokens.LAST_NAME);
@@ -45,7 +48,12 @@ const Header = (props) => {
     const [showPosRegisterModel, setShowPosRegisterModel] = useState(false);
     const [storeWarningModal, setStoreWarningModal] = useState(false);
     const [subscriptionWarningModal, setSubscriptionWarningModal] = useState(false);
-    const { allConfigData, loginUser } = useSelector(state => state)
+    const {
+        allConfigData,
+        loginUser,
+        config: userPermissions,
+        digitalTopupRequests: digitalTopupRequestsState
+    } = useSelector(state => state);
 
     const onClickDeleteModel = () => {
         setDeleteModel(!deleteModel);
@@ -55,6 +63,24 @@ const Header = (props) => {
         setStoreWarningModal(loginUser.roles !== ROLES.SUPER_ADMIN && allConfigData?.store_modal);
         setSubscriptionWarningModal(allConfigData?.is_sub_user && allConfigData?.is_expired);
     }, [allConfigData])
+
+    const hasTopupApprovalAccess = loginUser?.roles !== ROLES.SUPER_ADMIN &&
+        Array.isArray(userPermissions) &&
+        userPermissions.some((permission) =>
+            [
+                Permissions.MANAGE_DIGITAL_TOPUP,
+                Permissions.APPROVE_DIGITAL_TOPUP,
+                Permissions.VIEW_DIGITAL_TOPUP
+            ].includes(permission)
+        );
+
+    useEffect(() => {
+        if (hasTopupApprovalAccess) {
+            dispatch(fetchPendingDigitalTopupRequests());
+        }
+    }, [dispatch, hasTopupApprovalAccess]);
+
+    const pendingTopupCount = digitalTopupRequestsState?.pendingCount || 0;
 
     const onClickLanguageModel = () => {
         setLanguageModel(!languageModel);
@@ -119,6 +145,24 @@ const Header = (props) => {
                                 ''
                             }
                         </li>
+                        {hasTopupApprovalAccess && (
+                            <li className="px-sm-3 px-2">
+                                <Link
+                                    to="/user/digital/digital-topup-requests"
+                                    className='d-flex align-items-center text-decoration-none position-relative'
+                                >
+                                    <FontAwesomeIcon icon={faBell} className='text-warning fs-4' />
+                                    <span className='ms-2 d-none d-sm-inline text-gray-700'>
+                                        {getFormattedMessage('topup-requests.pending-requests')}
+                                    </span>
+                                    {pendingTopupCount > 0 && (
+                                        <Badge bg="danger" pill className="ms-2">
+                                            {pendingTopupCount}
+                                        </Badge>
+                                    )}
+                                </Link>
+                            </li>
+                        )}
                         {isFullscreen === true ?
                             <li className="px-sm-3 px-2 cursor-pointer" onClick={() => fullScreen()}>
                                 <FontAwesomeIcon icon={faMinimize} className='text-primary fs-2' />
