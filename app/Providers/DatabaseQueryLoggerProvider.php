@@ -142,8 +142,12 @@ class DatabaseQueryLoggerProvider extends ServiceProvider
             }
         }, $bindings);
 
+        // Escape % characters to prevent vsprintf errors
+        $readableSql = str_replace('%', '%%', $sql);
+
         // Replace ? placeholders with actual values
-        $readableSql = str_replace('?', '%s', $sql);
+        $readableSql = str_replace('?', '%s', $readableSql);
+
         return vsprintf($readableSql, $bindings);
     }
 

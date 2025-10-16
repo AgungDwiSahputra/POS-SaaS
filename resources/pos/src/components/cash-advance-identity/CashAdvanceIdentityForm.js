@@ -98,17 +98,26 @@ const CashAdvanceIdentityForm = (props) => {
     };
 
     const prepareData = (data) => {
-        return {
+        const preparedData = {
             name: data.name,
-            email: data.email,
-            phone: data.phone,
-            department: data.department,
-            address: data.address,
+            email: data.email || null,
+            phone: data.phone || null,
+            department: data.department || null,
+            address: data.address || null,
             date_of_birth: data.date_of_birth ? moment(data.date_of_birth).format('YYYY-MM-DD') : null,
             type: data.type,
-            is_active: data.is_active,
-            notes: data.notes,
+            is_active: data.is_active ? 1 : 0,
+            notes: data.notes || null,
         };
+
+        // Remove null values for cleaner API request
+        Object.keys(preparedData).forEach(key => {
+            if (preparedData[key] === null || preparedData[key] === undefined) {
+                delete preparedData[key];
+            }
+        });
+
+        return preparedData;
     };
 
     const onSubmit = (event) => {

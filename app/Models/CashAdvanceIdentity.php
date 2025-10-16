@@ -40,10 +40,10 @@ class CashAdvanceIdentity extends BaseModel
     public const TYPE_OTHER = 'other';
 
     protected $fillable = [
-        'tenant_id',
         'name',
         'email',
         'phone',
+        'employee_id',
         'department',
         'address',
         'date_of_birth',

@@ -25,11 +25,12 @@ class CreateCashAdvanceIdentityRequest extends FormRequest
             'name' => 'required|string|max:191',
             'email' => 'nullable|email|max:191|unique:cash_advance_identities,email',
             'phone' => 'nullable|string|max:191',
+            'employee_id' => 'nullable|string|max:191|unique:cash_advance_identities,employee_id',
             'department' => 'nullable|string|max:191',
             'address' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
             'type' => 'required|in:employee,contractor,other',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable|boolean',
             'notes' => 'nullable|string',
         ];
     }
