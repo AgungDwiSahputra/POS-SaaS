@@ -14,8 +14,7 @@ return new class extends Migration
     {
         // add tenant_id column to cash_advance_identities table
         Schema::table('cash_advance_identities', function (Blueprint $table) {
-            $table->unsignedBigInteger('tenant_id')->after('id');
-            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
+            $table->bigInteger('tenant_id')->after('id');
         });
     }
 
