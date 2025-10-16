@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::table('cash_advance_identities', function (Blueprint $table) {
             $table->unsignedBigInteger('tenant_id')->after('id');
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-        })
+        });
     }
 
     /**
