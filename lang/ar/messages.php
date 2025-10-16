@@ -255,9 +255,51 @@ return [
     ],
 
     'cash_advance' => [
+        'title' => 'السلفة النقدية',
+        'create' => [
+            'title' => 'إنشاء سلفة نقدية',
+        ],
+        'edit' => [
+            'title' => 'تحرير السلفة النقدية',
+        ],
+        'detail' => [
+            'date' => 'تاريخ',
+        ],
+        'input' => [
+            'amount' => [
+                'label' => 'المبلغ',
+                'placeholder' => [
+                    'label' => 'أدخل المبلغ',
+                ],
+                'validate' => [
+                    'label' => 'المبلغ مطلوب',
+                ],
+            ],
+            'note' => [
+                'label' => 'ملاحظة',
+                'placeholder' => [
+                    'label' => 'أدخل الملاحظة',
+                ],
+            ],
+        ],
         'status' => [
-            'pending' => 'Outstanding',
-            'paid' => 'Paid Off',
+            'pending' => 'مستحقة',
+            'paid' => 'مدفوعة بالكامل',
+        ],
+    ],
+
+    'cash_advance_identity' => [
+        'title' => 'هويات السلفة النقدية',
+        'input' => [
+            'identity_id' => [
+                'label' => 'الهوية',
+                'placeholder' => [
+                    'label' => 'اختر الهوية...',
+                ],
+                'validate' => [
+                    'label' => 'الهوية مطلوبة',
+                ],
+            ],
         ],
     ],
 

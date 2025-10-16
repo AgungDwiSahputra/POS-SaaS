@@ -158,9 +158,14 @@ export const fetchCashAdvanceIdentityWithHistory = (id) => {
 
 export const fetchActiveIdentitiesForSelect = () => {
     return (dispatch) => {
+        console.log('Redux: Fetching active identities for select...');
         apiConfig
             .get("active-identities-for-select")
             .then((response) => {
+                console.log('Redux: Active identities fetched successfully:', {
+                    dataLength: response.data.data?.length || response.data?.length,
+                    data: response.data.data || response.data
+                });
                 dispatch({
                     type: cashAdvanceIdentityActionType.FETCH_ACTIVE_IDENTITIES_FOR_SELECT,
                     payload: response.data.data || response.data,
@@ -168,6 +173,7 @@ export const fetchActiveIdentitiesForSelect = () => {
                 });
             })
             .catch((error) => {
+                console.error('Redux: Error fetching active identities:', error);
                 notifyAndStopLoading(dispatch, error, false);
             });
     };

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getFormattedMessage } from '../sharedMethod';
 
 const ReactSelect = ( props ) => {
-    const { isCustomWidth, title, placeholder, data, defaultValue, onChange, errors, value, isRequired, multiLanguageOption, isWarehouseDisable, addSearchItems, controlId } = props;
+    const { isCustomWidth, title, placeholder, data, defaultValue, onChange, errors, value, isRequired, multiLanguageOption, isWarehouseDisable, isDisabled, addSearchItems, controlId } = props;
     const dispatch = useDispatch();
     const isOptionDisabled = useSelector( ( state ) => state.isOptionDisabled );
 
@@ -39,6 +39,13 @@ const ReactSelect = ( props ) => {
         addSearchItems ? dispatch( { type: 'DISABLE_OPTION', payload: true } ) : dispatch( { type: 'DISABLE_OPTION', payload: false } )
     }, [] );
 
+    const handleChange = (selectedOption) => {
+        console.log('ReactSelect onChange called:', { selectedOption, isDisabled: isDisabled !== undefined ? isDisabled : (isWarehouseDisable ? isOptionDisabled : false) });
+        if (onChange) {
+            onChange(selectedOption);
+        }
+    };
+
     return (
         <Form.Group className={isCustomWidth ? 'form-group w-117px' : 'form-group w-100'}>
             {title ? <Form.Label htmlFor={generatedId}>{title}:</Form.Label> : ''}
@@ -47,10 +54,10 @@ const ReactSelect = ( props ) => {
                 placeholder={typeof placeholder === 'string' ? placeholder : placeholder}
                 value={value}
                 defaultValue={defaultValue}
-                onChange={onChange}
+                onChange={handleChange}
                 options={option}
                 noOptionsMessage={() => getFormattedMessage( 'no-option.label' )}
-                isDisabled={isWarehouseDisable ? isOptionDisabled : false}
+                isDisabled={isDisabled !== undefined ? isDisabled : (isWarehouseDisable ? isOptionDisabled : false)}
                 inputId={generatedId}
             />
             {errors ? <span className='text-danger d-block fw-400 fs-small mt-2'>{errors ? errors : null}</span> : null}

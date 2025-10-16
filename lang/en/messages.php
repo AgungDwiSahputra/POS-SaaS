@@ -257,9 +257,74 @@ return [
     ],
 
     'cash_advance' => [
+        'title' => 'Cash Advance',
+        'create' => [
+            'title' => 'Create Cash Advance',
+        ],
+        'edit' => [
+            'title' => 'Edit Cash Advance',
+        ],
+        'detail' => [
+            'date' => 'Date',
+        ],
+        'input' => [
+            'amount' => [
+                'label' => 'Amount',
+                'placeholder' => [
+                    'label' => 'Enter amount',
+                ],
+                'validate' => [
+                    'label' => 'Amount is required',
+                ],
+            ],
+            'note' => [
+                'label' => 'Note',
+                'placeholder' => [
+                    'label' => 'Enter note',
+                ],
+            ],
+        ],
+        'table' => [
+            'recipient' => 'Recipient',
+            'contact' => 'Contact',
+            'paid-amount' => 'Paid Amount',
+            'outstanding' => 'Outstanding',
+            'recorded-by' => 'Recorded By',
+            'notes' => 'Notes',
+            'installments' => 'Installments',
+        ],
+        'payment' => [
+            'view' => 'View Payments',
+        ],
+        'duplicate' => [
+            'button' => 'Duplicate',
+        ],
+        'filter' => [
+            'status' => 'Status',
+            'recorded-by' => 'Recorded By',
+        ],
+        'summary' => [
+            'pending-count' => 'Pending Count',
+            'paid-count' => 'Paid Count',
+        ],
         'status' => [
             'pending' => 'Outstanding',
             'paid' => 'Paid Off',
+        ],
+    ],
+
+    'cash_advance_identity' => [
+        'title' => 'Cash Advance Identities',
+        'input' => [
+            'identity_id' => [
+                'label' => 'Identity',
+                'placeholder' => [
+                    'label' => 'Select identity...',
+                ],
+                'validate' => [
+                    'label' => 'Identity is required',
+                ],
+            ],
         ],
     ],
 

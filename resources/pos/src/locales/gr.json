@@ -117,6 +117,7 @@
     "globally.detail.grand.total": "Gesamtsumme",
     "globally.detail.paid": "Bezahlt",
     "globally.detail.due": "Fällig",
+    "globally.detail.date": "Datum",
     "customers.title": "Kunden",
     "customer.title": "Kunde",
     "globally.search.field.label": "Produkt nach Codename suchen",
@@ -1150,5 +1151,6 @@
     "cash-advance-identity.dashboard.no_cash_advances_description": "Diese Identität hat noch keine Bargeldvorschüsse.",
     "cash-advance-identity.dashboard.select_identity": "Identität auswählen",
     "cash-advance-identity.dashboard.select_identity_description": "Bitte gehen Sie zur Registerkarte Identitäten und wählen Sie eine Identität aus, um ihre Bargeldvorschüsse anzuzeigen.",
-    "cash-advance-identity.dashboard.go_to_identities": "Zu Identitäten gehen"
+    "cash-advance-identity.dashboard.go_to_identities": "Zu Identitäten gehen",
+    "cash-advance.payment.pay": "Bezahlen"
 }

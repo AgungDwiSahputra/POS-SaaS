@@ -254,9 +254,51 @@ return [
     ],
 
     'cash_advance' => [
+        'title' => 'Peşinat',
+        'create' => [
+            'title' => 'Peşinat Oluştur',
+        ],
+        'edit' => [
+            'title' => 'Peşinatı Düzenle',
+        ],
+        'detail' => [
+            'date' => 'Tarih',
+        ],
+        'input' => [
+            'amount' => [
+                'label' => 'Tutar',
+                'placeholder' => [
+                    'label' => 'Tutar girin',
+                ],
+                'validate' => [
+                    'label' => 'Tutar zorunludur',
+                ],
+            ],
+            'note' => [
+                'label' => 'Not',
+                'placeholder' => [
+                    'label' => 'Not girin',
+                ],
+            ],
+        ],
         'status' => [
-            'pending' => 'Outstanding',
-            'paid' => 'Paid Off',
+            'pending' => 'Beklemede',
+            'paid' => 'Ödendi',
+        ],
+    ],
+
+    'cash_advance_identity' => [
+        'title' => 'Peşinat Kimlikleri',
+        'input' => [
+            'identity_id' => [
+                'label' => 'Kimlik',
+                'placeholder' => [
+                    'label' => 'Kimlik seçin...',
+                ],
+                'validate' => [
+                    'label' => 'Kimlik zorunludur',
+                ],
+            ],
         ],
     ],
 

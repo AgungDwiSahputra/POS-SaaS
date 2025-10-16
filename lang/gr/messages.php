@@ -254,9 +254,51 @@ return [
     ],
 
     'cash_advance' => [
+        'title' => 'Vorschuss',
+        'create' => [
+            'title' => 'Vorschuss erstellen',
+        ],
+        'edit' => [
+            'title' => 'Vorschuss bearbeiten',
+        ],
+        'detail' => [
+            'date' => 'Datum',
+        ],
+        'input' => [
+            'amount' => [
+                'label' => 'Betrag',
+                'placeholder' => [
+                    'label' => 'Betrag eingeben',
+                ],
+                'validate' => [
+                    'label' => 'Betrag ist erforderlich',
+                ],
+            ],
+            'note' => [
+                'label' => 'Notiz',
+                'placeholder' => [
+                    'label' => 'Notiz eingeben',
+                ],
+            ],
+        ],
         'status' => [
-            'pending' => 'Outstanding',
-            'paid' => 'Paid Off',
+            'pending' => 'Ausstehend',
+            'paid' => 'Bezahlt',
+        ],
+    ],
+
+    'cash_advance_identity' => [
+        'title' => 'Vorschuss-Identitäten',
+        'input' => [
+            'identity_id' => [
+                'label' => 'Identität',
+                'placeholder' => [
+                    'label' => 'Identität auswählen...',
+                ],
+                'validate' => [
+                    'label' => 'Identität ist erforderlich',
+                ],
+            ],
         ],
     ],
 

@@ -257,7 +257,7 @@ const CashAdvanceIdentityDetail = (props) => {
                                             </td>
                                             <td>
                                                 <span className={`badge bg-${advance.status === 1 ? 'success' : 'warning'}`}>
-                                                    {advance.status === 1 ? "Lunas" : "Belum Lunas"}
+                                                    {advance.status === 1 ? getFormattedMessage("cash-advance.status.paid") : getFormattedMessage("cash-advance.status.outstanding")}
                                                 </span>
                                             </td>
                                             <td>

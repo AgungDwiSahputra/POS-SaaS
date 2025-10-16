@@ -254,9 +254,51 @@ return [
     ],
 
     'cash_advance' => [
+        'title' => 'Ứng trước',
+        'create' => [
+            'title' => 'Tạo ứng trước',
+        ],
+        'edit' => [
+            'title' => 'Chỉnh sửa ứng trước',
+        ],
+        'detail' => [
+            'date' => 'Ngày',
+        ],
+        'input' => [
+            'amount' => [
+                'label' => 'Số tiền',
+                'placeholder' => [
+                    'label' => 'Nhập số tiền',
+                ],
+                'validate' => [
+                    'label' => 'Số tiền là bắt buộc',
+                ],
+            ],
+            'note' => [
+                'label' => 'Ghi chú',
+                'placeholder' => [
+                    'label' => 'Nhập ghi chú',
+                ],
+            ],
+        ],
         'status' => [
-            'pending' => 'Outstanding',
-            'paid' => 'Paid Off',
+            'pending' => 'Chờ xử lý',
+            'paid' => 'Đã thanh toán',
+        ],
+    ],
+
+    'cash_advance_identity' => [
+        'title' => 'Định danh ứng trước',
+        'input' => [
+            'identity_id' => [
+                'label' => 'Định danh',
+                'placeholder' => [
+                    'label' => 'Chọn định danh...',
+                ],
+                'validate' => [
+                    'label' => 'Định danh là bắt buộc',
+                ],
+            ],
         ],
     ],
 

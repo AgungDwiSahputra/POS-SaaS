@@ -148,4 +148,30 @@ return [
 
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Database Query Logging
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, all database queries will be logged with their execution
+    | time, parameters, and other useful debugging information. This is
+    | helpful for performance analysis and debugging.
+    |
+    */
+
+    'query_logging' => [
+        'enabled' => env('DB_QUERY_LOGGING', false),
+        'slow_query_threshold' => env('DB_SLOW_QUERY_THRESHOLD', 1000), // milliseconds
+        'error_threshold' => env('DB_ERROR_THRESHOLD', 5000), // milliseconds for potential errors
+        'log_parameters' => env('DB_LOG_PARAMETERS', true),
+        'log_duplicates' => env('DB_LOG_DUPLICATES', false),
+        'max_query_length' => env('DB_MAX_QUERY_LENGTH', 1000),
+        // Selective logging options (only log important events)
+        'log_errors' => env('DB_LOG_ERRORS', true),
+        'log_slow_queries' => env('DB_LOG_SLOW_QUERIES', true),
+        'log_failed_queries' => env('DB_LOG_FAILED_QUERIES', true),
+        // Exclude routine successful queries to reduce log noise
+        'log_successful_queries' => env('DB_LOG_SUCCESSFUL_QUERIES', false),
+    ],
+
 ];

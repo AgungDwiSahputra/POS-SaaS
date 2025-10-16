@@ -461,7 +461,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         borderColor: '#495057 !important'
                                                                     }}
                                                                 >
-                                                                    {intl.formatMessage({ id: "globally.detail.date" })}
+                                                                    {getFormattedMessage("globally.detail.date")}
                                                                 </th>
                                                                 <th 
                                                                     className="text-nowrap text-center" 
@@ -483,7 +483,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                             const paidAmount = parseFloat(cashAdvance.paid_amount) || 0;
                                                             const outstanding = amount - paidAmount;
                                                             const isPaid = cashAdvance.status === 1;
-                                                            const statusText = isPaid ? "Lunas" : "Belum Lunas";
+                                                            const statusText = isPaid ? getFormattedMessage("cash-advance.status.paid") : getFormattedMessage("cash-advance.status.outstanding");
                                                             const formattedDate = cashAdvance.date ? new Date(cashAdvance.date).toLocaleDateString() : 'N/A';
                                                             
                                                             return (
@@ -564,7 +564,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                         {isPaid && (
                                                                             <span className="text-muted small d-flex align-items-center">
                                                                                 <FontAwesomeIcon icon={faCheck} className="me-1 text-success" />
-                                                                                Lunas
+                                                                                {getFormattedMessage("cash-advance.status.paid")}
                                                                             </span>
                                                                         )}
                                                                     </div>

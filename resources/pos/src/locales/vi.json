@@ -116,6 +116,7 @@
     "globally.detail.paid": "Trả",
     "globally.search.field.label": "Tìm kiếm sản phẩm theo tên mã",
     "globally.detail.due": "Quá hạn",
+    "globally.detail.date": "Ngày",
     "globally.status.validate.label": "Vui lòng chọn trạng thái",
     "globally.payment.status.validate.label": "Vui lòng chọn trạng thái thanh toán",
     "customers.title": "Khách hàng",
@@ -1129,5 +1130,6 @@
     "cash-advance-identity.dashboard.no_identities": "Không tìm thấy nhận dạng",
     "cash-advance-identity.dashboard.no_identities_description": "Bắt đầu bằng cách tạo nhận dạng đầu tiên của bạn để quản lý ứng trước tiền mặt.",
     "cash-advance-identity.tab.identities": "Nhận dạng",
-    "cash-advance-identity.tab.cash-advances": "Ứng trước tiền mặt"
+    "cash-advance-identity.tab.cash-advances": "Ứng trước tiền mặt",
+    "cash-advance.payment.pay": "Thanh Toán"
 }

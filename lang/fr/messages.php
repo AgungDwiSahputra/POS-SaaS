@@ -254,9 +254,51 @@ return [
     ],
 
     'cash_advance' => [
+        'title' => 'Avance de fonds',
+        'create' => [
+            'title' => 'Créer une avance de fonds',
+        ],
+        'edit' => [
+            'title' => 'Modifier l\'avance de fonds',
+        ],
+        'detail' => [
+            'date' => 'Date',
+        ],
+        'input' => [
+            'amount' => [
+                'label' => 'Montant',
+                'placeholder' => [
+                    'label' => 'Entrer le montant',
+                ],
+                'validate' => [
+                    'label' => 'Le montant est obligatoire',
+                ],
+            ],
+            'note' => [
+                'label' => 'Note',
+                'placeholder' => [
+                    'label' => 'Entrer une note',
+                ],
+            ],
+        ],
         'status' => [
-            'pending' => 'Outstanding',
-            'paid' => 'Paid Off',
+            'pending' => 'En attente',
+            'paid' => 'Payé',
+        ],
+    ],
+
+    'cash_advance_identity' => [
+        'title' => 'Identités d\'avance de fonds',
+        'input' => [
+            'identity_id' => [
+                'label' => 'Identité',
+                'placeholder' => [
+                    'label' => 'Sélectionner une identité...',
+                ],
+                'validate' => [
+                    'label' => 'L\'identité est obligatoire',
+                ],
+            ],
         ],
     ],
 

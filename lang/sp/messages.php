@@ -254,9 +254,51 @@ return [
     ],
 
     'cash_advance' => [
+        'title' => 'Anticipo',
+        'create' => [
+            'title' => 'Crear Anticipo',
+        ],
+        'edit' => [
+            'title' => 'Editar Anticipo',
+        ],
+        'detail' => [
+            'date' => 'Fecha',
+        ],
+        'input' => [
+            'amount' => [
+                'label' => 'Monto',
+                'placeholder' => [
+                    'label' => 'Ingrese el monto',
+                ],
+                'validate' => [
+                    'label' => 'El monto es obligatorio',
+                ],
+            ],
+            'note' => [
+                'label' => 'Nota',
+                'placeholder' => [
+                    'label' => 'Ingrese una nota',
+                ],
+            ],
+        ],
         'status' => [
-            'pending' => 'Outstanding',
-            'paid' => 'Paid Off',
+            'pending' => 'Pendiente',
+            'paid' => 'Pagado',
+        ],
+    ],
+
+    'cash_advance_identity' => [
+        'title' => 'Identidades de Anticipo',
+        'input' => [
+            'identity_id' => [
+                'label' => 'Identidad',
+                'placeholder' => [
+                    'label' => 'Seleccionar identidad...',
+                ],
+                'validate' => [
+                    'label' => 'La identidad es obligatoria',
+                ],
+            ],
         ],
     ],
 

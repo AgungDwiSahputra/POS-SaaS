@@ -116,6 +116,7 @@
     "globally.detail.paid": "Dibayar",
     "globally.search.field.label": "Cari Produk berdasarkan Kode Nama",
     "globally.detail.due": "Piutang",
+    "globally.detail.date": "Tanggal",
     "globally.status.validate.label": "Silakan pilih Status",
     "globally.payment.status.validate.label": "Silakan pilih Status pembayaran",
     "customers.title": "Pelanggan",

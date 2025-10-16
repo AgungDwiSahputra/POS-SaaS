@@ -254,9 +254,51 @@ return [
     ],
 
     'cash_advance' => [
+        'title' => '预付现金',
+        'create' => [
+            'title' => '创建预付现金',
+        ],
+        'edit' => [
+            'title' => '编辑预付现金',
+        ],
+        'detail' => [
+            'date' => '日期',
+        ],
+        'input' => [
+            'amount' => [
+                'label' => '金额',
+                'placeholder' => [
+                    'label' => '输入金额',
+                ],
+                'validate' => [
+                    'label' => '金额为必填项',
+                ],
+            ],
+            'note' => [
+                'label' => '备注',
+                'placeholder' => [
+                    'label' => '输入备注',
+                ],
+            ],
+        ],
         'status' => [
-            'pending' => 'Outstanding',
-            'paid' => 'Paid Off',
+            'pending' => '未付清',
+            'paid' => '已付清',
+        ],
+    ],
+
+    'cash_advance_identity' => [
+        'title' => '预付现金身份',
+        'input' => [
+            'identity_id' => [
+                'label' => '身份',
+                'placeholder' => [
+                    'label' => '选择身份...',
+                ],
+                'validate' => [
+                    'label' => '身份为必填项',
+                ],
+            ],
         ],
     ],
 

@@ -121,6 +121,7 @@
     "globally.payment.status.validate.label": "الرجاء تحديد حالة الدفع",
     "globally.search.field.label": "ابحث عن المنتج حسب اسم الرمز",
     "globally.detail.due": "حق",
+    "globally.detail.date": "تاريخ",
     "customers.title": "عملاء",
     "customer.title": "عميل",
     "customer.create.title": "إنشاء العميل",
@@ -1154,5 +1155,6 @@
     "cash-advance-identity.dashboard.go_to_identities": "الذهاب إلى الهويات",
     "cash-advance-identity.input.identity_id.validate.label": "هوية السلفة النقدية مطلوبة",
     "cash-advance-identity.input.identity_id.placeholder.label": "اختر الهوية...",
-    "cash-advance-identity.input.employee_id.auto_generated": "تم إنشاؤها تلقائياً"
+    "cash-advance-identity.input.employee_id.auto_generated": "تم إنشاؤها تلقائياً",
+    "cash-advance.payment.pay": "دفع"
 }

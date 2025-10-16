@@ -35,6 +35,7 @@ class CashAdvance extends BaseModel
 
     protected $fillable = [
         'date',
+        'warehouse_id',
         'identity_id',
         'amount',
         'paid_amount',
@@ -46,6 +47,7 @@ class CashAdvance extends BaseModel
 
     public static $rules = [
         'date' => 'required|date',
+        'warehouse_id' => 'nullable|exists:warehouses,id',
         'identity_id' => 'required|exists:cash_advance_identities,id',
         'amount' => 'required|numeric',
         'notes' => 'nullable|string',
@@ -112,11 +114,17 @@ class CashAdvance extends BaseModel
         return $this->hasMany(CashAdvancePayment::class, 'cash_advance_id');
     }
 
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'warehouse_id', 'id');
+    }
+
     /**
      * @var string[]
      */
     public static $availableRelations = [
         'identity_id' => 'identity',
+        'warehouse_id' => 'warehouse',
         'recorded_by' => 'recordedBy',
         'payments' => 'payments',
     ];

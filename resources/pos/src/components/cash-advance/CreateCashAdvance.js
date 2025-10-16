@@ -15,6 +15,18 @@ const CreateCashAdvance = (props) => {
     const location = useLocation();
     const prefillData = location.state?.prefill ?? null;
 
+    useEffect(() => {
+        // Ensure identities are fetched when component mounts
+        if (!activeIdentitiesForSelect || activeIdentitiesForSelect.length === 0) {
+            console.log('CreateCashAdvance: Fetching active identities...', {
+                activeIdentitiesForSelect,
+                hasActiveIdentities: !!activeIdentitiesForSelect,
+                length: activeIdentitiesForSelect?.length
+            });
+            fetchActiveIdentitiesForSelect();
+        }
+    }, [fetchActiveIdentitiesForSelect, activeIdentitiesForSelect]);
+
     const addCashAdvanceData = (formValue) => {
         addCashAdvance(formValue, navigate);
     };
@@ -38,7 +50,7 @@ const CreateCashAdvance = (props) => {
 
 const mapStateToProps = (state) => {
     const { frontSetting, cashAdvanceIdentities } = state;
-    return { 
+    return {
         frontSetting,
         activeIdentitiesForSelect: cashAdvanceIdentities.activeIdentitiesForSelect,
     };

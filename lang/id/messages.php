@@ -337,5 +337,52 @@
     'go_to_login' => 'Pergi ke Login',
     'number_of_stores' => 'Jumlah toko: (:stores)',
   ),
-  'cash_advance' => 'Uang Muka',
+  'cash_advance' => [
+      'title' => 'Uang Muka',
+      'create' => [
+          'title' => 'Buat Uang Muka',
+      ],
+      'edit' => [
+          'title' => 'Edit Uang Muka',
+      ],
+      'detail' => [
+          'date' => 'Tanggal',
+      ],
+      'input' => [
+          'amount' => [
+              'label' => 'Jumlah',
+              'placeholder' => [
+                  'label' => 'Masukkan jumlah',
+              ],
+              'validate' => [
+                  'label' => 'Jumlah wajib diisi',
+              ],
+          ],
+          'note' => [
+              'label' => 'Catatan',
+              'placeholder' => [
+                  'label' => 'Masukkan catatan',
+              ],
+          ],
+      ],
+      'status' => [
+          'paid' => 'Lunas',
+          'pending' => 'Belum Lunas',
+      ],
+  ],
+
+  'cash_advance_identity' => [
+      'title' => 'Identitas Uang Muka',
+      'input' => [
+          'identity_id' => [
+              'label' => 'Identitas',
+              'placeholder' => [
+                  'label' => 'Pilih identitas...',
+              ],
+              'validate' => [
+                  'label' => 'Identitas wajib diisi',
+              ],
+          ],
+      ],
+  ],
 )?>
