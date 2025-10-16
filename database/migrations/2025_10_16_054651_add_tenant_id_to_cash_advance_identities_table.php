@@ -12,8 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Migration already completed - all required fields and constraints exist
-        // This is a safety migration that doesn't need to make any changes
+        // add tenant_id column to cash_advance_identities table
+        Schema::table('cash_advance_identities', function (Blueprint $table) {
+            $table->unsignedBigInteger('tenant_id')->after('id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
+        })
     }
 
     /**
