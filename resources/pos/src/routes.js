@@ -21,6 +21,10 @@ import Product from "./components/product/Product";
 import CreateProduct from "./components/product/CreateProduct";
 import EditProduct from "./components/product/EditProduct";
 import ProductDetail from "./components/product/ProductDetail";
+import DigitalProduct from "./components/digital-product/DigitalProductList";
+import CreateDigitalProduct from "./components/digital-product/CreateDigitalProduct";
+import EditDigitalProduct from "./components/digital-product/EditDigitalProduct";
+import DigitalProductDetail from "./components/digital-product/DigitalProductDetail";
 import Settings from "./components/settings/Settings";
 import ExpenseCategory from "./components/expense-category/ExpenseCategory";
 import Expenses from "./components/expense/Expenses";
@@ -266,6 +270,26 @@ export const route = [
     {
         path: "products/detail/:id",
         ele: <ProductDetail />,
+        permission: Permissions.VIEW_PRODUCTS,
+    },
+    {
+        path: "digital-products",
+        ele: <DigitalProduct />,
+        permission: Permissions.MANAGE_PRODUCTS,
+    },
+    {
+        path: "digital-products/create",
+        ele: <CreateDigitalProduct />,
+        permission: Permissions.CREATE_PRODUCTS,
+    },
+    {
+        path: "digital-products/edit/:id",
+        ele: <EditDigitalProduct />,
+        permission: Permissions.EDIT_PRODUCTS,
+    },
+    {
+        path: "digital-products/detail/:id",
+        ele: <DigitalProductDetail />,
         permission: Permissions.VIEW_PRODUCTS,
     },
     {

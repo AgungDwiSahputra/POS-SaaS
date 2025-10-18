@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { currencySymbolHandling, getFormattedMessage } from '../../shared/sharedMethod';
+import { currencySymbolHandling, getFormattedMessage, safeJSONParse, safeParseLocalStorage } from '../../shared/sharedMethod';
 import { Carousel, Table } from 'react-bootstrap';
 import { setCartProduct } from '../../store/action/cartAction';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,16 +18,18 @@ const CustomerDisplay = () => {
     useEffect(() => {
         const handleStorageChange = (e) => {
             if (e.key === 'cart-sync') {
-                const cartData = JSON.parse(e.newValue);
-                dispatch(setCartProduct(cartData));
+                const cartData = safeJSONParse(e.newValue, null);
+                if (cartData) {
+                    dispatch(setCartProduct(cartData));
+                }
             }
         };
 
         window.addEventListener('storage', handleStorageChange);
 
-        const savedCart = localStorage.getItem('cart-sync');
+        const savedCart = safeParseLocalStorage('cart-sync', null);
         if (savedCart) {
-            dispatch(setCartProduct(JSON.parse(savedCart)));
+            dispatch(setCartProduct(savedCart));
         }
 
         return () => {

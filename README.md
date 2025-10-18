@@ -1,65 +1,214 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# POS.ezakses - Point of Sale System
 
 <p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://via.placeholder.com/400x200/007bff/ffffff?text=POS.ezakses" alt="POS.ezakses Logo" width="400">
 </p>
 
-## About Laravel
+<p align="center">
+  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/badge/Laravel-10.x-red.svg" alt="Laravel Version"></a>
+  <a href="https://www.php.net/"><img src="https://img.shields.io/badge/PHP-8.1+-blue.svg" alt="PHP Version"></a>
+  <a href="https://reactjs.org/"><img src="https://img.shields.io/badge/React-17.x-blue.svg" alt="React Version"></a>
+  <a href="https://getbootstrap.com/docs/5.0/"><img src="https://img.shields.io/badge/Bootstrap-5.x-purple.svg" alt="Bootstrap Version"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+POS.ezakses is a comprehensive Point of Sale (POS) system built with Laravel and React, designed for retail businesses, warehouses, and multi-store operations. The system provides complete inventory management, sales tracking, purchase management, and financial reporting capabilities.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Key Features
 
-## Learning Laravel
+- **🏪 Multi-Store Management**: Support for multiple stores/tenants
+- **🌍 Multi-Language Support**: 10+ languages including English, Arabic, Chinese, French, German, Indonesian, Spanish, Turkish, and Vietnamese
+- **💰 Multi-Currency Support**: Automatic currency conversion
+- **🔐 Role-Based Access Control**: Comprehensive permission system
+- **💳 Payment Gateway Integration**: Stripe, PayPal, Razorpay, and Paystack
+- **📊 Advanced Reporting**: Sales, purchases, inventory, and financial reports
+- **📱 Responsive Design**: Works on desktop, tablet, and mobile devices
+- **🔄 Real-time Updates**: Live inventory and sales tracking
+- **📋 Barcode Generation**: Built-in barcode generation and printing
+- **📄 PDF Reports**: Generate PDF reports for all transactions
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Quick Start
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### System Requirements
 
-## Laravel Sponsors
+- **PHP**: 8.1 or higher
+- **Node.js**: 16.x or higher
+- **MySQL**: 5.7+ or PostgreSQL 10+
+- **Composer**: Latest version
+- **Web Server**: Apache/Nginx
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### Installation
 
-### Premium Partners
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-repo/pos-ezakses.git
+   cd pos-ezakses
+   ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+2. **Install PHP dependencies**
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   ```
+
+3. **Install Node.js dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Environment Configuration**
+   ```bash
+   cp .env.example .env
+   # Edit .env file with your database and other settings
+   ```
+
+5. **Generate application key**
+   ```bash
+   php artisan key:generate
+   ```
+
+6. **Database Setup**
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+7. **Build Assets**
+   ```bash
+   npm run production
+   ```
+
+8. **Start the application**
+   ```bash
+   php artisan serve
+   ```
+
+For detailed installation instructions, see [📖 Complete Documentation](docs/complete-system-documentation.md)
+
+## Usage
+
+### Basic Operations
+
+1. **Access the application** at `http://localhost:8000`
+2. **Login** with your credentials
+3. **Navigate** using the sidebar menu:
+   - **Dashboard**: Overview of sales, purchases, and inventory
+   - **POS Screen**: Quick sales processing
+   - **Products**: Manage inventory
+   - **Sales**: View and create sales
+   - **Purchases**: Manage suppliers and purchases
+   - **Reports**: Generate various reports
+
+### User Roles
+
+- **Super Admin**: Full system access, manage subscriptions
+- **Admin**: Store management, user management
+- **Manager**: Full store operations, reporting
+- **Cashier**: POS operations, basic reporting
+
+## API Documentation
+
+The system provides a comprehensive REST API for integration with external systems.
+
+### Authentication
+
+```http
+POST /api/login
+Content-Type: application/json
+
+{
+    "email": "user@example.com",
+    "password": "password"
+}
+```
+
+### Key API Endpoints
+
+- `GET /api/products` - List products
+- `POST /api/sales` - Create sale
+- `GET /api/reports/sales` - Sales reports
+- `POST /api/purchases` - Create purchase
+
+For complete API documentation, see [📖 Complete Documentation](docs/complete-system-documentation.md#api-documentation)
+
+## Support
+
+### Documentation
+
+- **[Complete System Documentation](docs/complete-system-documentation.md)** - Comprehensive guide covering all aspects
+- **[Laravel Documentation](https://laravel.com/docs)** - Backend framework documentation
+- **[React Documentation](https://reactjs.org/docs)** - Frontend framework documentation
+
+### Getting Help
+
+1. **Check the documentation** first
+2. **Search existing issues** on GitHub
+3. **Create a new issue** with detailed information
+
+### Common Issues
+
+- **Installation problems**: Check system requirements and PHP extensions
+- **Permission errors**: Ensure proper file permissions for `storage/` and `bootstrap/cache/`
+- **Database connection**: Verify database credentials in `.env` file
+- **Asset compilation**: Clear npm cache if build fails
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-## Code of Conduct
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Security
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+If you discover any security-related issues, please email security@pos-ezakses.com instead of using the issue tracker.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# e-pos-saas
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Changelog
+
+### Version 1.2.0 (Current)
+- ✅ Multi-tenancy support
+- ✅ Enhanced payment gateway integrations
+- ✅ Advanced reporting features
+- ✅ Multi-language support (10+ languages)
+- ✅ Improved UI/UX with Bootstrap 5
+
+### Version 1.1.0
+- ✅ Basic POS functionality
+- ✅ Inventory management
+- ✅ User management
+- ✅ Basic reporting
+
+### Version 1.0.0
+- ✅ Initial release
+- ✅ Core POS features
+- ✅ Basic inventory tracking
+
+## Acknowledgments
+
+- **[Laravel](https://laravel.com)** - The PHP framework
+- **[React](https://reactjs.org)** - The JavaScript library
+- **[Bootstrap](https://getbootstrap.com)** - CSS framework
+- **[InfyOm](https://infyom.com)** - Laravel generator and templates
+- **All contributors** who help improve this project
+
+---
+
+<p align="center">
+  <strong>Built with ❤️ for modern retail businesses</strong>
+</p>
+
+<p align="center">
+  <a href="#overview">Overview</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#support">Support</a> •
+  <a href="#contributing">Contributing</a>
+</p>

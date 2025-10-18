@@ -371,6 +371,64 @@ return [
         'renew_plan' => 'Renew Plan',
     ],
 
+    'globally' => [
+        'cancel-btn' => 'Cancel',
+        'delete-btn' => 'Delete',
+    ],
+
+    'digital-product' => [
+        'title' => 'Digital Products',
+        'create' => [
+            'title' => 'Create Digital Product',
+        ],
+        'edit' => [
+            'title' => 'Edit Digital Product',
+        ],
+        'detail' => [
+            'title' => 'Digital Product Detail',
+        ],
+        'input' => [
+            'name' => [
+                'label' => 'Name',
+                'placeholder' => 'Enter product name',
+            ],
+            'code' => [
+                'label' => 'Code',
+                'placeholder' => 'Enter product code',
+            ],
+            'description' => [
+                'label' => 'Description',
+                'placeholder' => 'Enter product description',
+            ],
+            'price' => [
+                'label' => 'Price',
+                'placeholder' => 'Enter product price',
+            ],
+            'cost' => [
+                'label' => 'Cost',
+                'placeholder' => 'Enter product cost',
+            ],
+            'expiry-date' => [
+                'label' => 'Expiry Date',
+                'placeholder' => 'Select expiry date',
+            ],
+        ],
+        'table' => [
+            'name' => 'Name',
+            'code' => 'Code',
+            'price' => 'Price',
+            'cost' => 'Cost',
+            'created-date' => 'Created Date',
+        ],
+    ],
+
+    'delete-modal' => [
+        'title' => 'Are you sure?',
+        'msg' => 'Do you want to delete this',
+        'yes-btn' => 'Yes, Delete it',
+        'no-btn' => 'No, Cancel',
+    ],
+
     'front_web' => [
         'home' => 'Home',
         'service' => 'Service',

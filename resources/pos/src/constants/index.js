@@ -127,7 +127,8 @@ export const apiBaseURL = {
     FRONT_CMS: "front-cms",
     DUAL_SCREEN_SETTINGS: "dual-screen-settings",
     DUAL_SCREEN_SETTINGS_UPDATE: "dual-screen-settings/update",
-    PAYMENT_METHOD: "payment-methods"
+    PAYMENT_METHOD: "payment-methods",
+    DIGITAL_PRODUCTS: "/digital-products"
 };
 
 export const adminApiBaseURL = {
@@ -838,6 +839,14 @@ export const productActionType = {
     EDIT_MAIN_PRODUCT: "EDIT_MAIN_PRODUCT",
     DELETE_MAIN_PRODUCT: "DELETE_MAIN_PRODUCT",
     RESET_PRODUCT: "RESET_PRODUCT",
+};
+
+export const digitalProductActionType = {
+    FETCH_DIGITAL_PRODUCTS: "FETCH_DIGITAL_PRODUCTS",
+    FETCH_DIGITAL_PRODUCT: "FETCH_DIGITAL_PRODUCT",
+    ADD_DIGITAL_PRODUCT: "ADD_DIGITAL_PRODUCT",
+    EDIT_DIGITAL_PRODUCT: "EDIT_DIGITAL_PRODUCT",
+    DELETE_DIGITAL_PRODUCT: "DELETE_DIGITAL_PRODUCT",
 };
 
 export const posProductActionType = {

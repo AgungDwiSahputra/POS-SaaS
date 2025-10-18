@@ -83,6 +83,14 @@ export const userMenu = [
                 permission: Permissions.MANAGE_PRODUCTS,
             },
             {
+                title: "digital-product.title",
+                to: "/user/digital-products",
+                name: "digital-products",
+                class: "d-flex",
+                fontIcon: <FontAwesomeIcon icon={faBoxes} />,
+                permission: Permissions.MANAGE_PRODUCTS,
+            },
+            {
                 title: "product.categories.title",
                 name: "product categories",
                 fontIcon: <FontAwesomeIcon icon={faBoxOpen} />,

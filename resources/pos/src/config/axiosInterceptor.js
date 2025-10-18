@@ -30,6 +30,28 @@ export default {
             response => successHandler(response),
             error => errorHandler(error)
         );
+
+        // Add response interceptor to handle HTML responses
+        axios.interceptors.response.use(
+            response => {
+                // Check if response is HTML when expecting JSON
+                const contentType = response.headers['content-type'];
+                if (contentType && contentType.includes('text/html') && !response.config.url.includes('login')) {
+                    console.error('Received HTML response when expecting JSON:', response.data);
+                    // Return a proper error response
+                    return Promise.reject({
+                        response: {
+                            status: 500,
+                            data: {
+                                message: 'Server returned HTML instead of JSON. This might indicate a server error.'
+                            }
+                        }
+                    });
+                }
+                return response;
+            },
+            error => error
+        );
         const errorHandler = (error) => {
             if (error?.response?.status === 401
                 || error?.response?.data?.message === errorMessage.TOKEN_NOT_PROVIDED

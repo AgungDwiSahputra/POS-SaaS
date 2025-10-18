@@ -226,3 +226,92 @@ export const paymentMethodName = (paymentMethods, updateProducts) => {
     const paymentMethodTypeName = paymentMethodType[0] && paymentMethodType[0].attributes && paymentMethodType[0].attributes.name;
     return paymentMethodTypeName;
 }
+
+/**
+ * Safely parse JSON from localStorage with error handling
+ * @param {string} key - The localStorage key
+ * @param {any} defaultValue - Default value if parsing fails or key doesn't exist
+ * @returns {any} - Parsed data or default value
+ */
+export const safeParseLocalStorage = (key, defaultValue = null) => {
+    try {
+        const item = localStorage.getItem(key);
+        if (item === null) {
+            return defaultValue;
+        }
+        return JSON.parse(item);
+    } catch (error) {
+        console.error(`Error parsing localStorage key "${key}":`, error);
+        return defaultValue;
+    }
+};
+
+/**
+ * Get current user data from localStorage with fallback handling
+ * @returns {object|null} - User object or null if not available
+ */
+export const getCurrentUser = () => {
+    // Try to get complete user object from loginUserArray first
+    const userFromLoginArray = safeParseLocalStorage('loginUserArray', null);
+    if (userFromLoginArray) {
+        return userFromLoginArray;
+    }
+    
+    // If loginUserArray is not available, try to construct user object from individual fields
+    try {
+        const firstName = localStorage.getItem(Tokens.FIRST_NAME);
+        const lastName = localStorage.getItem(Tokens.LAST_NAME);
+        const email = localStorage.getItem(Tokens.USER);
+        const image = localStorage.getItem(Tokens.IMAGE);
+        const language = localStorage.getItem(Tokens.LANGUAGE);
+        
+        if (email) {
+            return {
+                email,
+                first_name: firstName,
+                last_name: lastName,
+                image_url: image,
+                language
+            };
+        }
+    } catch (error) {
+        console.error('Error constructing user object from individual fields:', error);
+    }
+    
+    return null;
+};
+
+/**
+ * Validate if a value is a valid JSON string
+ * @param {string} value - String to validate
+ * @returns {boolean} - True if valid JSON, false otherwise
+ */
+export const isValidJSON = (value) => {
+    if (typeof value !== 'string') {
+        return false;
+    }
+    try {
+        JSON.parse(value);
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+/**
+ * Safe JSON parsing with validation
+ * @param {string} jsonString - String to parse
+ * @param {any} defaultValue - Default value if parsing fails
+ * @returns {any} - Parsed object or default value
+ */
+export const safeJSONParse = (jsonString, defaultValue = null) => {
+    if (!isValidJSON(jsonString)) {
+        return defaultValue;
+    }
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        console.error('Error parsing JSON:', error);
+        return defaultValue;
+    }
+};

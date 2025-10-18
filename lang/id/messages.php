@@ -1,5 +1,19 @@
 <?php return array (
-  'pdf' => 
+  'globally' =>
+  array (
+      'cancel-btn' => 'Batal',
+      'delete-btn' => 'Hapus',
+  ),
+
+  'delete-modal' =>
+  array (
+      'title' => 'Apakah Anda yakin?',
+      'msg' => 'Apakah Anda ingin menghapus ini',
+      'yes-btn' => 'Ya, Hapus',
+      'no-btn' => 'Tidak, Batal',
+  ),
+
+  'pdf' =>
   array (
     'date' => 'Tanggal',
     'number' => 'Nomor',
@@ -383,6 +397,52 @@
                   'label' => 'Identitas wajib diisi',
               ],
           ],
+      ],
+  ],
+
+  'digital-product' => [
+      'title' => 'Produk Digital',
+      'create' => [
+          'title' => 'Buat Produk Digital',
+      ],
+      'edit' => [
+          'title' => 'Edit Produk Digital',
+      ],
+      'detail' => [
+          'title' => 'Detail Produk Digital',
+      ],
+      'input' => [
+          'name' => [
+              'label' => 'Nama',
+              'placeholder' => 'Masukkan nama produk',
+          ],
+          'code' => [
+              'label' => 'Kode',
+              'placeholder' => 'Masukkan kode produk',
+          ],
+          'description' => [
+              'label' => 'Deskripsi',
+              'placeholder' => 'Masukkan deskripsi produk',
+          ],
+          'price' => [
+              'label' => 'Harga',
+              'placeholder' => 'Masukkan harga produk',
+          ],
+          'cost' => [
+              'label' => 'Biaya',
+              'placeholder' => 'Masukkan biaya produk',
+          ],
+          'expiry-date' => [
+              'label' => 'Tanggal Kadaluarsa',
+              'placeholder' => 'Pilih tanggal kadaluarsa',
+          ],
+      ],
+      'table' => [
+          'name' => 'Nama',
+          'code' => 'Kode',
+          'price' => 'Harga',
+          'cost' => 'Biaya',
+          'created-date' => 'Tanggal Dibuat',
       ],
   ],
 )?>

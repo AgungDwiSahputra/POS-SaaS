@@ -19,6 +19,7 @@ import cashAdvanceSummaryReducer from "./cashAdvanceSummaryReducer";
 import cashAdvanceReportReducer from "./cashAdvanceReportReducer";
 import cashAdvanceIdentityReducer from "../reducer/cashAdvanceIdentityReducer";
 import productReducers from "./productReducers";
+import digitalProductReducer from "./digitalProductReducer";
 import settingReducers from "./settingReducers";
 import purchaseProductReducer from "./purchaseProductReducer";
 import changePasswordReducers from "./changePasswordReducers";
@@ -145,6 +146,7 @@ export default combineReducers({
     cashAdvanceReport: cashAdvanceReportReducer,
     cashAdvanceIdentities: cashAdvanceIdentityReducer,
     products: productReducers,
+    digitalProducts: digitalProductReducer,
     sales: saleReducer,
     productSales: productSaleUnitReducers,
     settings: settingReducers,

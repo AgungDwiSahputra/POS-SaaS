@@ -34,7 +34,10 @@ Route::get('/email/verify/{id}', [AuthController::class, 'emailVerification'])
 Route::get('/email-verify', [AuthController::class, 'viewEmailVerification'])->name('email-verify');
 
 Route::middleware(['set_language'])->group(function () {
-    Route::any('/', [HomeController::class, 'index'])->name('home');
+    // Route::any('/', [HomeController::class, 'index'])->name('home');
+    Route::any('/', function () {
+        return redirect('/app#/login');
+    })->name('home');
     Route::get('/faqs', [HomeController::class, 'faqs'])->name('faqs');
     Route::get('/terms-and-conditions', [HomeController::class, 'termsAndConditions'])->name('terms-and-conditions');
     Route::get('/privacy-policy', [HomeController::class, 'privacyPolicy'])->name('privacy-policy');
