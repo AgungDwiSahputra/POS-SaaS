@@ -90,6 +90,9 @@ return [
 
     'error' => [
         'product_cant_deleted' => 'Product can\'t be deleted',
+        'product_cant_deleted_sales' => 'Product cannot be deleted because it is associated with sales records',
+        'product_cant_deleted_purchases' => 'Product cannot be deleted because it is associated with purchase records',
+        'product_cant_deleted_both' => 'Product cannot be deleted because it is associated with both sales and purchase records',
         'code_taken' => 'The code has already been taken.',
         'default_warehouse_cant_delete' => 'Default warehouse can\'t be deleted.',
         'warehouse_cant_delete' => 'Warehouse can\'t be deleted.',

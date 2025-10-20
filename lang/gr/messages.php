@@ -90,6 +90,9 @@ return [
 
     'error' => [
         'product_cant_deleted' => 'Produkt kann nicht gelöscht werden',
+        'product_cant_deleted_sales' => 'Produkt kann nicht gelöscht werden, da es mit Verkaufsdatensätzen verknüpft ist',
+        'product_cant_deleted_purchases' => 'Produkt kann nicht gelöscht werden, da es mit Einkaufsdatensätzen verknüpft ist',
+        'product_cant_deleted_both' => 'Produkt kann nicht gelöscht werden, da es mit Verkaufs- und Einkaufsdatensätzen verknüpft ist',
         'code_taken' => 'Der Code wurde bereits vergeben.',
         'default_warehouse_cant_delete' => 'Das Standardlager kann nicht gelöscht werden.',
         'warehouse_cant_delete' => 'Lager kann nicht gelöscht werden.',

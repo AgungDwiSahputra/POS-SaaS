@@ -90,6 +90,9 @@ return [
 
     'error' => [
         'product_cant_deleted' => 'Le produit ne peut pas être supprimé',
+        'product_cant_deleted_sales' => 'Le produit ne peut pas être supprimé car il est associé aux enregistrements de ventes',
+        'product_cant_deleted_purchases' => 'Le produit ne peut pas être supprimé car il est associé aux enregistrements d\'achats',
+        'product_cant_deleted_both' => 'Le produit ne peut pas être supprimé car il est associé aux enregistrements de ventes et d\'achats',
         'code_taken' => 'Ce code est déjà pris.',
         'default_warehouse_cant_delete' => 'L\'entrepôt par défaut ne peut pas être supprimé.',
         'warehouse_cant_delete' => 'L\'entrepôt ne peut pas être supprimé.',

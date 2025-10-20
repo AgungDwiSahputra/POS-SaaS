@@ -278,7 +278,7 @@ export const userMenu = [
             },
             {
                 title: "cash-advance-identity.dashboard.title",
-                name: "cash advances",
+                name: "cash-advance-identity",
                 fontIcon: <FontAwesomeIcon icon={faMoneyBill} />,
                 class: "d-flex",
                 permission: Permissions.MANAGE_CASH_ADVANCES,

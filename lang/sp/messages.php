@@ -90,6 +90,9 @@ return [
 
     'error' => [
         'product_cant_deleted' => 'El producto no se puede eliminar',
+        'product_cant_deleted_sales' => 'El producto no se puede eliminar porque está asociado con registros de ventas',
+        'product_cant_deleted_purchases' => 'El producto no se puede eliminar porque está asociado con registros de compras',
+        'product_cant_deleted_both' => 'El producto no se puede eliminar porque está asociado con registros de ventas y compras',
         'code_taken' => 'El código ya ha sido tomado.',
         'default_warehouse_cant_delete' => 'El almacén predeterminado no se puede eliminar.',
         'warehouse_cant_delete' => 'El almacén no se puede eliminar.',

@@ -135,8 +135,18 @@ class ProductAPIController extends AppBaseController
         ];
         $purchaseResult = canDelete($purchaseItemModels, 'product_id', $id);
         $saleResult = canDelete($saleItemModels, 'product_id', $id);
+        
         if ($purchaseResult || $saleResult) {
-            return $this->sendError(__('messages.error.product_cant_deleted'));
+            // Provide specific error message based on why the product can't be deleted
+            if ($purchaseResult && $saleResult) {
+                $errorMessage = __('messages.error.product_cant_deleted_both');
+            } elseif ($purchaseResult) {
+                $errorMessage = __('messages.error.product_cant_deleted_purchases');
+            } else {
+                $errorMessage = __('messages.error.product_cant_deleted_sales');
+            }
+            
+            return $this->sendError($errorMessage);
         }
 
         if (File::exists(Storage::path('product_barcode/barcode-PR_' . $id . '.png'))) {

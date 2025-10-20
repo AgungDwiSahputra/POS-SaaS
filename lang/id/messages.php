@@ -91,9 +91,12 @@
     'user' => 'Pengguna',
     'title' => 'Judul',
   ),
-  'error' => 
+  'error' =>
   array (
     'product_cant_deleted' => 'Produk tidak dapat dihapus',
+    'product_cant_deleted_sales' => 'Produk tidak dapat dihapus karena terkait dengan data penjualan',
+    'product_cant_deleted_purchases' => 'Produk tidak dapat dihapus karena terkait dengan data pembelian',
+    'product_cant_deleted_both' => 'Produk tidak dapat dihapus karena terkait dengan data penjualan dan pembelian',
     'code_taken' => 'Kode sudah digunakan.',
     'default_warehouse_cant_delete' => 'Gudang default tidak dapat dihapus.',
     'warehouse_cant_delete' => 'Gudang tidak dapat dihapus.',

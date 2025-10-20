@@ -143,11 +143,11 @@ const CashAdvanceForm = (props) => {
         let isValid = true;
 
         if (!cashAdvanceValue["identity_id"]) {
-            formErrors["identity_id"] = getFormattedMessage("cash_advance_identity.input.identity_id.validate.label");
+            formErrors["identity_id"] = getFormattedMessage("cash-advance-identity.input.identity_id.validate.label");
             isValid = false;
         }
         if (!cashAdvanceValue["amount"]) {
-            formErrors["amount"] = getFormattedMessage("cash_advance.input.amount.validate.label");
+            formErrors["amount"] = getFormattedMessage("cash-advance.input.amount.validate.label");
             isValid = false;
         }
 
@@ -217,7 +217,7 @@ const CashAdvanceForm = (props) => {
                     <div className="row">
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                {getFormattedMessage("cash_advance.detail.date")}:
+                                {getFormattedMessage("globally.detail.date")}:
                             </label>
                             <span className="required" />
                             <div className="position-relative">
@@ -231,8 +231,8 @@ const CashAdvanceForm = (props) => {
                         <div className="col-md-6 mb-3">
                             <ReactSelect
                                 key={renderKey}
-                                title={getFormattedMessage("cash_advance_identity.title")}
-                                placeholder={intl.formatMessage({ id: "cash_advance_identity.input.identity_id.placeholder.label" })}
+                                title={getFormattedMessage("cash-advance-identity.title")}
+                                placeholder={intl.formatMessage({ id: "cash-advance-identity.input.identity_id.placeholder.label" })}
                                 value={selectedIdentity}
                                 errors={errors["identity_id"]}
                                 data={activeIdentitiesForSelect}
@@ -245,7 +245,7 @@ const CashAdvanceForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <label className="form-label">
-                                {getFormattedMessage("cash_advance.input.amount.label")}:
+                                {getFormattedMessage("cash-advance.input.amount.label")}:
                             </label>
                             <span className="required" />
                             <InputGroup>
@@ -253,7 +253,7 @@ const CashAdvanceForm = (props) => {
                                     type="text"
                                     name="amount"
                                     value={cashAdvanceValue.amount || ""}
-                                    placeholder={intl.formatMessage({ id: "cash_advance.input.amount.placeholder.label" })}
+                                    placeholder={intl.formatMessage({ id: "cash-advance.input.amount.placeholder.label" })}
                                     pattern="[0-9]*"
                                     min={0}
                                     className="form-control"
@@ -271,13 +271,13 @@ const CashAdvanceForm = (props) => {
 
                         <div className="col-12 mb-3">
                             <label className="form-label">
-                                {getFormattedMessage("cash_advance.input.note.label")}:
+                                {getFormattedMessage("cash-advance.input.notes.label")}:
                             </label>
                             <textarea
                                 name="notes"
                                 className="form-control"
                                 rows="3"
-                                placeholder={intl.formatMessage({ id: "cash_advance.input.note.placeholder.label" })}
+                                placeholder={intl.formatMessage({ id: "cash-advance.input.notes.placeholder.label" })}
                                 onChange={(e) => onChangeInput(e)}
                                 value={cashAdvanceValue.notes || ""}
                             />

@@ -72,7 +72,7 @@ class DefaultPermissionsSeeder extends Seeder
             ],
             [
                 'name' => 'manage_cash_advances',
-                'display_name' => 'Manage Cash Advances'
+                'display_name' => __('cash_advance.permission.manage')
             ],
             [
                 'name' => 'manage_setting',

@@ -90,6 +90,9 @@ return [
 
     'error' => [
         'product_cant_deleted' => 'Sản phẩm không thể bị xóa',
+        'product_cant_deleted_sales' => 'Sản phẩm không thể bị xóa vì nó có liên quan đến hồ sơ bán hàng',
+        'product_cant_deleted_purchases' => 'Sản phẩm không thể bị xóa vì nó có liên quan đến hồ sơ mua hàng',
+        'product_cant_deleted_both' => 'Sản phẩm không thể bị xóa vì nó có liên quan đến hồ sơ bán hàng và mua hàng',
         'code_taken' => 'Mã này đã được sử dụng.',
         'default_warehouse_cant_delete' => 'Kho mặc định không thể bị xóa.',
         'warehouse_cant_delete' => 'Kho không thể bị xóa.',

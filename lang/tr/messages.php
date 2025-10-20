@@ -90,6 +90,9 @@ return [
 
     'error' => [
         'product_cant_deleted' => 'Ürün silinemez.',
+        'product_cant_deleted_sales' => 'Ürün satış kayıtları ile ilişkili olduğu için silinemez',
+        'product_cant_deleted_purchases' => 'Ürün satın alma kayıtları ile ilişkili olduğu için silinemez',
+        'product_cant_deleted_both' => 'Ürün satış ve satın alma kayıtları ile ilişkili olduğu için silinemez',
         'code_taken' => 'Bu kod zaten alınmış.',
         'default_warehouse_cant_delete' => 'Varsayılan depo silinemez.',
         'warehouse_cant_delete' => 'Depo silinemez.',

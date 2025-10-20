@@ -90,6 +90,9 @@ return [
 
     'error' => [
         'product_cant_deleted' => 'لا يمكن حذف المنتج',
+        'product_cant_deleted_sales' => 'لا يمكن حذف المنتج لأنه مرتبط بسجلات المبيعات',
+        'product_cant_deleted_purchases' => 'لا يمكن حذف المنتج لأنه مرتبط بسجلات المشتريات',
+        'product_cant_deleted_both' => 'لا يمكن حذف المنتج لأنه مرتبط بسجلات المبيعات والمشتريات',
         'code_taken' => 'تم أخذ الرمز بالفعل.',
         'default_warehouse_cant_delete' => 'لا يمكن حذف المستودع الافتراضي.',
         'warehouse_cant_delete' => 'لا يمكن حذف المستودع.',

@@ -90,6 +90,9 @@ return [
 
     'error' => [
         'product_cant_deleted' => '产品无法删除',
+        'product_cant_deleted_sales' => '产品无法删除，因为它与销售记录相关联',
+        'product_cant_deleted_purchases' => '产品无法删除，因为它与采购记录相关联',
+        'product_cant_deleted_both' => '产品无法删除，因为它与销售和采购记录相关联',
         'code_taken' => '此代码已被使用。',
         'default_warehouse_cant_delete' => '默认仓库无法删除。',
         'warehouse_cant_delete' => '仓库无法删除。',
