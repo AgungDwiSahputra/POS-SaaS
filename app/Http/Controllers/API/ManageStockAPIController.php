@@ -6,41 +6,40 @@ use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\ManageStockCollection;
 use App\Http\Resources\ManageStockResource;
 use App\Repositories\ManageStockRepository;
+use App\Services\ReportStockService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Class UserAPIController
+ * Class ManageStockAPIController
  */
 class ManageStockAPIController extends AppBaseController
 {
     private $manageStockRepository;
+    private $reportStockService;
 
-    public function __construct(ManageStockRepository $manageStockRepository)
-    {
+    public function __construct(
+        ManageStockRepository $manageStockRepository,
+        ReportStockService $reportStockService
+    ) {
         $this->manageStockRepository = $manageStockRepository;
+        $this->reportStockService = $reportStockService;
     }
 
-    public function stockReport(Request $request): ManageStockCollection
+    public function stockReport(Request $request): JsonResponse
     {
-        $request->request->remove('filter');
-        $perPage = getPageSize($request);
-        $search = $request->get('search');
-        $warehouseId = $request->get('warehouse_id');
-        if ($search && $search != 'null') {
-            $stocks = $this->manageStockRepository->whereHas('product.productCategory',
-                function ($query) use ($search) {
-                    $query->where('products.code', 'like', '%'.$search.'%')
-                        ->orWhere('products.name', 'like', '%'.$search.'%')
-                        ->orWhere('products.product_cost', 'like', '%'.$search.'%')
-                        ->orWhere('products.product_price', 'like', '%'.$search.'%')
-                        ->orWhere('products.product_price', 'like', '%'.$search.'%')
-                        ->orWhere('product_categories.name', 'like', '%'.$search.'%');
-                })->where('warehouse_id', $warehouseId)->paginate($perPage);
-        } else {
-            $stocks = $this->manageStockRepository->where('warehouse_id', $warehouseId)->paginate($perPage);
-        }
-        ManageStockResource::usingWithCollection();
+        $filters = [
+            'category_id' => $request->get('category_id'),
+            'warehouse_id' => $request->get('warehouse_id'),
+            'supplier_id' => $request->get('supplier_id'),
+            'q' => $request->get('search'),
+            'start' => $request->get('start_date'),
+            'end' => $request->get('end_date'),
+            'per_page' => getPageSize($request),
+        ];
 
-        return new ManageStockCollection($stocks);
+        $reportData = $this->reportStockService->getReport($filters);
+
+        return $this->sendResponse($reportData, 'Stock report retrieved successfully');
     }
 }
