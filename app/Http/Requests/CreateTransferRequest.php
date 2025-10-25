@@ -68,36 +68,8 @@ class CreateTransferRequest extends FormRequest
                 }
             }
 
-            // Pre-validate product conflicts untuk cross-tenant transfer
-            if ($fromStoreId && $toStoreId && $fromStore && $toStore) {
-                $isCrossTenant = $fromStore->tenant_id !== $toStore->tenant_id;
-                
-                if ($isCrossTenant) {
-                    $transferItems = $this->input('transfer_items', []);
-                    
-                    if (!empty($transferItems)) {
-                        $productSyncService = app(ProductSyncService::class);
-                        
-                        foreach ($transferItems as $index => $item) {
-                            $productId = $item['product_id'] ?? null;
-                            
-                            if ($productId) {
-                                $product = Product::find($productId);
-                                
-                                if ($product && $productSyncService->detectConflict($product, $toStore->tenant_id)) {
-                                    $validator->errors()->add(
-                                        "transfer_items.{$index}.product_id",
-                                        __('messages.transfer.product_code_conflict', [
-                                            'code' => $product->product_code,
-                                            'name' => $product->name
-                                        ])
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            // Product conflict validation removed to allow multiple transfers with same product code
+            // The system will now update existing products instead of rejecting transfers
         });
     }
 }

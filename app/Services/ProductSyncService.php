@@ -22,19 +22,17 @@ class ProductSyncService
      */
     public function syncProduct(Product $sourceProduct, string $targetTenantId): array
     {
-        // 1. Check for conflicts (code sama tapi produk beda)
-        if ($this->detectConflict($sourceProduct, $targetTenantId)) {
-            throw new \Exception(
-                "Product code {$sourceProduct->product_code} already exists with different details (name or category) in destination store"
-            );
-        }
-        
-        // 2. Try to match existing product (code + name + category)
-        $existingProduct = $this->matchProduct($sourceProduct, $targetTenantId);
+        // 1. Cek apakah produk dengan code sama sudah ada di tenant tujuan
+        $existingProduct = Product::withoutGlobalScope('tenant')
+            ->where('tenant_id', $targetTenantId)
+            ->where('product_code', $sourceProduct->product_code)
+            ->first();
         
         if ($existingProduct) {
-            // Product exists, update synced fields only
-            $this->syncProductFields($existingProduct, $sourceProduct);
+            // Update produk yang sudah ada dengan data terbaru dari source
+            $this->updateExistingProduct($existingProduct, $sourceProduct);
+            
+            Log::info("Product updated for transfer: existing={$existingProduct->id}, source={$sourceProduct->id}");
             
             return [
                 'product_id' => $existingProduct->id,
@@ -43,7 +41,7 @@ class ProductSyncService
             ];
         }
         
-        // 3. Product not found, create new (replicate)
+        // 2. Product belum ada, buat baru (replicate)
         $newProduct = $this->replicateProduct($sourceProduct, $targetTenantId);
         
         return [
@@ -86,7 +84,49 @@ class ProductSyncService
     }
     
     /**
-     * Update synced fields pada existing product
+     * Update existing product dengan data terbaru dari source
+     * Mengupdate semua field yang relevan untuk menjaga konsistensi data
+     */
+    protected function updateExistingProduct(Product $targetProduct, Product $sourceProduct): void
+    {
+        // Get target tenant ID from existing product
+        $targetTenantId = $targetProduct->tenant_id;
+        
+        // Clone/Find Category (AUTO-CREATE)
+        $targetCategory = $this->cloneCategory(
+            $sourceProduct->productCategory,
+            $targetTenantId
+        );
+        
+        // Clone/Find Brand (AUTO-CREATE)
+        $targetBrand = null;
+        if ($sourceProduct->brand_id) {
+            $targetBrand = $this->cloneBrand(
+                $sourceProduct->brand,
+                $targetTenantId
+            );
+        }
+        
+        // Update field yang perlu disinkronkan
+        $targetProduct->update([
+            'name' => $sourceProduct->name,
+            'product_category_id' => $targetCategory->id,
+            'brand_id' => $targetBrand ? $targetBrand->id : null,
+            'product_cost' => $sourceProduct->product_cost,
+            'product_unit' => $sourceProduct->product_unit,
+            'sale_unit' => $sourceProduct->sale_unit,
+            'purchase_unit' => $sourceProduct->purchase_unit,
+            'barcode_symbol' => $sourceProduct->barcode_symbol,
+            'tax_type' => $sourceProduct->tax_type,
+            'order_tax' => $sourceProduct->order_tax,
+            'notes' => $sourceProduct->notes,
+        ]);
+        
+        Log::info("Product updated: {$targetProduct->id} with data from source {$sourceProduct->id}");
+    }
+    
+    /**
+     * Update synced fields pada existing product (legacy method)
      * Synced fields: product_code, name, product_category_id
      */
     protected function syncProductFields(Product $targetProduct, Product $sourceProduct): void
