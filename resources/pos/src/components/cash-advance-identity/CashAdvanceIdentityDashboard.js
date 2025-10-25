@@ -49,9 +49,10 @@ const CashAdvanceIdentityDashboard = (props) => {
         
         const matchesType = filterType === "all" || identity.type === filterType;
         
+        // Perbaikan logika filter status - handle boolean dan integer dengan benar
         const matchesStatus = filterStatus === "all" ||
-                             (filterStatus === "active" && identity.is_active === 1) ||
-                             (filterStatus === "inactive" && identity.is_active === 0);
+                             (filterStatus === "active" && (identity.is_active === true || identity.is_active === 1)) ||
+                             (filterStatus === "inactive" && (identity.is_active === false || identity.is_active === 0));
         
         return matchesSearch && matchesType && matchesStatus;
     }) || [];
@@ -69,7 +70,7 @@ const CashAdvanceIdentityDashboard = (props) => {
         const value = parseFloat(identity.total_paid);
         return sum + (isNaN(value) ? 0 : value);
     }, 0) || 0;
-    const activeIdentities = identitiesWithSummary?.filter(identity => identity.is_active).length || 0;
+    const activeIdentities = identitiesWithSummary?.filter(identity => identity.is_active === true || identity.is_active === 1).length || 0;
 
     const getTypeBadgeColor = (type) => {
         switch (type) {
