@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import MasterLayout from "../MasterLayout";
 import TabTitle from "../../shared/tab-title/TabTitle";
 import { fetchIdentitiesWithSummary } from "../../store/action/cashAdvanceIdentityAction";
-import { fetchCashAdvances } from "../../store/action/cashAdvanceAction";
+import { fetchCashAdvances, deleteCashAdvance } from "../../store/action/cashAdvanceAction";
 import { getFormattedMessage, currencySymbolHandling, placeholderText } from "../../shared/sharedMethod";
 import { useIntl } from "react-intl";
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faMoneyBill, faExclamationTriangle, faSearch, faPlus, faList, faEye, faEdit, faTrash, faCreditCard, faCheck } from "@fortawesome/free-solid-svg-icons";
 import CashAdvancePaymentsModal from "../cash-advance/CashAdvancePaymentsModal";
+import DeleteCashAdvance from "../cash-advance/DeleteCashAdvance";
 
 const CashAdvanceIdentityDashboard = (props) => {
     const {
@@ -22,15 +23,19 @@ const CashAdvanceIdentityDashboard = (props) => {
         frontSetting,
         allConfigData,
         isLoading,
+        deleteCashAdvance,
     } = props;
     const navigate = useNavigate();
     const intl = useIntl();
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("all");
+    const [filterStatus, setFilterStatus] = useState("all");
     const [activeTab, setActiveTab] = useState("identities");
     const [selectedIdentity, setSelectedIdentity] = useState(null);
     const [showPaymentsModal, setShowPaymentsModal] = useState(false);
     const [selectedCashAdvance, setSelectedCashAdvance] = useState(null);
+    const [deleteModel, setDeleteModel] = useState(false);
+    const [onDelete, setOnDelete] = useState(null);
 
     useEffect(() => {
         fetchIdentitiesWithSummary();
@@ -44,7 +49,11 @@ const CashAdvanceIdentityDashboard = (props) => {
         
         const matchesType = filterType === "all" || identity.type === filterType;
         
-        return matchesSearch && matchesType;
+        const matchesStatus = filterStatus === "all" ||
+                             (filterStatus === "active" && identity.is_active === 1) ||
+                             (filterStatus === "inactive" && identity.is_active === 0);
+        
+        return matchesSearch && matchesType && matchesStatus;
     }) || [];
 
     const totalIdentities = identitiesWithSummary?.length || 0;
@@ -106,6 +115,21 @@ const CashAdvanceIdentityDashboard = (props) => {
         fetchCashAdvances();
         setShowPaymentsModal(false);
         setSelectedCashAdvance(null);
+    };
+
+    const onClickDeleteModel = (isDeleteModel) => {
+        setDeleteModel(isDeleteModel);
+    };
+
+    const onDeleteCashAdvance = (cashAdvance) => {
+        setOnDelete(cashAdvance);
+        setDeleteModel(true);
+    };
+
+    const handleDeleteSuccess = () => {
+        // Refresh data after delete
+        fetchCashAdvances();
+        fetchIdentitiesWithSummary();
     };
 
     return (
@@ -191,6 +215,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                     <Button
                                         variant="success"
                                         onClick={() => navigate("/user/cash-advances/create")}
+                                        disabled={activeIdentities === 0}
                                     >
                                         <FontAwesomeIcon icon={faMoneyBill} className="me-2" />
                                         {getFormattedMessage("cash-advance.create.title")}
@@ -221,7 +246,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                         />
                                     </InputGroup>
                                 </Col>
-                                <Col xs={6} md={3} className="mb-2 mb-md-0">
+                                <Col xs={6} md={2} className="mb-2 mb-md-0">
                                     <Form.Select
                                         value={filterType}
                                         onChange={(e) => setFilterType(e.target.value)}
@@ -232,11 +257,26 @@ const CashAdvanceIdentityDashboard = (props) => {
                                         <option value="other">{intl.formatMessage({ id: "cash-advance-identity.input.type.other" })}</option>
                                     </Form.Select>
                                 </Col>
-                                <Col xs={6} md={3}>
+                                <Col xs={6} md={2} className="mb-2 mb-md-0">
+                                    <Form.Select
+                                        value={filterStatus}
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                    >
+                                        <option value="all">{intl.formatMessage({ id: "cash-advance-identity.filter.all_status" })}</option>
+                                        <option value="active">{intl.formatMessage({ id: "cash-advance-identity.filter.active_only" })}</option>
+                                        <option value="inactive">{intl.formatMessage({ id: "cash-advance-identity.filter.inactive_only" })}</option>
+                                    </Form.Select>
+                                </Col>
+                                <Col xs={12} md={4}>
                                     <div className="text-muted text-center text-md-start">
                                         {intl.formatMessage({ id: "cash-advance-identity.dashboard.showing" })}: {filteredIdentities.length} {intl.formatMessage({ id: "cash-advance-identity.dashboard.of" })} {totalIdentities}
                                     </div>
                                 </Col>
+                                {/* <Col xs={6} md={3}>
+                                    <div className="text-muted text-center text-md-start">
+                                        {intl.formatMessage({ id: "cash-advance-identity.dashboard.showing" })}: {filteredIdentities.length} {intl.formatMessage({ id: "cash-advance-identity.dashboard.of" })} {totalIdentities}
+                                    </div>
+                                </Col> */}
                             </Row>
                         </Card.Body>
                     </Card>
@@ -247,18 +287,34 @@ const CashAdvanceIdentityDashboard = (props) => {
             <Row>
                 {filteredIdentities.map((identity) => (
                     <Col md={6} lg={4} key={identity.id} className="mb-4">
-                        <Card className="h-100">
-                            <Card.Header className="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 className="mb-0">{identity.name}</h6>
-                                    {identity.employee_id && (
-                                        <small className="text-muted">ID: {identity.employee_id}</small>
-                                    )}
+                        <Card className={`h-100 ${!identity.is_active ? 'border-secondary' : ''}`}>
+                            <Card.Header className="w-100 d-flex justify-content-start align-items-start flex-column gap-2">
+                                <Button
+                                    variant="outline-warning"
+                                    size="sm"
+                                    onClick={() => navigate(`/user/cash-advance-identities/edit/${identity.id}`)}
+                                    title={getFormattedMessage("cash-advance-identity.edit.title")}
+                                >
+                                    <FontAwesomeIcon icon={faEdit} className="me-1" />
+                                    {getFormattedMessage("globally.edit.label")}
+                                </Button>
+                                <div className="w-100 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 className="mb-0">{identity.name}</h6>
+                                        {identity.employee_id && (
+                                            <small className="text-muted">ID: {identity.employee_id}</small>
+                                        )}
+                                    </div>
+                                    <div className="d-flex gap-2">
+                                        <Badge bg={identity.is_active ? 'success' : 'secondary'}>
+                                            {identity.is_active ? getFormattedMessage("cash-advance-identity.status.active") : getFormattedMessage("cash-advance-identity.status.inactive")}
+                                        </Badge>
+                                        <Badge bg={getTypeBadgeColor(identity.type)}>
+                                            {identity.type === 'employee' ? getFormattedMessage("cash-advance-identity.input.type.employee") :
+                                            identity.type === 'contractor' ? getFormattedMessage("cash-advance-identity.input.type.contractor") : getFormattedMessage("cash-advance-identity.input.type.other")}
+                                        </Badge>
+                                    </div>
                                 </div>
-                                <Badge bg={getTypeBadgeColor(identity.type)}>
-                                    {identity.type === 'employee' ? getFormattedMessage("cash-advance-identity.input.type.employee") : 
-                                     identity.type === 'contractor' ? getFormattedMessage("cash-advance-identity.input.type.contractor") : getFormattedMessage("cash-advance-identity.input.type.other")}
-                                </Badge>
                             </Card.Header>
                             <Card.Body>
                                 <div className="mb-3">
@@ -303,18 +359,21 @@ const CashAdvanceIdentityDashboard = (props) => {
                                 </div>
                             </Card.Body>
                             <Card.Footer className="d-flex justify-content-between">
-                                <Button
-                                    variant="outline-primary"
-                                    size="sm"
-                                    onClick={() => handleIdentitySelect(identity)}
-                                >
-                                    <FontAwesomeIcon icon={faList} className="me-1" />
-                                    {getFormattedMessage("cash-advance-identity.dashboard.view_cash_advances")}
-                                </Button>
+                                <div className="btn-group" role="group">
+                                    <Button
+                                        variant="outline-primary"
+                                        size="sm"
+                                        onClick={() => handleIdentitySelect(identity)}
+                                    >
+                                        <FontAwesomeIcon icon={faList} className="me-1" />
+                                        {getFormattedMessage("cash-advance-identity.dashboard.view_cash_advances")}
+                                    </Button>
+                                </div>
                                 <Button
                                     variant="outline-success"
                                     size="sm"
                                     onClick={() => navigate(`/user/cash-advances/create?identity_id=${identity.id}`)}
+                                    disabled={!identity.is_active}
                                 >
                                     <FontAwesomeIcon icon={faPlus} className="me-1" />
                                     {getFormattedMessage("cash-advance.create.title")}
@@ -553,7 +612,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                                             <Button
                                                                                 variant="outline-danger"
                                                                                 size="sm"
-                                                                                onClick={() => navigate(`/user/cash-advances/delete/${cashAdvance.id}`)}
+                                                                                onClick={() => onDeleteCashAdvance(cashAdvance)}
                                                                                 title={getFormattedMessage("globally.delete.label")}
                                                                                 className="d-none d-sm-inline-flex align-items-center justify-content-center"
                                                                                 style={{ minWidth: '40px', minHeight: '40px' }}
@@ -592,6 +651,7 @@ const CashAdvanceIdentityDashboard = (props) => {
                                                 <Button
                                                     variant="primary"
                                                     onClick={() => navigate(`/user/cash-advances/create?identity_id=${selectedIdentity.id}`)}
+                                                    disabled={!selectedIdentity.is_active}
                                                 >
                                                     <FontAwesomeIcon icon={faPlus} className="me-2" />
                                                     {getFormattedMessage("cash-advance.create.first")}
@@ -640,6 +700,14 @@ const CashAdvanceIdentityDashboard = (props) => {
                     onPaymentSuccess={handlePaymentSuccess}
                 />
             )}
+
+            {/* Delete Modal */}
+            <DeleteCashAdvance
+                deleteModel={deleteModel}
+                onClickDeleteModel={onClickDeleteModel}
+                onDelete={onDelete}
+                onDeleteSuccess={handleDeleteSuccess}
+            />
         </MasterLayout>
     );
 };
@@ -655,4 +723,4 @@ const mapStateToProps = (state) => {
     };
 };
 
-export default connect(mapStateToProps, { fetchIdentitiesWithSummary, fetchCashAdvances })(CashAdvanceIdentityDashboard);
+export default connect(mapStateToProps, { fetchIdentitiesWithSummary, fetchCashAdvances, deleteCashAdvance })(CashAdvanceIdentityDashboard);

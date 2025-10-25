@@ -5,8 +5,9 @@ import moment from "moment";
 import MasterLayout from "../MasterLayout";
 import { useNavigate } from "react-router-dom";
 import ReactDataTable from "../../shared/table/ReactDataTable";
-import { fetchCashAdvanceIdentities } from "../../store/action/cashAdvanceIdentityAction";
+import { fetchCashAdvanceIdentities, editCashAdvanceIdentity } from "../../store/action/cashAdvanceIdentityAction";
 import DeleteCashAdvanceIdentity from "./DeleteCashAdvanceIdentity";
+import EditCashAdvanceIdentityModal from "./EditCashAdvanceIdentityModal";
 import TabTitle from "../../shared/tab-title/TabTitle";
 import {
     currencySymbolHandling,
@@ -21,6 +22,7 @@ import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
 import { Permissions } from "../../constants";
 import ReactSelect from "../../shared/select/reactSelect";
 import { useIntl } from "react-intl";
+import { toast } from "react-toastify";
 
 const CashAdvanceIdentities = (props) => {
     const {
@@ -34,6 +36,10 @@ const CashAdvanceIdentities = (props) => {
     } = props;
     const [deleteModel, setDeleteModel] = useState(false);
     const [isDelete, setIsDelete] = useState(null);
+    const [editModal, setEditModal] = useState(false);
+    const [selectedIdentity, setSelectedIdentity] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
     const filtersRef = useRef({});
     const intl = useIntl();
@@ -67,6 +73,34 @@ const CashAdvanceIdentities = (props) => {
     const onClickDeleteModel = (isDelete = null) => {
         setDeleteModel(!deleteModel);
         setIsDelete(isDelete);
+    };
+
+    const onClickEditModel = (identity = null) => {
+        console.log("Edit button clicked for identity:", identity);
+        setEditModal(!editModal);
+        setSelectedIdentity(identity);
+        setError(null);
+    };
+
+    const handleSaveIdentity = async (formData) => {
+        setIsSaving(true);
+        setError(null);
+
+        try {
+            console.log("Saving identity data:", formData);
+            await editCashAdvanceIdentity(selectedIdentity.id, formData, navigate);
+            setEditModal(false);
+            setSelectedIdentity(null);
+            // Refresh the list
+            fetchCashAdvanceIdentities();
+        } catch (err) {
+            console.error("Error saving identity:", err);
+            const errorMessage = err.response?.data?.message || 'Terjadi kesalahan saat menyimpan';
+            setError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const onChange = (filter) => {
@@ -177,19 +211,58 @@ const CashAdvanceIdentities = (props) => {
         },
         {
             name: getFormattedMessage("react-data-table.action.column.label"),
-            cell: (row) => (
-                <ActionButton
-                    item={row}
-                    goToEditPage={getPermission().isUpdate && getPermission().isUpdate}
-                    goToViewPage={getPermission().isRead && getPermission().isRead}
-                    isViewMode={true}
-                    isEditMode={true}
-                    isDeleteMode={getPermission().isDelete && getPermission().isDelete}
-                    onClickDeleteModel={onClickDeleteModel}
-                    editUrl={`/user/cash-advance-identities/${row.id}/edit`}
-                    viewUrl={`/user/cash-advance-identities/${row.id}`}
-                />
-            ),
+            cell: (row) => {
+                const permissions = getPermission();
+                console.log("Permissions for row:", row.id, permissions);
+
+                return (
+                    <div className="d-flex align-items-center">
+                        {/* Tombol Lihat Cash Advances */}
+                        {permissions.isRead && (
+                            <button
+                                className="btn btn-sm btn-outline-primary me-2"
+                                onClick={() => navigate(`/user/cash-advance-identities/${row.id}`)}
+                                title={getFormattedMessage("globally.view.tooltip.label")}
+                                aria-label="Lihat Cash Advances"
+                            >
+                                <i className="bi bi-eye me-1"></i>
+                                Lihat
+                            </button>
+                        )}
+
+                        {/* Tombol Ubah - ditempatkan di sebelah kiri tombol Lihat */}
+                        {permissions.isUpdate && (
+                            <button
+                                className="btn btn-sm btn-outline-warning me-2"
+                                onClick={() => onClickEditModel(row)}
+                                title="Ubah Identitas Cash Advance"
+                                aria-label="Ubah Identitas"
+                            >
+                                <i className="bi bi-pencil me-1"></i>
+                                Ubah
+                            </button>
+                        )}
+
+                        {/* Tombol Hapus */}
+                        {permissions.isDelete && (
+                            <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => onClickDeleteModel(row)}
+                                title={getFormattedMessage("globally.delete.tooltip.label")}
+                                aria-label="Hapus Identitas"
+                            >
+                                <i className="bi bi-trash me-1"></i>
+                                Hapus
+                            </button>
+                        )}
+
+                        {/* Jika tidak ada permission, tampilkan tanda - */}
+                        {!permissions.isRead && !permissions.isUpdate && !permissions.isDelete && (
+                            <span className="text-muted small">-</span>
+                        )}
+                    </div>
+                );
+            },
         },
     ];
 
@@ -250,6 +323,18 @@ const CashAdvanceIdentities = (props) => {
                 show={deleteModel}
                 onDeleteModel={onClickDeleteModel}
                 onDelete={isDelete}
+            />
+            <EditCashAdvanceIdentityModal
+                show={editModal}
+                onHide={() => {
+                    setEditModal(false);
+                    setSelectedIdentity(null);
+                    setError(null);
+                }}
+                identity={selectedIdentity}
+                onSave={handleSaveIdentity}
+                isSaving={isSaving}
+                error={error}
             />
         </MasterLayout>
     );

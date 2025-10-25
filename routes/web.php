@@ -27,6 +27,21 @@ Route::any('/app', function () {
     return view('web.app');
 })->name('app');
 
+// Cash Advance Edit Route - Fix for blank page issue
+Route::middleware(['auth'])->group(function () {
+    Route::middleware(['permission:cash-advance.update'])->group(function () {
+        Route::get('/user/cash-advances/edit/{id}', function () {
+            return view('web.app'); // Return SPA container that loads React bundle
+        })->name('cash-advances.edit');
+    });
+
+    Route::middleware(['permission:cash-advance-identity.update'])->group(function () {
+        Route::get('/user/cash-advance-identities/edit/{id}', function () {
+            return view('web.app'); // Return SPA container that loads React bundle
+        })->name('cash-advance-identities.edit');
+    });
+});
+
 Route::get('/email/verify/{id}', [AuthController::class, 'emailVerification'])
     ->middleware(['signed'])
     ->name('verification.verify');

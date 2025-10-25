@@ -30,7 +30,7 @@ let persistor = persistStore(store)
 ReactDOM.render(
     <Provider store={store}>
         <PersistGate persistor={persistor}>
-            <HashRouter>
+            <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <App />
             </HashRouter>
         </PersistGate>

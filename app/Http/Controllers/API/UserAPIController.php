@@ -160,6 +160,27 @@ class UserAPIController extends AppBaseController
         return $this->sendResponse($user->language, 'Language Updated Successfully');
     }
 
+    public function updateLocale(Request $request): JsonResponse
+    {
+        $preferredLocale = $request->get('preferred_locale');
+        $user = Auth::user();
+
+        // Validate locale
+        $availableLocales = ['id', 'en', 'ar', 'cn', 'fr', 'gr', 'tr', 'vi'];
+        if (!in_array($preferredLocale, $availableLocales)) {
+            return $this->sendError('Invalid locale specified');
+        }
+
+        $user->update([
+            'preferred_locale' => $preferredLocale,
+        ]);
+
+        return $this->sendResponse([
+            'preferred_locale' => $user->preferred_locale,
+            'message' => 'Preferred locale updated successfully'
+        ], 'Preferred locale updated successfully');
+    }
+
     public function config(Request $request)
     {
         $user = Auth::user();

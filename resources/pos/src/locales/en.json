@@ -90,6 +90,7 @@
     "globally.save-btn": "Save",
     "globally.cancel-btn": "Cancel",
     "globally.edit-btn": "Edit",
+    "globally.edit.label": "Edit",
     "globally.submit-btn": "Submit",
     "globally.delete.tooltip.label": "Delete",
     "globally.view.tooltip.label": "View",
@@ -292,6 +293,8 @@
     "cash-advance.success.create.message": "Cash advance created successfully",
     "cash-advance.success.edit.message": "Cash advance updated successfully",
     "cash-advance.success.delete.message": "Cash advance deleted successfully",
+    "cash-advance.identity_inactive": "Cannot create cash advance for inactive identity.",
+    "cash-advance.identity_not_found": "The selected identity was not found.",
     "cash-advance.status.outstanding": "Outstanding",
     "cash-advance.status.paid": "Paid Off",
     "cash-advance.filter.status": "Status",
@@ -365,6 +368,9 @@
     "cash-advance-identity.summary.outstanding": "Outstanding",
     "cash-advance-identity.dashboard.quick_actions": "Quick Actions",
     "cash-advance-identity.filter.all_types": "All Types",
+    "cash-advance-identity.filter.all_status": "All Status",
+    "cash-advance-identity.filter.active_only": "Active Only",
+    "cash-advance-identity.filter.inactive_only": "Inactive Only",
     "cash-advance-identity.dashboard.showing": "Showing",
     "cash-advance-identity.dashboard.of": "of",
     "cash-advance-identity.dashboard.view_cash_advances": "View Cash Advances",
@@ -1187,5 +1193,6 @@
     "payment.method.deleted.success.message":"Payment method deleted successfully",
     "cash-advance-identity.input.identity_id.validate.label": "Cash Advance Identity is required",
     "cash-advance-identity.input.identity_id.placeholder.label": "Select identity...",
-    "cash-advance-identity.input.employee_id.auto_generated": "Auto generated"
+    "cash-advance-identity.input.employee_id.auto_generated": "Auto generated",
+    "cash-advance-identity.dashboard.loading": "Loading..."
 }

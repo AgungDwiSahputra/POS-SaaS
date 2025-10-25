@@ -234,10 +234,12 @@
         'paid' => 'Lunas',
         'pending' => 'Belum Lunas',
       ),
-      'payment' => 
+      'payment' =>
       array (
         'success' => 'Pembayaran berhasil dicatat.',
       ),
+      'identity_inactive' => 'Tidak dapat membuat uang muka untuk identitas yang tidak aktif.',
+      'identity_not_found' => 'Identitas yang dipilih tidak ditemukan.',
     ),
     'cash_advance_identity' => 
     array (
@@ -296,7 +298,21 @@
   'sales_payments' => 'Pembayaran Penjualan',
   'email' => 'Email',
   'plan' => 'Plan',
-  'front_web' => 
+  'language' => [
+      'selector' => [
+          'label' => 'Bahasa',
+          'placeholder' => 'Pilih Bahasa',
+      ],
+      'current' => 'Bahasa Saat Ini',
+      'change' => 'Ubah Bahasa',
+      'save_preference' => 'Simpan Preferensi Bahasa',
+      'detection' => [
+          'auto' => 'Deteksi Otomatis',
+          'browser' => 'Bahasa Browser',
+          'manual' => 'Pilihan Manual',
+      ],
+  ],
+  'front_web' =>
   array (
     'home' => 'Beranda',
     'service' => 'Layanan',
@@ -390,7 +406,63 @@
 
   'cash_advance_identity' => [
       'title' => 'Identitas Uang Muka',
+      'titles' => [
+          'index' => 'Identitas Uang Muka',
+          'create' => 'Buat Identitas',
+          'edit' => 'Edit Identitas',
+          'show' => 'Detail Identitas',
+          'dashboard' => 'Dashboard Identitas',
+      ],
       'input' => [
+          'name' => [
+              'label' => 'Nama',
+              'placeholder' => 'Masukkan nama lengkap',
+              'validate' => [
+                  'label' => 'Nama wajib diisi',
+              ]
+          ],
+          'email' => [
+              'label' => 'Email',
+              'placeholder' => 'Masukkan alamat email',
+              'validate' => [
+                  'label' => 'Masukkan email yang valid',
+              ]
+          ],
+          'phone' => [
+              'label' => 'Telepon',
+              'placeholder' => 'Masukkan nomor telepon',
+              'validate' => 'Nomor telepon wajib diisi',
+          ],
+          'employee_id' => [
+              'label' => 'ID Karyawan',
+              'placeholder' => 'Masukkan ID karyawan',
+          ],
+          'department' => [
+              'label' => 'Departemen',
+              'placeholder' => 'Masukkan departemen',
+          ],
+          'address' => [
+              'label' => 'Alamat',
+              'placeholder' => 'Masukkan alamat',
+          ],
+          'date_of_birth' => [
+              'label' => 'Tanggal Lahir',
+              'placeholder' => 'Pilih tanggal lahir',
+          ],
+          'type' => [
+              'label' => 'Tipe',
+              'placeholder' => 'Pilih tipe',
+              'validate' => [
+                  'label' => 'Tipe wajib diisi',
+              ]
+          ],
+          'status' => [
+              'label' => 'Status',
+          ],
+          'notes' => [
+              'label' => 'Catatan',
+              'placeholder' => 'Masukkan catatan',
+          ],
           'identity_id' => [
               'label' => 'Identitas',
               'placeholder' => [
@@ -400,6 +472,102 @@
                   'label' => 'Identitas wajib diisi',
               ],
           ],
+      ],
+      'type' => [
+          'employee' => 'Karyawan',
+          'contractor' => 'Kontraktor',
+          'other' => 'Lainnya',
+      ],
+      'status' => [
+          'active' => 'Aktif',
+          'inactive' => 'Tidak Aktif',
+      ],
+      'summary' => [
+          'total_identities' => 'Total Identitas',
+          'active_identities' => 'Identitas Aktif',
+          'inactive_identities' => 'Identitas Tidak Aktif',
+          'total_amount' => 'Total Jumlah',
+          'outstanding' => 'Outstanding',
+          'total_advances' => 'Total Uang Muka',
+          'total_paid' => 'Total Dibayar',
+      ],
+      'dashboard' => [
+          'title' => 'Dashboard Identitas',
+          'search_placeholder' => 'Cari identitas...',
+          'filter' => [
+              'all_types' => 'Semua Tipe',
+              'all_status' => 'Semua Status',
+              'active_only' => 'Hanya Aktif',
+              'inactive_only' => 'Hanya Tidak Aktif',
+          ],
+          'showing' => 'Menampilkan',
+          'of' => 'dari',
+          'no_identities' => 'Tidak ada identitas ditemukan',
+          'no_identities_description' => 'Mulai dengan membuat identitas pertama Anda',
+          'view_cash_advances' => 'Lihat Uang Muka',
+          'create_cash_advance' => 'Buat Uang Muka',
+          'back_to_identities' => 'Kembali ke Identitas',
+          'go_to_identities' => 'Pergi ke Identitas',
+          'select_identity' => 'Pilih Identitas',
+          'select_identity_description' => 'Silakan pilih identitas untuk melihat uang muka',
+          'no_cash_advances_found' => 'Tidak ada uang muka ditemukan',
+          'no_cash_advances_description' => 'Identitas ini belum memiliki uang muka',
+          'create_first' => 'Buat Uang Muka Pertama',
+          'cash_advances_for' => 'Uang Muka untuk',
+      ],
+      'filter' => [
+          'type' => 'Tipe',
+          'status' => 'Status',
+          'department' => 'Departemen',
+          'all' => 'Semua',
+      ],
+      'table' => [
+          'name' => 'Nama',
+          'type' => 'Tipe',
+          'department' => 'Departemen',
+          'contact' => 'Kontak',
+          'total_advances' => 'Total Uang Muka',
+          'outstanding' => 'Outstanding',
+          'status' => 'Status',
+          'actions' => 'Aksi',
+          'empty' => 'Tidak ada identitas ditemukan',
+          'loading' => 'Memuat identitas...',
+      ],
+      'form' => [
+          'personal_info' => 'Informasi Pribadi',
+          'contact_info' => 'Informasi Kontak',
+          'employment_info' => 'Informasi Pekerjaan',
+          'additional_info' => 'Informasi Tambahan',
+      ],
+      'buttons' => [
+          'create' => 'Buat Identitas',
+          'edit' => 'Edit Identitas',
+          'save' => 'Simpan Identitas',
+          'cancel' => 'Batal',
+          'view' => 'Lihat',
+          'delete' => 'Hapus',
+          'activate' => 'Aktifkan',
+          'deactivate' => 'Nonaktifkan',
+      ],
+      'messages' => [
+          'created' => 'Identitas berhasil dibuat',
+          'updated' => 'Identitas berhasil diperbarui',
+          'deleted' => 'Identitas berhasil dihapus',
+          'activated' => 'Identitas berhasil diaktifkan',
+          'deactivated' => 'Identitas berhasil dinonaktifkan',
+          'not_found' => 'Identitas tidak ditemukan',
+      ],
+      'validation' => [
+          'name_required' => 'Nama wajib diisi',
+          'email_valid' => 'Masukkan alamat email yang valid',
+          'phone_required' => 'Nomor telepon wajib diisi',
+          'type_required' => 'Tipe wajib diisi',
+      ],
+      'errors' => [
+          'unauthorized' => 'Anda tidak memiliki izin untuk melakukan tindakan ini.',
+          'not_found' => 'Identitas cash advance tidak ditemukan atau sudah dihapus.',
+          'loading_failed' => 'Gagal memuat data cash advance identity. Silakan coba lagi.',
+          'identity_not_found' => 'Identitas yang dipilih tidak ditemukan dalam daftar identitas aktif.',
       ],
   ],
 

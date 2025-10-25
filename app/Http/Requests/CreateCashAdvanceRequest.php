@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\CashAdvance;
+use App\Models\CashAdvanceIdentity;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateCashAdvanceRequest extends FormRequest
 {
@@ -22,6 +24,22 @@ class CreateCashAdvanceRequest extends FormRequest
      */
     public function rules(): array
     {
-        return CashAdvance::$rules;
+        $rules = CashAdvance::$rules;
+        
+        // Add custom validation for identity_id to check if identity is active
+        $rules['identity_id'] = [
+            'required',
+            'exists:cash_advance_identities,id',
+            function ($attribute, $value, $fail) {
+                $identity = CashAdvanceIdentity::find($value);
+                if (!$identity) {
+                    $fail(__('messages.cash_advance.identity_not_found'));
+                } elseif (!$identity->is_active) {
+                    $fail(__('messages.cash_advance.identity_inactive'));
+                }
+            },
+        ];
+
+        return $rules;
     }
 }

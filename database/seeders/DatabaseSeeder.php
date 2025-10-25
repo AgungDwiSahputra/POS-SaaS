@@ -20,5 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call(DefaultSettingSeeder::class);
         $this->call(DefaultFeaturesSeeder::class);
         $this->call(GenerateCrudPermissionsSeeder::class);
+        $this->call(SetDefaultUserPreferredLocaleSeeder::class);
     }
 }

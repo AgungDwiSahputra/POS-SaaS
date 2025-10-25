@@ -114,7 +114,7 @@ class CashAdvanceIdentityRepository extends BaseRepository
      */
     public function getActiveIdentitiesForSelect()
     {
-        return $this->model->where('is_active', true)
+        return $this->model->withoutGlobalScopes()->where('is_active', true)
             ->orderBy('name')
             ->get()
             ->map(function ($identity) {

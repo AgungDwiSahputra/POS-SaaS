@@ -5,11 +5,14 @@ import { deleteCashAdvance } from "../../store/action/cashAdvanceAction";
 import { getFormattedMessage } from "../../shared/sharedMethod";
 
 const DeleteCashAdvance = (props) => {
-    const { deleteCashAdvance, onDelete, deleteModel, onClickDeleteModel } = props;
+    const { deleteCashAdvance, onDelete, deleteModel, onClickDeleteModel, onDeleteSuccess } = props;
 
     const deleteClick = () => {
         deleteCashAdvance(onDelete.id);
         onClickDeleteModel(false);
+        if (onDeleteSuccess) {
+            onDeleteSuccess();
+        }
     };
 
     return (

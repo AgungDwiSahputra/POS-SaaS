@@ -15,6 +15,7 @@ const LanguageModel = (props) => {
     const [languageValue, setLanguageValue] = useState({
         language: ''
     })
+    const [isLoading, setIsLoading] = useState(false)
 
     const [isoCodeValue, setISOCodeValue] = useState({
         isoCode: '',
@@ -53,16 +54,31 @@ const LanguageModel = (props) => {
         setLanguageValue(inputs => ({ ...inputs, language: obj }));
     };
 
+
     useEffect(() => {
         const getLanguage = fetchAllLanguages.filter(items => items?.attributes?.name === languageValue.language.label)
         setISOCodeValue(inputs => ({ ...inputs, isoCode: getLanguage[0]?.attributes?.iso_code, language_id: getLanguage[0]?.id }))
     }, [languageValue.language])
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
-        updateLanguage({ 'language': isoCodeValue.isoCode }, isoCodeValue.language_id);
-        onClickLanguageModel(false)
+        setIsLoading(true);
+
+        try {
+            // Update language (existing functionality)
+            if (isoCodeValue.language_id) {
+                await updateLanguage({ 'language': isoCodeValue.isoCode }, isoCodeValue.language_id);
+            }
+
+
+            onClickLanguageModel(false);
+        } catch (error) {
+            console.error('Error updating language:', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
+
 
     return (
         <Modal show={languageModel}
@@ -80,21 +96,27 @@ const LanguageModel = (props) => {
                 <Modal.Body>
                     <div className='row'>
                         <div className='col-md-12 mb-5'>
-                            <ReactSelect title={getFormattedMessage("language.title")}
+                            <ReactSelect
+                                title={getFormattedMessage("language.title")}
                                 defaultValue={languageValue.language}
                                 value={languageValue?.language}
                                 multiLanguageOption={itemsValue}
-                                onChange={onLanguageChange} />
+                                onChange={onLanguageChange}
+                            />
                         </div>
                     </div>
                 </Modal.Body>
             </Form>
             <Modal.Footer children='justify-content-start' className='pt-0'>
                 <button type="button" className="btn btn-primary m-0"
-                    onClick={(event) => onSubmit(event)}>
-                    {placeholderText('globally.save-btn')}</button>
+                    onClick={(event) => onSubmit(event)}
+                    disabled={isLoading}>
+                    {isLoading ? 'Saving...' : placeholderText('globally.save-btn')}
+                </button>
                 <button type="button" className="btn btn-secondary my-0 ms-5 me-0" data-bs-dismiss="modal"
-                    onClick={() => onClickLanguageModel(false)}>{getFormattedMessage('globally.cancel-btn')}
+                    onClick={() => onClickLanguageModel(false)}
+                    disabled={isLoading}>
+                    {getFormattedMessage('globally.cancel-btn')}
                 </button>
             </Modal.Footer>
         </Modal>

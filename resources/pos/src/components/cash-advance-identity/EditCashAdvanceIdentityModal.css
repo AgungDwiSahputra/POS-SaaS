@@ -1,0 +1,287 @@
+/* Edit Cash Advance Identity Modal Styles */
+.cash-advance-identity-modal .modal-dialog {
+    max-width: 800px;
+    margin: 2rem auto;
+}
+
+.cash-advance-identity-modal .modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.cash-advance-identity-modal .modal-backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    animation: backdropFadeIn 0.3s ease-out;
+}
+
+.cash-advance-identity-modal .modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px 12px 0 0;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.cash-advance-identity-modal .modal-header .btn-close {
+    filter: invert(1);
+    opacity: 0.8;
+}
+
+.cash-advance-identity-modal .modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+.cash-advance-identity-modal .modal-body {
+    padding: 2rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.cash-advance-identity-modal .modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 12px 12px;
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+}
+
+/* Form styling */
+.cash-advance-identity-modal .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.cash-advance-identity-modal .form-control,
+.cash-advance-identity-modal .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.cash-advance-identity-modal .form-control:focus,
+.cash-advance-identity-modal .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.cash-advance-identity-modal .form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.cash-advance-identity-modal .form-control.is-valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Switch styling */
+.cash-advance-identity-modal .form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.cash-advance-identity-modal .form-check-input:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Button styling */
+.cash-advance-identity-modal .btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.cash-advance-identity-modal .btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.cash-advance-identity-modal .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.cash-advance-identity-modal .btn-primary:disabled {
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
+.cash-advance-identity-modal .btn-secondary {
+    background: #6c757d;
+    border: none;
+}
+
+.cash-advance-identity-modal .btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* Alert styling */
+.cash-advance-identity-modal .alert {
+    border-radius: 8px;
+    border: none;
+    font-size: 0.875rem;
+}
+
+.cash-advance-identity-modal .alert-warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+/* Loading spinner */
+.cash-advance-identity-modal .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .cash-advance-identity-modal .modal-dialog {
+        margin: 1rem;
+        max-width: calc(100vw - 2rem);
+    }
+
+    .cash-advance-identity-modal .modal-body {
+        padding: 1rem;
+        max-height: 60vh;
+    }
+
+    .cash-advance-identity-modal .modal-header,
+    .cash-advance-identity-modal .modal-footer {
+        padding: 1rem;
+    }
+
+    .cash-advance-identity-modal .btn-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .cash-advance-identity-modal .btn-group .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .cash-advance-identity-modal .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100vw - 1rem);
+    }
+
+    .cash-advance-identity-modal .row > * {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animations */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes backdropFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Custom scrollbar for modal body */
+.cash-advance-identity-modal .modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cash-advance-identity-modal .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.cash-advance-identity-modal .modal-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.cash-advance-identity-modal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Form validation indicators */
+.cash-advance-identity-modal .text-danger {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.cash-advance-identity-modal .text-muted {
+    font-size: 0.8rem;
+}
+
+/* Status indicator */
+.cash-advance-identity-modal .form-check-label {
+    font-weight: 500;
+}
+
+/* Unsaved changes indicator */
+.cash-advance-identity-modal .alert-warning {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Focus states for accessibility */
+.cash-advance-identity-modal .form-control:focus,
+.cash-advance-identity-modal .form-select:focus,
+.cash-advance-identity-modal .btn:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .cash-advance-identity-modal .modal-content {
+        border: 2px solid #000;
+    }
+
+    .cash-advance-identity-modal .form-control,
+    .cash-advance-identity-modal .form-select {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .cash-advance-identity-modal .modal-content,
+    .cash-advance-identity-modal .modal-backdrop,
+    .cash-advance-identity-modal .btn,
+    .cash-advance-identity-modal .form-control {
+        animation: none !important;
+        transition: none !important;
+    }
+}

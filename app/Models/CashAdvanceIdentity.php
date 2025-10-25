@@ -49,6 +49,7 @@ class CashAdvanceIdentity extends BaseModel
         'date_of_birth',
         'type',
         'is_active',
+        'deactivated_at',
         'notes',
         'created_by',
     ];
@@ -127,6 +128,22 @@ class CashAdvanceIdentity extends BaseModel
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by', 'id')->withoutGlobalScope('tenant');
+    }
+
+    /**
+     * Scope for active identities
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope for inactive identities
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
     }
 
     /**

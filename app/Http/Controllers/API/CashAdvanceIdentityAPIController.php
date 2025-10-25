@@ -25,14 +25,27 @@ class CashAdvanceIdentityAPIController extends AppBaseController
         Log::info('CashAdvanceIdentityAPI: Starting index request', [
             'user_id' => auth()->id(),
             'ip' => $request->ip(),
-            'user_agent' => $request->userAgent()
+            'user_agent' => $request->userAgent(),
+            'status_filter' => $request->get('status')
         ]);
 
-        $cashAdvanceIdentities = CashAdvanceIdentity::withoutGlobalScopes()->get();
+        $status = $request->get('status', 'active');
+        $query = CashAdvanceIdentity::withoutGlobalScopes();
+
+        // Apply status filtering
+        if ($status === 'active') {
+            $query->active();
+        } elseif ($status === 'inactive') {
+            $query->inactive();
+        }
+        // For 'all' status, no additional filtering needed
+
+        $cashAdvanceIdentities = $query->get();
 
         Log::info('CashAdvanceIdentityAPI: Index request completed', [
             'user_id' => auth()->id(),
             'count' => $cashAdvanceIdentities->count(),
+            'status_filter' => $status,
             'execution_time' => microtime(true)
         ]);
 
@@ -132,6 +145,16 @@ class CashAdvanceIdentityAPIController extends AppBaseController
         }
 
         $input = $request->all();
+
+        // Handle deactivated_at timestamp when status changes
+        if (isset($input['is_active'])) {
+            $input['is_active'] = (bool) $input['is_active'];
+            if (!$input['is_active']) {
+                $input['deactivated_at'] = now();
+            } else {
+                $input['deactivated_at'] = null;
+            }
+        }
 
         $cashAdvanceIdentity = $this->cashAdvanceIdentityRepository->update($input, $id);
 
@@ -235,16 +258,26 @@ class CashAdvanceIdentityAPIController extends AppBaseController
             'user_id' => auth()->id()
         ]);
 
-        $identities = $this->cashAdvanceIdentityRepository->getActiveIdentitiesForSelect();
+        try {
+            $identities = $this->cashAdvanceIdentityRepository->getActiveIdentitiesForSelect();
 
-        Log::info('CashAdvanceIdentityAPI: getActiveIdentitiesForSelect request completed', [
-            'user_id' => auth()->id(),
-            'active_identities_count' => $identities->count()
-        ]);
+            Log::info('CashAdvanceIdentityAPI: getActiveIdentitiesForSelect request completed', [
+                'user_id' => auth()->id(),
+                'active_identities_count' => $identities->count()
+            ]);
 
-        return $this->sendResponse(
-            $identities->toArray(),
-            __('messages.cash_advance_identity.success.active_retrieved.message')
-        );
+            return $this->sendResponse(
+                $identities->toArray(),
+                __('messages.cash_advance_identity.success.active_retrieved.message')
+            );
+        } catch (\Exception $e) {
+            Log::error('CashAdvanceIdentityAPI: getActiveIdentitiesForSelect request failed', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return $this->sendError($e->getMessage(), 500);
+        }
     }
 }

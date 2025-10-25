@@ -32,7 +32,10 @@ const TodaySalePurchaseCount = (props) => {
     } = props;
     const navigate = useNavigate();
 
-    const [selectDate, setSelectDate] = useState();
+    const [selectDate, setSelectDate] = useState({
+        start_date: moment().locale("en").startOf("month").format(dateFormat.NATIVE),
+        end_date: moment().locale("en").format(dateFormat.NATIVE)
+    });
     const startMonth = moment().locale("en").startOf("month").format(dateFormat.NATIVE);
     const today = moment().locale("en").format(dateFormat.NATIVE);
 

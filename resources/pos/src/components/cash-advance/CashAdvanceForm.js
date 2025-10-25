@@ -98,6 +98,13 @@ const CashAdvanceForm = (props) => {
                     ...prev,
                     identity_id: identityIdFromUrl
                 }));
+            } else if (identityIdFromUrl && !identityExists) {
+                // Identity from URL doesn't exist in active identities
+                console.warn('Identity from URL not found in active identities:', identityIdFromUrl);
+                setErrors(prev => ({
+                    ...prev,
+                    identity_id: getFormattedMessage("cash-advance-identity.errors.identity_not_found")
+                }));
             }
         }
     }, [identityIdFromUrl, activeIdentitiesForSelect, cashAdvanceValue.identity_id]);

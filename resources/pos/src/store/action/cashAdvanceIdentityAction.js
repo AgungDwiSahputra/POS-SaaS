@@ -14,10 +14,21 @@ const notifyAndStopLoading = (dispatch, error, isLoading) => {
     if (isLoading) {
         dispatch(setLoading(false));
     }
+    
+    let errorMessage = error.message;
+    
+    // Handle validation errors
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        errorMessage = Object.values(errors).flat().join(', ');
+    } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+    }
+    
     dispatch(
         addToast({
             type: toastType.ERROR,
-            message: error.response?.data?.message || error.message,
+            message: errorMessage,
         })
     );
 };
@@ -33,7 +44,7 @@ export const fetchCashAdvanceIdentities = (filter) => {
             .then((response) => {
                 dispatch({
                     type: cashAdvanceIdentityActionType.FETCH_CASH_ADVANCE_IDENTITIES,
-                    payload: response.data.data,
+                    payload: response.data?.data || response.data,
                     totalRecord: response.data.meta?.total || response.data.data?.length || 0,
                     isLoading: false,
                     isCallFetchDataApi: true,
@@ -128,7 +139,7 @@ export const fetchCashAdvanceIdentity = (id) => {
             .then((response) => {
                 dispatch({
                     type: cashAdvanceIdentityActionType.FETCH_CASH_ADVANCE_IDENTITY,
-                    payload: [response.data.data],
+                    payload: [response.data?.data || response.data],
                     isLoading: false,
                 });
             })
@@ -146,7 +157,7 @@ export const fetchCashAdvanceIdentityWithHistory = (id) => {
             .then((response) => {
                 dispatch({
                     type: cashAdvanceIdentityActionType.FETCH_CASH_ADVANCE_IDENTITY,
-                    payload: [response.data.data],
+                    payload: [response.data?.data || response.data],
                     isLoading: false,
                 });
             })
@@ -163,17 +174,36 @@ export const fetchActiveIdentitiesForSelect = () => {
             .get("active-identities-for-select")
             .then((response) => {
                 console.log('Redux: Active identities fetched successfully:', {
-                    dataLength: response.data.data?.length || response.data?.length,
-                    data: response.data.data || response.data
+                    dataLength: response.data?.data?.length || response.data?.length,
+                    data: response.data?.data || response.data
                 });
+                
+                // Handle different response structures
+                let payload = response.data?.data || response.data;
+                
+                // If payload is an array but has no items, log warning
+                if (Array.isArray(payload) && payload.length === 0) {
+                    console.warn('Redux: No active identities found');
+                }
+                
                 dispatch({
                     type: cashAdvanceIdentityActionType.FETCH_ACTIVE_IDENTITIES_FOR_SELECT,
-                    payload: response.data.data || response.data,
+                    payload: payload,
                     isLoading: false,
                 });
             })
             .catch((error) => {
                 console.error('Redux: Error fetching active identities:', error);
+                
+                // Handle different error structures
+                let errorMessage = error.message;
+                if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error.response?.status === 422 && error.response?.data?.errors) {
+                    const errors = error.response.data.errors;
+                    errorMessage = Object.values(errors).flat().join(', ');
+                }
+                
                 notifyAndStopLoading(dispatch, error, false);
             });
     };
@@ -191,7 +221,7 @@ export const fetchIdentitiesWithSummary = (filter = {}) => {
             .then((response) => {
                 dispatch({
                     type: cashAdvanceIdentityActionType.FETCH_IDENTITIES_WITH_SUMMARY,
-                    payload: response.data.data || response.data,
+                    payload: response.data?.data || response.data,
                     isLoading: false,
                 });
             })

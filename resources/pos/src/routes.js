@@ -33,7 +33,6 @@ import EditExpense from "./components/expense/EditExpense";
 import CashAdvances from "./components/cash-advance/CashAdvances";
 import CreateCashAdvance from "./components/cash-advance/CreateCashAdvance";
 import EditCashAdvance from "./components/cash-advance/EditCashAdvance";
-import CashAdvanceIdentities from "./components/cash-advance-identity/CashAdvanceIdentities";
 import CreateCashAdvanceIdentity from "./components/cash-advance-identity/CreateCashAdvanceIdentity";
 import EditCashAdvanceIdentity from "./components/cash-advance-identity/EditCashAdvanceIdentity";
 import CashAdvanceIdentityDetail from "./components/cash-advance-identity/CashAdvanceIdentityDetail";
@@ -365,11 +364,6 @@ export const route = [
     {
         path: "cash-advance-identities",
         ele: <CashAdvanceIdentityDashboard />,
-        permission: Permissions.MANAGE_CASH_ADVANCES,
-    },
-    {
-        path: "cash-advance-identities/list",
-        ele: <CashAdvanceIdentities />,
         permission: Permissions.MANAGE_CASH_ADVANCES,
     },
     {

@@ -225,6 +225,8 @@ return [
             'payment' => [
                 'success' => 'Payment recorded successfully.',
             ],
+            'identity_inactive' => 'Cannot create cash advance for inactive identity.',
+            'identity_not_found' => 'The selected identity was not found.',
         ],
         'cash_advance_identity' => [
             'success' => [
@@ -318,7 +320,57 @@ return [
 
     'cash_advance_identity' => [
         'title' => 'Cash Advance Identities',
+        'titles' => [
+            'index' => 'Cash Advance Identities',
+            'create' => 'Create Identity',
+            'edit' => 'Edit Identity',
+            'show' => 'Identity Details',
+            'dashboard' => 'Identity Dashboard',
+        ],
         'input' => [
+            'name' => [
+                'label' => 'Name',
+                'placeholder' => 'Enter full name',
+                'validate' => 'Name is required',
+            ],
+            'email' => [
+                'label' => 'Email',
+                'placeholder' => 'Enter email address',
+                'validate' => 'Please enter a valid email',
+            ],
+            'phone' => [
+                'label' => 'Phone',
+                'placeholder' => 'Enter phone number',
+                'validate' => 'Phone number is required',
+            ],
+            'employee_id' => [
+                'label' => 'Employee ID',
+                'placeholder' => 'Enter employee ID',
+            ],
+            'department' => [
+                'label' => 'Department',
+                'placeholder' => 'Enter department',
+            ],
+            'address' => [
+                'label' => 'Address',
+                'placeholder' => 'Enter address',
+            ],
+            'date_of_birth' => [
+                'label' => 'Date of Birth',
+                'placeholder' => 'Select date of birth',
+            ],
+            'type' => [
+                'label' => 'Type',
+                'placeholder' => 'Select type',
+                'validate' => 'Type is required',
+            ],
+            'status' => [
+                'label' => 'Status',
+            ],
+            'notes' => [
+                'label' => 'Notes',
+                'placeholder' => 'Enter notes',
+            ],
             'identity_id' => [
                 'label' => 'Identity',
                 'placeholder' => [
@@ -328,6 +380,102 @@ return [
                     'label' => 'Identity is required',
                 ],
             ],
+        ],
+        'type' => [
+            'employee' => 'Employee',
+            'contractor' => 'Contractor',
+            'other' => 'Other',
+        ],
+        'status' => [
+            'active' => 'Active',
+            'inactive' => 'Inactive',
+        ],
+        'summary' => [
+            'total_identities' => 'Total Identities',
+            'active_identities' => 'Active Identities',
+            'inactive_identities' => 'Inactive Identities',
+            'total_amount' => 'Total Amount',
+            'outstanding' => 'Outstanding',
+            'total_advances' => 'Total Advances',
+            'total_paid' => 'Total Paid',
+        ],
+        'dashboard' => [
+            'title' => 'Identity Dashboard',
+            'search_placeholder' => 'Search identities...',
+            'filter' => [
+                'all_types' => 'All Types',
+                'all_status' => 'All Status',
+                'active_only' => 'Active Only',
+                'inactive_only' => 'Inactive Only',
+            ],
+            'showing' => 'Showing',
+            'of' => 'of',
+            'no_identities' => 'No identities found',
+            'no_identities_description' => 'Get started by creating your first identity',
+            'view_cash_advances' => 'View Cash Advances',
+            'create_cash_advance' => 'Create Cash Advance',
+            'back_to_identities' => 'Back to Identities',
+            'go_to_identities' => 'Go to Identities',
+            'select_identity' => 'Select Identity',
+            'select_identity_description' => 'Please select an identity to view cash advances',
+            'no_cash_advances_found' => 'No cash advances found',
+            'no_cash_advances_description' => 'This identity has no cash advances yet',
+            'create_first' => 'Create First Cash Advance',
+            'cash_advances_for' => 'Cash Advances for',
+        ],
+        'filter' => [
+            'type' => 'Type',
+            'status' => 'Status',
+            'department' => 'Department',
+            'all' => 'All',
+        ],
+        'table' => [
+            'name' => 'Name',
+            'type' => 'Type',
+            'department' => 'Department',
+            'contact' => 'Contact',
+            'total_advances' => 'Total Advances',
+            'outstanding' => 'Outstanding',
+            'status' => 'Status',
+            'actions' => 'Actions',
+            'empty' => 'No identities found',
+            'loading' => 'Loading identities...',
+        ],
+        'form' => [
+            'personal_info' => 'Personal Information',
+            'contact_info' => 'Contact Information',
+            'employment_info' => 'Employment Information',
+            'additional_info' => 'Additional Information',
+        ],
+        'buttons' => [
+            'create' => 'Create Identity',
+            'edit' => 'Edit Identity',
+            'save' => 'Save Identity',
+            'cancel' => 'Cancel',
+            'view' => 'View',
+            'delete' => 'Delete',
+            'activate' => 'Activate',
+            'deactivate' => 'Deactivate',
+        ],
+        'messages' => [
+            'created' => 'Identity created successfully',
+            'updated' => 'Identity updated successfully',
+            'deleted' => 'Identity deleted successfully',
+            'activated' => 'Identity activated successfully',
+            'deactivated' => 'Identity deactivated successfully',
+            'not_found' => 'Identity not found',
+        ],
+        'validation' => [
+            'name_required' => 'Name is required',
+            'email_valid' => 'Please enter a valid email address',
+            'phone_required' => 'Phone number is required',
+            'type_required' => 'Type is required',
+        ],
+        'errors' => [
+            'unauthorized' => 'You are not authorized to perform this action.',
+            'not_found' => 'Cash advance identity not found or has been deleted.',
+            'loading_failed' => 'Failed to load cash advance identity data. Please try again.',
+            'identity_not_found' => 'The selected identity was not found in the list of active identities.',
         ],
     ],
 
@@ -432,6 +580,20 @@ return [
         'no-btn' => 'No, Cancel',
     ],
 
+    'language' => [
+        'selector' => [
+            'label' => 'Language',
+            'placeholder' => 'Select Language',
+        ],
+        'current' => 'Current Language',
+        'change' => 'Change Language',
+        'save_preference' => 'Save Language Preference',
+        'detection' => [
+            'auto' => 'Auto-detect',
+            'browser' => 'Browser Language',
+            'manual' => 'Manual Selection',
+        ],
+    ],
     'front_web' => [
         'home' => 'Home',
         'service' => 'Service',

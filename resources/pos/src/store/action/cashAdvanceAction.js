@@ -124,13 +124,34 @@ export const addCashAdvance = (cashAdvance, navigate) => async (dispatch) => {
         })
         .catch((error) => {
             dispatch(setSavingButton(false));
-
+ 
             const message = resolveApiErrorMessage(error);
-
+ 
+            // Handle specific error for inactive identity
+            if (error.response?.status === 422 && error.response?.data?.errors?.identity_id) {
+                const errorMessage = error.response?.data?.errors?.identity_id;
+                if (errorMessage.includes('inactive')) {
+                    dispatch(
+                        addToast({
+                            text: getFormattedMessage("cash-advance.identity_inactive"),
+                            type: toastType.ERROR,
+                        })
+                    );
+                } else if (errorMessage.includes('not found')) {
+                    dispatch(
+                        addToast({
+                            text: getFormattedMessage("cash-advance.identity_not_found"),
+                            type: toastType.ERROR,
+                        })
+                    );
+                }
+                return;
+            }
+ 
             if (!message || message === getFormattedMessage("toast.error.title")) {
                 return;
             }
-
+ 
             dispatch(
                 addToast({
                     text: message,
@@ -162,19 +183,40 @@ export const editCashAdvance =
             })
             .catch((error) => {
                 dispatch(setSavingButton(false));
-
+     
                 const message = resolveApiErrorMessage(error);
-
+     
+                // Handle specific error for inactive identity
+                if (error.response?.status === 422 && error.response?.data?.errors?.identity_id) {
+                    const errorMessage = error.response?.data?.errors?.identity_id;
+                    if (errorMessage.includes('inactive')) {
+                        dispatch(
+                            addToast({
+                                text: getFormattedMessage("cash-advance.identity_inactive"),
+                                type: toastType.ERROR,
+                            })
+                        );
+                    } else if (errorMessage.includes('not found')) {
+                        dispatch(
+                            addToast({
+                                text: getFormattedMessage("cash-advance.identity_not_found"),
+                                type: toastType.ERROR,
+                            })
+                        );
+                    }
+                    return;
+                }
+     
                 if (!message || message === getFormattedMessage("toast.error.title")) {
                     return;
                 }
-
+     
                 dispatch(
                     addToast({
-                        text: message,
-                        type: toastType.ERROR,
-                    })
-                );
+                            text: message,
+                            type: toastType.ERROR,
+                        })
+                    );
             });
     };
 
@@ -188,6 +230,8 @@ export const deleteCashAdvance = (cashAdvanceId) => async (dispatch) => {
                 payload: cashAdvanceId,
             });
             dispatch(callFetchDataApi(true));
+            // Refresh cash advances data after delete
+            dispatch(fetchCashAdvances({}, false));
             dispatch(
                 addToast({
                     text: getFormattedMessage("cash-advance.success.delete.message"),

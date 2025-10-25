@@ -201,6 +201,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         // update user profile
         Route::get('edit-profile', [UserAPIController::class, 'editProfile'])->name('edit-profile');
         Route::post('update-profile', [UserAPIController::class, 'updateProfile'])->name('update-profile');
+        Route::post('user/update-locale', [UserAPIController::class, 'updateLocale'])->name('user.update-locale');
         Route::patch('/change-password', [UserAPIController::class, 'changePassword'])->name('user.changePassword');
 
         //suppliers route

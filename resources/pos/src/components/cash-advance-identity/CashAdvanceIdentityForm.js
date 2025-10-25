@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
@@ -19,23 +19,46 @@ const CashAdvanceIdentityForm = (props) => {
     } = props;
     const navigate = useNavigate();
     const intl = useIntl();
-    const [identityValue, setIdentityValue] = useState({
-        name: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].name : "",
-        email: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].email : "",
-        phone: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].phone : "",
-        department: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].department : "",
-        address: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].address : "",
-        date_of_birth: singleCashAdvanceIdentity && singleCashAdvanceIdentity[0].date_of_birth
-            ? moment(singleCashAdvanceIdentity[0].date_of_birth).toDate()
-            : null,
-        type: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].type : "employee",
-        is_active: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].is_active : true,
-        notes: singleCashAdvanceIdentity ? singleCashAdvanceIdentity[0].notes : "",
+    
+    // Initialize form with default values
+    const getDefaultValues = () => ({
+        name: "",
+        email: "",
+        phone: "",
+        department: "",
+        address: "",
+        date_of_birth: null,
+        type: "employee",
+        is_active: true,
+        notes: "",
     });
+    
+    const [identityValue, setIdentityValue] = useState(getDefaultValues());
+    
+    // Update form when data is available
+    useEffect(() => {
+        if (singleCashAdvanceIdentity && singleCashAdvanceIdentity.length > 0) {
+            const data = singleCashAdvanceIdentity[0];
+            setIdentityValue({
+                name: data.name || "",
+                email: data.email || "",
+                phone: data.phone || "",
+                department: data.department || "",
+                address: data.address || "",
+                date_of_birth: data.date_of_birth
+                    ? moment(data.date_of_birth).toDate()
+                    : null,
+                type: data.type || "employee",
+                is_active: data.is_active ?? true,
+                notes: data.notes || "",
+            });
+        }
+    }, [singleCashAdvanceIdentity]);
 
     const [errors, setErrors] = useState({
         name: "",
         type: "",
+        email: "",
     });
 
     const typeOptions = [
@@ -44,14 +67,21 @@ const CashAdvanceIdentityForm = (props) => {
         { value: "other", label: getFormattedMessage("cash-advance-identity.input.type.other") },
     ];
 
-    const [selectedType] = useState(
-        singleCashAdvanceIdentity
-            ? typeOptions.find(option => option.value === singleCashAdvanceIdentity[0].type)
-            : typeOptions[0]
-    );
+    const [selectedType, setSelectedType] = useState(typeOptions[0]);
+    
+    // Update selected type when data changes
+    useEffect(() => {
+        if (singleCashAdvanceIdentity && singleCashAdvanceIdentity.length > 0) {
+            const type = singleCashAdvanceIdentity[0].type;
+            const foundType = typeOptions.find(option => option.value === type);
+            if (foundType) {
+                setSelectedType(foundType);
+            }
+        }
+    }, [singleCashAdvanceIdentity]);
 
     const disabled =
-        singleCashAdvanceIdentity &&
+        singleCashAdvanceIdentity?.[0] &&
         singleCashAdvanceIdentity[0].name === identityValue.name &&
         singleCashAdvanceIdentity[0].email === identityValue.email &&
         singleCashAdvanceIdentity[0].phone === identityValue.phone &&
@@ -65,13 +95,22 @@ const CashAdvanceIdentityForm = (props) => {
         let formErrors = {};
         let isValid = true;
 
-        if (!identityValue["name"]) {
+        if (!identityValue["name"] || identityValue["name"].trim() === '') {
             formErrors["name"] = getFormattedMessage("cash-advance-identity.input.name.validate.label");
             isValid = false;
         }
         if (!identityValue["type"]) {
             formErrors["type"] = getFormattedMessage("cash-advance-identity.input.type.validate.label");
             isValid = false;
+        }
+        
+        // Email validation if provided
+        if (identityValue["email"] && identityValue["email"].trim() !== '') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(identityValue["email"])) {
+                formErrors["email"] = getFormattedMessage("cash-advance-identity.input.email.validate.label");
+                isValid = false;
+            }
         }
 
         setErrors(formErrors);
@@ -80,7 +119,8 @@ const CashAdvanceIdentityForm = (props) => {
 
     const onTypeChange = (obj) => {
         setIdentityValue((inputs) => ({ ...inputs, type: obj.value }));
-        setErrors("");
+        setSelectedType(obj);
+        setErrors((prev) => ({ ...prev, type: "" }));
     };
 
     const onChangeInput = (e) => {
@@ -90,7 +130,7 @@ const CashAdvanceIdentityForm = (props) => {
             ...inputs,
             [name]: type === 'checkbox' ? checked : value
         }));
-        setErrors("");
+        setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
     const handleCallback = (date) => {
@@ -99,23 +139,23 @@ const CashAdvanceIdentityForm = (props) => {
 
     const prepareData = (data) => {
         const preparedData = {
-            name: data.name,
-            email: data.email || null,
-            phone: data.phone || null,
-            department: data.department || null,
-            address: data.address || null,
+            name: data.name?.trim() || '',
+            email: data.email?.trim() || '',
+            phone: data.phone?.trim() || '',
+            department: data.department?.trim() || '',
+            address: data.address?.trim() || '',
             date_of_birth: data.date_of_birth ? moment(data.date_of_birth).format('YYYY-MM-DD') : null,
-            type: data.type,
+            type: data.type || 'employee',
             is_active: data.is_active ? 1 : 0,
-            notes: data.notes || null,
+            notes: data.notes?.trim() || '',
         };
 
-        // Remove null values for cleaner API request
-        Object.keys(preparedData).forEach(key => {
-            if (preparedData[key] === null || preparedData[key] === undefined) {
-                delete preparedData[key];
-            }
-        });
+        // Convert empty strings to null for nullable fields
+        if (preparedData.email === '') preparedData.email = null;
+        if (preparedData.phone === '') preparedData.phone = null;
+        if (preparedData.department === '') preparedData.department = null;
+        if (preparedData.address === '') preparedData.address = null;
+        if (preparedData.notes === '') preparedData.notes = null;
 
         return preparedData;
     };
@@ -125,7 +165,7 @@ const CashAdvanceIdentityForm = (props) => {
         const valid = handleValidation();
         if (singleCashAdvanceIdentity && valid) {
             if (!disabled) {
-                editCashAdvanceIdentity(id, prepareData(identityValue), navigate);
+                editCashAdvanceIdentity(prepareData(identityValue));
             }
         } else if (valid) {
             setIdentityValue(identityValue);
@@ -171,7 +211,7 @@ const CashAdvanceIdentityForm = (props) => {
                             />
                         </div>
 
-                        {singleCashAdvanceIdentity && singleCashAdvanceIdentity[0].employee_id && (
+                        {singleCashAdvanceIdentity?.[0]?.employee_id && (
                             <div className="col-md-6 mb-3">
                                 <label className="form-label">
                                     {getFormattedMessage("cash-advance-identity.input.employee_id.label")}:
@@ -179,7 +219,7 @@ const CashAdvanceIdentityForm = (props) => {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    value={singleCashAdvanceIdentity[0].employee_id}
+                                    value={singleCashAdvanceIdentity[0]?.employee_id || ''}
                                     readOnly
                                     style={{ backgroundColor: '#f8f9fa' }}
                                 />
@@ -194,11 +234,14 @@ const CashAdvanceIdentityForm = (props) => {
                             <input
                                 type="email"
                                 name="email"
-                                className="form-control"
+                                className={`form-control ${errors["email"] ? "is-invalid" : ""}`}
                                 placeholder={intl.formatMessage({ id: "cash-advance-identity.input.email.placeholder.label" })}
                                 onChange={(e) => onChangeInput(e)}
                                 value={identityValue.email || ""}
                             />
+                            <span className="text-danger d-block fw-400 fs-small mt-2">
+                                {errors["email"] ? errors["email"] : null}
+                            </span>
                         </div>
 
                         <div className="col-md-6 mb-3">

@@ -92,6 +92,7 @@ class User extends Authenticatable implements HasMedia, JsonResourceful, CanRese
         'password',
         'tenant_id',
         'language',
+        'preferred_locale',
         'status',
         'email_verified_at',
     ];
@@ -163,6 +164,7 @@ class User extends Authenticatable implements HasMedia, JsonResourceful, CanRese
             'role' => $this->roles ? ['id' => $this->roles->pluck('id')->first(), 'name' => $this->roles->pluck('name')->first()] : null,
             'created_at' => $this->created_at,
             'language' => $this->language,
+            'preferred_locale' => $this->preferred_locale,
             'status' => $this->status ? true : false,
             'stores' => $this->stores ? $this->stores->pluck('store_id')->toArray() : null,
         ];

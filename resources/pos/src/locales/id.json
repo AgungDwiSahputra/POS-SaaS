@@ -90,6 +90,7 @@
     "globally.save-btn": "Simpan",
     "globally.cancel-btn": "Batal",
     "globally.edit-btn": "Edit",
+    "globally.edit.label": "Edit",
     "globally.submit-btn": "Kirim",
     "globally.delete.tooltip.label": "Hapus",
     "globally.view.tooltip.label": "Lihat",
@@ -288,6 +289,8 @@
     "cash-advance.success.create.message": "Uang muka berhasil dibuat",
     "cash-advance.success.edit.message": "Uang muka berhasil diperbarui",
     "cash-advance.success.delete.message": "Uang muka berhasil dihapus",
+    "cash-advance.identity_inactive": "Tidak dapat membuat uang muka untuk identitas yang tidak aktif.",
+    "cash-advance.identity_not_found": "Identitas yang dipilih tidak ditemukan.",
     "cash-advance.status.outstanding": "Belum Lunas",
     "cash-advance.status.paid": "Lunas",
     "cash-advance.filter.status": "Status",
@@ -348,6 +351,9 @@
     "cash-advance-identity.dashboard.search_placeholder": "Cari identitas...",
     "cash-advance-identity.dashboard.quick_actions": "Aksi Cepat",
     "cash-advance-identity.filter.all_types": "Semua Tipe",
+    "cash-advance-identity.filter.all_status": "Semua Status",
+    "cash-advance-identity.filter.active_only": "Hanya Aktif",
+    "cash-advance-identity.filter.inactive_only": "Hanya Tidak Aktif",
     "cash-advance-identity.dashboard.showing": "Menampilkan",
     "cash-advance-identity.dashboard.of": "dari",
     "cash-advance-identity.dashboard.view_cash_advances": "Lihat Cash Advance",
@@ -1178,5 +1184,6 @@
     "globally.detail.payment.details": "Pembayaran Detail",
     "payment.method.save.success.message": "Pembayaran method berhasil dibuat",
     "payment.method.edit.success.message": "Pembayaran method edited successfully",
-    "payment.method.deleted.success.message": "Pembayaran method berhasil dihapus"
+    "payment.method.deleted.success.message": "Pembayaran method berhasil dihapus",
+    "cash-advance-identity.dashboard.loading": "Memuat..."
 }

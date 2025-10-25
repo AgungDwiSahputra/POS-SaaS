@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-moment.locale("fr", {
+moment.updateLocale("fr", {
     months: "janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre".split(
         "_"
     ),
@@ -66,7 +66,7 @@ moment.locale("fr", {
     },
 });
 
-moment.locale("gr", {
+moment.updateLocale("gr", {
     months: "Januar_Februar_März_April_Mai_Juni_Juli_August_September_Oktober_November_Dezember".split(
         "_"
     ),
@@ -130,7 +130,7 @@ moment.locale("gr", {
     },
 });
 
-moment.locale("sp", {
+moment.updateLocale("sp", {
     months: "enero_febrero_marzo_abril_mayo_junio_julio_agosto_septiembre_octubre_noviembre_diciembre".split(
         "_"
     ),
@@ -186,7 +186,7 @@ moment.locale("sp", {
     },
 });
 
-moment.locale("id", {
+moment.updateLocale("id", {
     months: "Januari_Februari_Maret_April_Mei_Juni_Juli_Agustus_September_Oktober_November_Desember".split(
         "_"
     ),
@@ -266,7 +266,7 @@ moment.locale("id", {
     },
 });
 
-moment.locale("tr", {
+moment.updateLocale("tr", {
     months: "Ocak_Şubat_Mart_Nisan_Mayıs_Haziran_Temmuz_Ağustos_Eylül_Ekim_Kasım_Aralık".split(
         "_"
     ),
@@ -333,7 +333,7 @@ moment.locale("tr", {
     },
 });
 
-moment.locale("cn", {
+moment.updateLocale("cn", {
     months: "一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月".split(
         "_"
     ),
