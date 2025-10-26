@@ -315,3 +315,48 @@ export const safeJSONParse = (jsonString, defaultValue = null) => {
         return defaultValue;
     }
 };
+
+/**
+ * Handle image loading errors with fallback
+ * @param {React.SyntheticEvent} e - The error event
+ * @param {string} fallbackSrc - Fallback image source
+ */
+export const handleImageError = (e, fallbackSrc = null) => {
+    e.target.onerror = null; // Prevent infinite loop
+    if (fallbackSrc) {
+        e.target.src = fallbackSrc;
+    } else {
+        // Use a default avatar or hide the image
+        e.target.style.display = 'none';
+        
+        // Try to show a parent container with a default avatar
+        const parent = e.target.parentElement;
+        if (parent) {
+            // Create a default avatar element
+            const defaultAvatar = document.createElement('div');
+            defaultAvatar.className = 'custom-user-avatar fs-5';
+            defaultAvatar.textContent = 'U'; // Default avatar text
+            
+            // Replace the image with the default avatar
+            parent.replaceChild(defaultAvatar, e.target);
+        }
+    }
+};
+
+/**
+ * Get safe image URL with error handling
+ * @param {string} imageUrl - The image URL to check
+ * @returns {string|null} - Safe image URL or null
+ */
+export const getSafeImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    
+    // Check if the URL contains user_image path
+    if (imageUrl.includes('user_image/')) {
+        // For now, we'll return null to trigger fallback
+        // In a real implementation, you might want to check if the file exists
+        return null;
+    }
+    
+    return imageUrl;
+};

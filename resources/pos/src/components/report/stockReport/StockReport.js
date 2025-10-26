@@ -109,6 +109,8 @@ const StockReport = (props) => {
                 (stockReport.attributes.quantity || 0),
             id: stockReport.attributes.product_id,
             currency: currencySymbol,
+            // Add image handling with error prevention
+            product_image: stockReport.attributes.product.image_url || null,
         }));
 
     const totalAssetsValue = useMemo(() => {

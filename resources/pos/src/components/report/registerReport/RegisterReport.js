@@ -6,6 +6,8 @@ import {
     getAvatarName,
     getFormattedMessage,
     placeholderText,
+    handleImageError,
+    getSafeImageUrl,
 } from "../../../shared/sharedMethod";
 import ReactDataTable from "../../../shared/table/ReactDataTable";
 import TopProgressBar from "../../../shared/components/loaders/TopProgressBar";
@@ -227,7 +229,7 @@ const RegisterReport = () => {
             sortField: "first_name",
             sortable: false,
             cell: (row) => {
-                const imageUrl = row.user_image ? row.user_image : null;
+                const imageUrl = getSafeImageUrl(row.user_image);
                 const lastName =
                     row.user_last_name !== "" &&
                     row.user_last_name !== null &&
@@ -245,6 +247,7 @@ const RegisterReport = () => {
                                         width="50"
                                         alt="User Image"
                                         className="image image-circle image-mini"
+                                        onError={(e) => handleImageError(e)}
                                     />
                                 ) : (
                                     <span className="custom-user-avatar fs-5">
