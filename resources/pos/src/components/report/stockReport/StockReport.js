@@ -44,74 +44,78 @@ const StockReport = (props) => {
             : [];
 
     useEffect(() => {
-        stockReportAction(
-            warehouseValue.value
-                ? warehouseValue.value
-                : frontSetting?.value?.default_warehouse
-        );
-    }, [frontSetting, warehouseValue]);
-
-    useEffect(() => {
         fetchAllWarehouses();
     }, []);
 
+    // Set warehouse value when warehouses loaded and fetch initial data
     useEffect(() => {
-        // Set warehouse value when warehouses loaded
-        if (warehouses && warehouses.length > 0 && !warehouseValue.value) {
-            const defaultWh = warehouses.find(
-                (w) => w.id === Number(frontSetting?.value?.default_warehouse)
-            );
-            
-            if (defaultWh) {
-                setWarehouseValue({
-                    label: defaultWh.attributes.name,
-                    value: defaultWh.id,
-                });
-            } else {
-                // Use first warehouse if no default match
-                setWarehouseValue({
-                    label: warehouses[0].attributes.name,
-                    value: warehouses[0].id,
-                });
+        if (warehouses && warehouses.length > 0) {
+            // Set warehouse value if not already set
+            if (!warehouseValue.value) {
+                const defaultWh = warehouses.find(
+                    (w) => w.id === Number(frontSetting?.value?.default_warehouse)
+                );
+                
+                if (defaultWh) {
+                    setWarehouseValue({
+                        label: defaultWh.attributes.name,
+                        value: defaultWh.id,
+                    });
+                } else {
+                    // Use first warehouse if no default match
+                    setWarehouseValue({
+                        label: warehouses[0].attributes.name,
+                        value: warehouses[0].id,
+                    });
+                }
             }
         }
-    }, [warehouses, frontSetting]);
+    }, [warehouses, frontSetting?.value?.default_warehouse]);
+
+    // Fetch stock report data when warehouse value changes
+    useEffect(() => {
+        if (warehouseValue.value) {
+            stockReportAction(warehouseValue.value);
+        }
+    }, [warehouseValue.value, stockReportAction]);
 
     useEffect(() => {
         if (isWarehouseValue === true) {
-            totalStockReportExcel(
-                warehouseValue.value
-                    ? warehouseValue.value
-                    : frontSetting?.value?.default_warehouse,
-                setIsWarehouseValue
-            );
-            setIsWarehouseValue(false);
+            const warehouseId = warehouseValue.value || frontSetting?.value?.default_warehouse;
+            if (warehouseId) {
+                totalStockReportExcel(warehouseId, {}, true, setIsWarehouseValue);
+            } else {
+                setIsWarehouseValue(false);
+            }
         }
-    }, [isWarehouseValue]);
+    }, [isWarehouseValue, warehouseValue.value, frontSetting?.value?.default_warehouse, totalStockReportExcel]);
 
-    const itemsValue =
-        currencySymbol &&
-        stockReports.length >= 0 &&
-        stockReports.map((stockReport) => ({
-            code: stockReport.attributes.product.code,
-            name: stockReport.attributes.product.name,
-            product_category_name: stockReport.attributes.product_category_name,
-            product_cost: stockReport.attributes.product.product_cost,
-            product_price: stockReport.attributes.product.product_price,
-            hpp: stockReport.attributes.product.hpp,
-            product_unit: stockReport.attributes.product_unit_name,
-            current_stock: stockReport.attributes.quantity,
+    const itemsValue = useMemo(() => {
+        if (!currencySymbol || !Array.isArray(stockReports) || stockReports.length === 0) {
+            return [];
+        }
+
+        return stockReports.map((stockReport) => ({
+            code: stockReport.attributes?.product?.code || '',
+            name: stockReport.attributes?.product?.name || '',
+            product_category_name: stockReport.attributes?.product_category_name || '',
+            product_cost: stockReport.attributes?.product?.product_cost || 0,
+            product_price: stockReport.attributes?.product?.product_price || 0,
+            hpp: stockReport.attributes?.product?.hpp || 0,
+            product_unit: stockReport.attributes?.product_unit_name || '',
+            current_stock: stockReport.attributes?.quantity || 0,
             total_hpp:
-                (stockReport.attributes.product.hpp || 0) *
-                (stockReport.attributes.quantity || 0),
+                (stockReport.attributes?.product?.hpp || 0) *
+                (stockReport.attributes?.quantity || 0),
             total_assets:
-                (stockReport.attributes.product.hpp || 0) *
-                (stockReport.attributes.quantity || 0),
-            id: stockReport.attributes.product_id,
+                (stockReport.attributes?.product?.product_price || 0) *
+                (stockReport.attributes?.quantity || 0),
+            id: stockReport.attributes?.product_id || '',
             currency: currencySymbol,
             // Add image handling with error prevention
-            product_image: stockReport.attributes.product.image_url || null,
+            product_image: stockReport.attributes?.product?.image_url || null,
         }));
+    }, [currencySymbol, stockReports]);
 
     const totalAssetsValue = useMemo(() => {
         if (!Array.isArray(stockReports) || stockReports.length === 0) {
@@ -120,10 +124,9 @@ const StockReport = (props) => {
 
         return stockReports.reduce((sum, stockReport) => {
             const quantity = parseFloat(stockReport.attributes?.quantity) || 0;
-            const hpp =
-                parseFloat(stockReport.attributes?.product?.hpp) || 0;
+            const productPrice = parseFloat(stockReport.attributes?.product?.product_price) || 0;
 
-            return sum + quantity * hpp;
+            return sum + quantity * productPrice;
         }, 0);
     }, [stockReports]);
 
@@ -150,7 +153,7 @@ const StockReport = (props) => {
 
     const itemsWithSummary = useMemo(() => {
         if (!itemsValue || itemsValue.length === 0) {
-            return itemsValue;
+            return [];
         }
 
         return [...itemsValue, summaryRow];
@@ -169,16 +172,15 @@ const StockReport = (props) => {
     );
 
     const onChange = (filter) => {
-        stockReportAction(
-            warehouseValue.value
-                ? warehouseValue.value
-                : frontSetting?.value?.default_warehouse,
-            filter
-        );
+        // Only apply filter if warehouseValue is set
+        if (warehouseValue.value) {
+            stockReportAction(warehouseValue.value, filter);
+        }
     };
 
     const onWarehouseChange = (obj) => {
         setWarehouseValue(obj);
+        // Data will be fetched automatically by the useEffect that watches warehouseValue.value
     };
 
     const onExcelClick = () => {
@@ -408,7 +410,7 @@ const mapStateToProps = (state) => {
         totalRecord,
         warehouses,
         frontSetting,
-        stockReports,
+        stockReports: stockReports?.data || stockReports || [], // Handle both old and new structure
         allConfigData,
     };
 };

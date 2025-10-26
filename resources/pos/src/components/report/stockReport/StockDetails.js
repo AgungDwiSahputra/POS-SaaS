@@ -19,8 +19,10 @@ const StockDetails = (props) => {
     const {id} = useParams();
 
     useEffect(() => {
-        stockDetailsWarehouseAction(id);
-    }, []);
+        if (id) {
+            stockDetailsWarehouseAction(id);
+        }
+    }, [id, stockDetailsWarehouseAction]);
 
     return (
         <MasterLayout>
@@ -29,7 +31,7 @@ const StockDetails = (props) => {
             <TabTitle title={placeholderText('stock.report.details.title')}/>
             <div className='card'>
                 <div className='m-auto mb-5 col-12 mt-5 text-center'>
-                    <h3>{stockWarehouse[0] && stockWarehouse[0].product.name}</h3>
+                    <h3>{stockWarehouse && stockWarehouse.length > 0 && stockWarehouse[0]?.product?.name}</h3>
                 </div>
                 <div className='col-md-5 ms-5'>
                     <table className='table table-responsive'>
@@ -44,15 +46,18 @@ const StockDetails = (props) => {
                         </tr>
                         </thead>
                         <tbody>
-                        {stockWarehouse && stockWarehouse.map((warehouse, index) => {
+                        {stockWarehouse && stockWarehouse.length > 0 && stockWarehouse.map((warehouse, index) => {
+                            const productUnit = stockWarehouse[0]?.product?.product_unit;
+                            const unitLabel = productUnit === "1" ? "Pc" : productUnit === "2" ? "M" : productUnit === "3" ? "Kg" : "";
+                            
                             return (
                                 <tr key={index}>
-                                    <td>{warehouse.warehouse.name}</td>
-                                    <td>{(warehouse.quantity).toFixed(2)} {stockWarehouse[0] && stockWarehouse[0].product.product_unit === "1" && "Pc" || stockWarehouse[0].product.product_unit === "2" && "M" || stockWarehouse[0].product.product_unit === "3" && "Kg"}</td>
+                                    <td>{warehouse.warehouse?.name || ''}</td>
+                                    <td>{(warehouse.quantity || 0).toFixed(2)} {unitLabel}</td>
                                 </tr>
                             )
                         })}
-                        {!stockWarehouse.length &&
+                        {(!stockWarehouse || stockWarehouse.length === 0) &&
                         <tr>
                             <td colSpan={5} className='fs-5 px-3 py-6 text-center'>
                                 {getFormattedMessage('sale.product.table.no-data.label')}

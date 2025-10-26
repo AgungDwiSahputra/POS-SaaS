@@ -52,7 +52,7 @@ import warehouseReportReducer from "./warehouseReportReducer";
 import resetOptionReducer from "./resetOptionReducer";
 import dateReducer from "./dateReducres";
 import printQuantity from "./printQuantity";
-import stockReportReducer from "./stockReportReducres";
+import stockReportReducer from "./stockReportReducer";
 import productQuantityReport from "./productQuantityReport";
 import topSellingReportReducer from "./topSellingReportReducer";
 import stockDetailsSaleTabReducers from "./stockDetailsSaleTabReducers";
