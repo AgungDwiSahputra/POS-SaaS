@@ -74,6 +74,7 @@ class ReportStockService
                 DB::raw('COALESCE(stock_summary.total_qty, 0) as qty'),
                 DB::raw('COALESCE(products.product_cost, 0) as cost'),
                 DB::raw('(COALESCE(stock_summary.total_qty, 0) * COALESCE(products.product_cost, 0)) as asset_value'),
+                DB::raw('(SELECT bu.name FROM base_units bu WHERE bu.id = products.product_unit) as product_unit_name'),
             ])
             ->leftJoin(DB::raw('(
                 SELECT product_id, SUM(quantity) as total_qty
@@ -93,6 +94,7 @@ class ReportStockService
                 DB::raw('COALESCE(warehouse_stock.total_qty, 0) as qty'),
                 DB::raw('COALESCE(products.product_cost, 0) as cost'),
                 DB::raw('(COALESCE(warehouse_stock.total_qty, 0) * COALESCE(products.product_cost, 0)) as asset_value'),
+                DB::raw('(SELECT bu.name FROM base_units bu WHERE bu.id = products.product_unit) as product_unit_name'),
             ])
             ->leftJoin(DB::raw('(
                 SELECT product_id, SUM(quantity) as total_qty

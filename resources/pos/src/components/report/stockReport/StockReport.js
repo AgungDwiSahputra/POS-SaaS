@@ -25,6 +25,8 @@ const StockReport = (props) => {
         warehouses,
         stockReportAction,
         allConfigData,
+        grandTotalAsset,
+        filteredTotalAsset,
     } = props;
     const [warehouseValue, setWarehouseValue] = useState({
         label: "All",
@@ -96,39 +98,51 @@ const StockReport = (props) => {
         }
 
         return stockReports.map((stockReport) => ({
-            code: stockReport.attributes?.product?.code || '',
-            name: stockReport.attributes?.product?.name || '',
-            product_category_name: stockReport.attributes?.product_category_name || '',
-            product_cost: stockReport.attributes?.product?.product_cost || 0,
-            product_price: stockReport.attributes?.product?.product_price || 0,
-            hpp: stockReport.attributes?.product?.hpp || 0,
-            product_unit: stockReport.attributes?.product_unit_name || '',
-            current_stock: stockReport.attributes?.quantity || 0,
+            code: stockReport.code || '',
+            name: stockReport.name || '',
+            product_category_name: stockReport.product_category_name || '',
+            product_cost: stockReport.product_cost || 0,
+            product_price: stockReport.product_price || 0,
+            hpp: stockReport.hpp || stockReport.product_cost || 0,
+            product_unit: stockReport.product_unit_name || 'Pcs',
+            current_stock: stockReport.qty || 0,
             total_hpp:
-                (stockReport.attributes?.product?.hpp || 0) *
-                (stockReport.attributes?.quantity || 0),
+                (stockReport.hpp || stockReport.product_cost || 0) *
+                (stockReport.qty || 0),
             total_assets:
-                (stockReport.attributes?.product?.product_price || 0) *
-                (stockReport.attributes?.quantity || 0),
-            id: stockReport.attributes?.product_id || '',
+                (stockReport.product_price || stockReport.product_cost || 0) *
+                (stockReport.qty || 0),
+            id: stockReport.id || '',
             currency: currencySymbol,
             // Add image handling with error prevention
-            product_image: stockReport.attributes?.product?.image_url || null,
+            product_image: stockReport.image_url || null,
         }));
     }, [currencySymbol, stockReports]);
 
+    // Gunakan filteredTotalAsset dari props untuk perhitungan yang akurat
     const totalAssetsValue = useMemo(() => {
+        // Prioritaskan filteredTotalAsset dari props
+        if (filteredTotalAsset !== undefined && filteredTotalAsset !== 0) {
+            return filteredTotalAsset;
+        }
+        
+        // Fallback: hitung manual jika data tidak tersedia
         if (!Array.isArray(stockReports) || stockReports.length === 0) {
             return 0;
         }
 
         return stockReports.reduce((sum, stockReport) => {
-            const quantity = parseFloat(stockReport.attributes?.quantity) || 0;
-            const productPrice = parseFloat(stockReport.attributes?.product?.product_price) || 0;
+            const quantity = parseFloat(stockReport.qty) || 0;
+            const productPrice = parseFloat(stockReport.product_price || stockReport.product_cost || 0);
 
             return sum + quantity * productPrice;
         }, 0);
-    }, [stockReports]);
+    }, [stockReports, filteredTotalAsset]);
+
+    // Grand total asset (non-filter) untuk informasi
+    const grandTotalAssetValue = useMemo(() => {
+        return grandTotalAsset || 0;
+    }, [grandTotalAsset]);
 
     const summaryRow = useMemo(
         () => ({
@@ -147,8 +161,11 @@ const StockReport = (props) => {
             current_stock: '',
             product_unit: '',
             currency: currencySymbol,
+            // Tambahkan info untuk debugging
+            grandTotalAsset: grandTotalAssetValue,
+            filteredTotalAsset: totalAssetsValue,
         }),
-        [totalAssetsValue, currencySymbol]
+        [totalAssetsValue, grandTotalAssetValue, currencySymbol]
     );
 
     const itemsWithSummary = useMemo(() => {
@@ -322,7 +339,7 @@ const StockReport = (props) => {
                         </div>
 
                         <span className="badge bg-light-success me-2">
-                            <span>{row.product_unit}</span>
+                            <span>{row.product_unit || 'Pcs'}</span>
                         </span>
                     </div>
                 );
@@ -382,6 +399,38 @@ const StockReport = (props) => {
                 )}
             </div>
             <div className="pt-md-7">
+                {/* Info Total Aset */}
+                {/* <div className="row mb-3">
+                    <div className="col-md-6">
+                        <div className="card">
+                            <div className="card-body">
+                                <h6 className="card-title">Total Aset (Non-Filter)</h6>
+                                <h4 className="text-primary">
+                                    {currencySymbolHandling(
+                                        allConfigData,
+                                        currencySymbol,
+                                        grandTotalAssetValue
+                                    )}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-md-6">
+                        <div className="card">
+                            <div className="card-body">
+                                <h6 className="card-title">Total Aset (Filter)</h6>
+                                <h4 className="text-success">
+                                    {currencySymbolHandling(
+                                        allConfigData,
+                                        currencySymbol,
+                                        totalAssetsValue
+                                    )}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div> */}
+                
                 <ReactDataTable
                     columns={columns}
                     items={itemsWithSummary}
@@ -411,6 +460,8 @@ const mapStateToProps = (state) => {
         warehouses,
         frontSetting,
         stockReports: stockReports?.data || stockReports || [], // Handle both old and new structure
+        grandTotalAsset: stockReports?.grandTotalAsset || 0,
+        filteredTotalAsset: stockReports?.filteredTotalAsset || 0,
         allConfigData,
     };
 };

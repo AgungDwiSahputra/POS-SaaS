@@ -39,14 +39,18 @@ export const stockReportAction =
             .then((response) => {
                 dispatch({
                     type: stockReportActionType.STOCK_REPORT,
-                    payload: response.data.data || [],
+                    payload: {
+                        data: response.data.data?.data?.data || [],
+                        grandTotalAsset: response.data.data?.meta?.totals?.grand_total_asset || 0,
+                        filteredTotalAsset: response.data.data?.meta?.totals?.filtered_total_asset || 0,
+                    },
                 });
                 dispatch(
                     setTotalRecord(
-                        response.data.meta?.total !== undefined &&
-                            response.data.meta.total >= 0
-                            ? response.data.meta.total
-                            : (response.data.data?.length || 0)
+                        response.data.data?.meta?.pagination?.total !== undefined &&
+                            response.data.data.meta.pagination.total >= 0
+                            ? response.data.data.meta.pagination.total
+                            : (response.data.data?.data?.data?.length || 0)
                     )
                 );
             })
