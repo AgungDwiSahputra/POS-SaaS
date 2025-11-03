@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateMainProductRequest extends FormRequest
 {
@@ -34,7 +35,7 @@ class UpdateMainProductRequest extends FormRequest
 
         return [
             'name' => 'required',
-            'product_code' => 'required',
+            'product_code' => 'required|unique:main_products,code,' . $this->route('id') . ',id,tenant_id,' . Auth::user()->tenant_id,
             'product_category_id' => 'required|exists:product_categories,id',
             'brand_id' => 'required|exists:brands,id',
             // 'product_cost' => 'required|numeric', //
@@ -63,7 +64,7 @@ class UpdateMainProductRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'code.unique' => __('messages.error.code_taken'),
+            'product_code.unique' => __('messages.error.code_taken'),
             'images.*.max' => __('messages.error.images_max_size'),
             'images.*.image' => __('messages.error.invalid_image'),
             'images.*.mimes' => __('messages.error.allowed_image_types'),

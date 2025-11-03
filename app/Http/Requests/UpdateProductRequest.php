@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         $rules = Product::rules();
-        $rules['code'] = 'required|unique:products,code,' . $this->route('product');
+        $rules['code'] = 'required|unique:products,code,' . $this->route('product') . ',id,tenant_id,' . Auth::user()->tenant_id;
 
         return $rules;
     }

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -141,9 +142,20 @@ class MainProductAPIController extends AppBaseController
         $input = $request->all();
         $mainProduct = MainProduct::find($id);
 
-        if ($mainProduct->product_type == MainProduct::SINGLE_PRODUCT && Product::where('code', $input['product_code'])->whereNot('main_product_id', $mainProduct->id)->exists()) {
-            throw new UnprocessableEntityHttpException(__('validation.unique', ['attribute' => __('messages.pdf.product_code')]));
+        // Validasi kode produk untuk single product dalam tenant yang sama
+        // Pastikan kode tidak digunakan oleh produk lain dalam tenant yang sama dengan main_product_id yang berbeda
+        if ($mainProduct->product_type == MainProduct::SINGLE_PRODUCT) {
+            $existingProduct = Product::where('code', $input['product_code'])
+                ->where('tenant_id', Auth::user()->tenant_id)
+                ->where('main_product_id', '!=', $mainProduct->id)
+                ->first();
+                
+            if ($existingProduct) {
+                throw new UnprocessableEntityHttpException(__('messages.error.code_taken'));
+            }
         }
+        
+        // Untuk variation product, tidak perlu validasi kode unik karena setiap variasi memiliki kode sendiri
 
         $mainProduct->update([
             'name' => $input['name'],
