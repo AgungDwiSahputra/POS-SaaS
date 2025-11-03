@@ -12,3 +12,4 @@ yarn-error.log
 !/public/barcode-images
 !/public/import_demo_files
 node_modules
+public/uploads
