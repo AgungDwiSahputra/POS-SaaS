@@ -136,9 +136,9 @@ const TransfersTable = (props) => {
                 <td>
                     {singleProduct.isEdit ? (
                         singleProduct.stock.length >= 1 &&
-                        singleProduct.stock.map((item) => {
+                        singleProduct.stock.map((item, index) => {
                             return (
-                                <span className="badge bg-light-warning">
+                                <span key={index} className="badge bg-light-warning">
                                     <span>
                                         {item.quantity}&nbsp;
                                         {singleProduct.short_name}

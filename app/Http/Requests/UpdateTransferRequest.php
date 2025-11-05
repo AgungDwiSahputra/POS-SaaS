@@ -69,6 +69,10 @@ class UpdateTransferRequest extends FormRequest
             }
 
             // Pre-validate product conflicts untuk cross-tenant transfer
+            // Skip validation untuk transfer yang sudah ada (mode edit)
+            $transferId = $this->route('id');
+            $isEditMode = !empty($transferId);
+            
             if ($fromStoreId && $toStoreId && $fromStore && $toStore) {
                 $isCrossTenant = $fromStore->tenant_id !== $toStore->tenant_id;
                 
@@ -84,7 +88,11 @@ class UpdateTransferRequest extends FormRequest
                             if ($productId) {
                                 $product = Product::find($productId);
                                 
-                                if ($product && $productSyncService->detectConflict($product, $toStore->tenant_id)) {
+                                // Skip validation untuk item yang sudah ada di transfer lama
+                                $existingItemId = $item['transfer_item_id'] ?? null;
+                                $isExistingItem = !empty($existingItemId);
+                                
+                                if ($product && !$isExistingItem && $productSyncService->detectConflict($product, $toStore->tenant_id)) {
                                     $validator->errors()->add(
                                         "transfer_items.{$index}.product_id",
                                         __('messages.transfer.product_code_conflict', [

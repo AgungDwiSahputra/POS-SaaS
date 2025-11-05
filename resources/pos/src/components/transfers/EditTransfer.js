@@ -25,16 +25,24 @@ const EditTransfer = ( props ) => {
         date: tansfers.attributes.date,
         warehouse_id: {
             value: tansfers.attributes.from_warehouse_id,
-            label: tansfers.attributes.from_warehouse.name,
+            label: tansfers.attributes.from_warehouse?.name || '',
         },
         from_warehouse_id: {
             value: tansfers.attributes.from_warehouse_id,
-            label: tansfers.attributes.from_warehouse.name,
+            label: tansfers.attributes.from_warehouse?.name || '',
         },
         to_warehouse_id: {
             value: tansfers.attributes.to_warehouse_id,
-            label: tansfers.attributes.to_warehouse.name,
+            label: tansfers.attributes.to_warehouse?.name || '',
         },
+        from_store_id: tansfers.attributes.from_store ? {
+            label: tansfers.attributes.from_store.name || '',
+            value: tansfers.attributes.from_store.id
+        } : null,
+        to_store_id: tansfers.attributes.to_store ? {
+            label: tansfers.attributes.to_store.name || '',
+            value: tansfers.attributes.to_store.id
+        } : null,
         tax_rate: tansfers.attributes.tax_rate,
         tax_amount: tansfers.attributes.tax_amount,
         discount: tansfers.attributes.discount,

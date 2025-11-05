@@ -80,11 +80,12 @@ const TransferForm = ( props ) => {
 
     // Fetch available stores
     useEffect(() => {
+        let isMounted = true;
         const fetchAvailableStores = async () => {
             try {
                 const response = await apiConfig.get(apiBaseURL.TRANSFERS_AVAILABLE_STORES);
                 console.log('Stores Response:', response.data);
-                if (response.data && response.data.success && response.data.data) {
+                if (isMounted && response.data && response.data.success && response.data.data) {
                     const formattedStores = response.data.data.map(store => ({
                         label: store.name,
                         value: store.id,
@@ -94,10 +95,16 @@ const TransferForm = ( props ) => {
                     setStores(formattedStores);
                 }
             } catch (error) {
-                console.error('Error fetching stores:', error);
+                if (isMounted) {
+                    console.error('Error fetching stores:', error);
+                }
             }
         };
         fetchAvailableStores();
+        
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     useEffect(() => {
@@ -110,15 +117,15 @@ const TransferForm = ( props ) => {
             setTransferValue({
                 date: moment(singleTransfer.date).toDate(),
                 from_warehouse_id: singleTransfer.from_warehouse_id,
-                from_store_id: singleTransfer.from_store ? {
-                    label: singleTransfer.from_store.name,
-                    value: singleTransfer.from_store.id
-                } : singleTransfer.from_store_id,
+                from_store_id: singleTransfer.from_store_id || {
+                    label: singleTransfer.from_store?.name || '',
+                    value: singleTransfer.from_store?.id
+                },
                 to_warehouse_id: singleTransfer.to_warehouse_id,
-                to_store_id: singleTransfer.to_store ? {
-                    label: singleTransfer.to_store.name,
-                    value: singleTransfer.to_store.id
-                } : singleTransfer.to_store_id,
+                to_store_id: singleTransfer.to_store_id || {
+                    label: singleTransfer.to_store?.name || '',
+                    value: singleTransfer.to_store?.id
+                },
                 warehouse_id: undefined,
                 supplier_id: singleTransfer.supplier_id,
                 tax_rate: singleTransfer.tax_rate.toFixed(2),
@@ -142,11 +149,10 @@ const TransferForm = ( props ) => {
     }, [ updateProducts, quantity, newCost, newDiscount, newTax, subTotal, newPurchaseUnit ] );
 
     useEffect( () => {
-        if ( singleTransfer && !transferValueUpdated) {
+        if ( singleTransfer && transferValueUpdated) {
             setUpdateProducts( singleTransfer.transfer_items );
-            setTransferValueUpdated(true);
         }
-    }, [singleTransfer] );
+    }, [singleTransfer, transferValueUpdated] );
 
     useEffect( () => {
         updateProducts.length >= 1 ? dispatch( { type: 'DISABLE_OPTION', payload: true } ) : dispatch( { type: 'DISABLE_OPTION', payload: false } )
@@ -159,6 +165,7 @@ const TransferForm = ( props ) => {
 
     // Fetch warehouses when from store changes
     useEffect(() => {
+        let isMounted = true;
         const fetchFromWarehouses = async () => {
             if (transferValue.from_store_id && transferValue.from_store_id.value) {
                 try {
@@ -166,29 +173,53 @@ const TransferForm = ( props ) => {
                         `${apiBaseURL.TRANSFERS_WAREHOUSES_BY_STORE}/${transferValue.from_store_id.value}`
                     );
                     console.log('From Warehouses Response:', response.data);
-                    if (response.data && response.data.success && response.data.data) {
-                        const formattedWarehouses = response.data.data.map(warehouse => ({
-                            label: warehouse.name,
-                            value: warehouse.id
-                        }));
-                        console.log('From Warehouses formatted:', formattedWarehouses);
-                        setFromWarehouses(formattedWarehouses);
-                    } else {
-                        setFromWarehouses([]);
+                    if (isMounted) {
+                        if (response.data && response.data.success && response.data.data) {
+                            const formattedWarehouses = response.data.data.map(warehouse => ({
+                                label: warehouse.name,
+                                value: warehouse.id
+                            }));
+                            console.log('From Warehouses formatted:', formattedWarehouses);
+                            setFromWarehouses(formattedWarehouses);
+                            
+                            // Auto-select the warehouse if it matches the current from_warehouse_id
+                            if (singleTransfer && singleTransfer.from_warehouse_id) {
+                                const matchingWarehouse = formattedWarehouses.find(
+                                    w => w.value === singleTransfer.from_warehouse_id
+                                );
+                                if (matchingWarehouse) {
+                                    setTransferValue(prev => ({
+                                        ...prev,
+                                        from_warehouse_id: matchingWarehouse
+                                    }));
+                                }
+                            }
+                        } else {
+                            setFromWarehouses([]);
+                        }
                     }
                 } catch (error) {
-                    console.error('Error fetching from warehouses:', error);
-                    setFromWarehouses([]);
+                    if (isMounted) {
+                        console.error('Error fetching from warehouses:', error);
+                        setFromWarehouses([]);
+                    }
                 }
             } else {
-                setFromWarehouses([]);
+                if (isMounted) {
+                    setFromWarehouses([]);
+                }
             }
         };
         fetchFromWarehouses();
+        
+        return () => {
+            isMounted = false;
+        };
     }, [transferValue.from_store_id]);
 
     // Fetch warehouses when to store changes
     useEffect(() => {
+        let isMounted = true;
         const fetchToWarehouses = async () => {
             if (transferValue.to_store_id && transferValue.to_store_id.value) {
                 try {
@@ -196,26 +227,144 @@ const TransferForm = ( props ) => {
                         `${apiBaseURL.TRANSFERS_WAREHOUSES_BY_STORE}/${transferValue.to_store_id.value}`
                     );
                     console.log('To Warehouses Response:', response.data);
-                    if (response.data && response.data.success && response.data.data) {
-                        const formattedWarehouses = response.data.data.map(warehouse => ({
-                            label: warehouse.name,
-                            value: warehouse.id
-                        }));
-                        console.log('To Warehouses formatted:', formattedWarehouses);
-                        setToWarehouses(formattedWarehouses);
-                    } else {
-                        setToWarehouses([]);
+                    if (isMounted) {
+                        if (response.data && response.data.success && response.data.data) {
+                            const formattedWarehouses = response.data.data.map(warehouse => ({
+                                label: warehouse.name,
+                                value: warehouse.id
+                            }));
+                            console.log('To Warehouses formatted:', formattedWarehouses);
+                            setToWarehouses(formattedWarehouses);
+                            
+                            // Auto-select the warehouse if it matches the current to_warehouse_id
+                            if (singleTransfer && singleTransfer.to_warehouse_id) {
+                                const matchingWarehouse = formattedWarehouses.find(
+                                    w => w.value === singleTransfer.to_warehouse_id
+                                );
+                                if (matchingWarehouse) {
+                                    setTransferValue(prev => ({
+                                        ...prev,
+                                        to_warehouse_id: matchingWarehouse
+                                    }));
+                                }
+                            }
+                        } else {
+                            setToWarehouses([]);
+                        }
                     }
                 } catch (error) {
-                    console.error('Error fetching to warehouses:', error);
-                    setToWarehouses([]);
+                    if (isMounted) {
+                        console.error('Error fetching to warehouses:', error);
+                        setToWarehouses([]);
+                    }
                 }
             } else {
-                setToWarehouses([]);
+                if (isMounted) {
+                    setToWarehouses([]);
+                }
             }
         };
         fetchToWarehouses();
+        
+        return () => {
+            isMounted = false;
+        };
     }, [transferValue.to_store_id]);
+
+    // Additional effect to ensure warehouses are loaded when editing
+    useEffect(() => {
+        if (singleTransfer && transferValueUpdated) {
+            // If we have store data but no warehouses yet, fetch them
+            if (transferValue.from_store_id && transferValue.from_store_id.value && fromWarehouses.length === 0) {
+                const fetchFromWarehouses = async () => {
+                    try {
+                        const response = await apiConfig.get(
+                            `${apiBaseURL.TRANSFERS_WAREHOUSES_BY_STORE}/${transferValue.from_store_id.value}`
+                        );
+                        if (response.data && response.data.success && response.data.data) {
+                            const formattedWarehouses = response.data.data.map(warehouse => ({
+                                label: warehouse.name,
+                                value: warehouse.id
+                            }));
+                            setFromWarehouses(formattedWarehouses);
+                            
+                            // Set the correct warehouse if it exists
+                            const matchingWarehouse = formattedWarehouses.find(
+                                w => w.value === singleTransfer.from_warehouse_id
+                            );
+                            if (matchingWarehouse) {
+                                setTransferValue(prev => ({
+                                    ...prev,
+                                    from_warehouse_id: matchingWarehouse
+                                }));
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching from warehouses:', error);
+                    }
+                };
+                fetchFromWarehouses();
+            }
+
+            if (transferValue.to_store_id && transferValue.to_store_id.value && toWarehouses.length === 0) {
+                const fetchToWarehouses = async () => {
+                    try {
+                        const response = await apiConfig.get(
+                            `${apiBaseURL.TRANSFERS_WAREHOUSES_BY_STORE}/${transferValue.to_store_id.value}`
+                        );
+                        if (response.data && response.data.success && response.data.data) {
+                            const formattedWarehouses = response.data.data.map(warehouse => ({
+                                label: warehouse.name,
+                                value: warehouse.id
+                            }));
+                            setToWarehouses(formattedWarehouses);
+                            
+                            // Set the correct warehouse if it exists
+                            const matchingWarehouse = formattedWarehouses.find(
+                                w => w.value === singleTransfer.to_warehouse_id
+                            );
+                            if (matchingWarehouse) {
+                                setTransferValue(prev => ({
+                                    ...prev,
+                                    to_warehouse_id: matchingWarehouse
+                                }));
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching to warehouses:', error);
+                    }
+                };
+                fetchToWarehouses();
+            }
+        }
+    }, [singleTransfer, transferValueUpdated, transferValue.from_store_id, transferValue.to_store_id]);
+
+    // Effect to handle initial warehouse loading when editing
+    useEffect(() => {
+        if (singleTransfer && stores.length > 0) {
+            // Find and set from store if not already set
+            if (!transferValue.from_store_id && singleTransfer.from_store_id) {
+                const fromStore = stores.find(s => s.value === singleTransfer.from_store_id);
+                if (fromStore) {
+                    setTransferValue(prev => ({
+                        ...prev,
+                        from_store_id: fromStore
+                    }));
+                }
+            }
+            
+            // Find and set to store if not already set
+            if (!transferValue.to_store_id && singleTransfer.to_store_id) {
+                const toStore = stores.find(s => s.value === singleTransfer.to_store_id);
+                if (toStore) {
+                    setTransferValue(prev => ({
+                        ...prev,
+                        to_store_id: toStore
+                    }));
+                }
+            }
+        }
+    }, [singleTransfer, stores]);
 
     const handleValidation = () => {
         let errorss = {};
@@ -479,7 +628,7 @@ const TransferForm = ( props ) => {
                             </thead>
                             <tbody>
                                 {updateProducts && updateProducts.map( ( singleProduct, index ) => {
-                                    return <TransfersTable singleProduct={singleProduct} index={index}
+                                    return <TransfersTable key={singleProduct.id || index} singleProduct={singleProduct} index={index}
                                         updateQty={updatedQty}
                                         updateCost={updateCost} updateDiscount={updateDiscount}
                                         updateProducts={updateProducts}
@@ -511,7 +660,7 @@ const TransferForm = ( props ) => {
                                 className='form-control'
                                 onBlur={( event ) => onBlurInput( event )}
                                 onFocus={( event ) => onFocusInput( event )}
-                                value={transferValue.tax_rate} type='text' name='tax_rate'
+                                value={transferValue.tax_rate || '0.00'} type='text' name='tax_rate'
                                 onKeyPress={( event ) => decimalValidate( event )}
                                 onChange={( e ) => {
                                     onChangeInput( e )
@@ -529,7 +678,7 @@ const TransferForm = ( props ) => {
                                 className='form-control'
                                 onBlur={( event ) => onBlurInput( event )}
                                 onFocus={( event ) => onFocusInput( event )}
-                                value={transferValue.discount} type='text' name='discount'
+                                value={transferValue.discount || '0.00'} type='text' name='discount'
                                 onKeyPress={( event ) => decimalValidate( event )}
                                 onChange={( e ) => onChangeInput( e )}
                             />
@@ -544,7 +693,7 @@ const TransferForm = ( props ) => {
                         </label>
                         <InputGroup>
                             <input aria-label='Dollar amount (with dot and two decimal places)'
-                                className='form-control' value={transferValue.shipping}
+                                className='form-control' value={transferValue.shipping || '0.00'}
                                 type='text' name='shipping'
                                 onBlur={( event ) => onBlurInput( event )}
                                 onFocus={( event ) => onFocusInput( event )}
@@ -567,7 +716,7 @@ const TransferForm = ( props ) => {
                             {getFormattedMessage( 'globally.input.note.label' )}:
                         </label>
                         <textarea name='notes' className='form-control'
-                            value={transferValue.notes}
+                            value={transferValue.notes || ''}
                             placeholder={placeholderText( 'globally.input.note.placeholder.label' )}
                             onChange={( e ) => onNotesChangeInput( e )}
                         />

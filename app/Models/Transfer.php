@@ -157,14 +157,14 @@ class Transfer extends BaseModel implements HasMedia, JsonResourceful
             'to_warehouse' => $this->toWarehouse,
             'from_store' => $fromStore
                 ? [
-                    'id' => $fromStore->id,
-                    'name' => $fromStore->name,
+                    'id' => $fromStore->id ?? null,
+                    'name' => $fromStore->name ?? null,
                 ]
                 : null,
             'to_store' => $toStore
                 ? [
-                    'id' => $toStore->id,
-                    'name' => $toStore->name,
+                    'id' => $toStore->id ?? null,
+                    'name' => $toStore->name ?? null,
                 ]
                 : null,
             'created_at' => $this->created_at,

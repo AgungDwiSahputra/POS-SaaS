@@ -156,6 +156,9 @@ class TransferRepository extends BaseRepository
         
         $productSyncService = app(ProductSyncService::class);
         
+        // Skip validation untuk transfer yang sudah ada (mode edit)
+        $isEditMode = isset($transfer->id);
+        
         foreach ($input['transfer_items'] as $transferItem) {
             $sourceProductId = $transferItem['product_id'];
             $destinationProductId = $sourceProductId; // Default: same (same tenant)
@@ -174,13 +177,13 @@ class TransferRepository extends BaseRepository
                 throw new UnprocessableEntityHttpException('Quantity should not be greater than available quantity.');
             }
             
-            // 2. CROSS-TENANT PRODUCT SYNC
-            if ($isCrossTenant) {
+            // 2. CROSS-TENANT PRODUCT SYNC (skip untuk mode edit)
+            if ($isCrossTenant && !$isEditMode) {
                 $sourceProduct = Product::find($sourceProductId);
                 
                 try {
                     $syncResult = $productSyncService->syncProduct(
-                        $sourceProduct, 
+                        $sourceProduct,
                         $toStore->tenant_id
                     );
                     
@@ -203,7 +206,7 @@ class TransferRepository extends BaseRepository
                 // HARUS SEBELUM stock movement untuk dapat qty yang benar
                 if ($isCrossTenant) {
                     $this->updateHPPCrossTenant(
-                        $destinationProductId, 
+                        $destinationProductId,
                         $transferItem['quantity'],
                         $transferItem['net_unit_price'] ?? $transferItem['product_price']
                     );
