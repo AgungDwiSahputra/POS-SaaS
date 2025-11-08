@@ -21,6 +21,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardAPIController extends AppBaseController
 {
@@ -82,24 +83,40 @@ class DashboardAPIController extends AppBaseController
 
     public function getTopSellingProducts(): JsonResponse
     {
-        $month = Carbon::now()->month;
-        $year = Carbon::now()->year;
-        $topSellings = Product::leftJoin('sale_items', 'products.id', '=', 'sale_items.product_id')
-            ->whereMonth('sale_items.created_at', $month)
-            ->whereYear('sale_items.created_at', $year)
-            ->selectRaw('products.*, COALESCE(sum(sale_items.sub_total),0) grand_total')
-            ->selectRaw('products.*, COALESCE(sum(sale_items.quantity),0) total_quantity')
-            ->groupBy('products.id')
-            ->orderBy('total_quantity', 'desc')
-            ->latest()
-            ->take(5)
-            ->get();
-        $data = [];
-        foreach ($topSellings as $topSelling) {
-            $data[] = $topSelling->prepareTopSelling();
-        }
+        try {
+            $month = Carbon::now()->month;
+            $year = Carbon::now()->year;
+            $topSellings = Product::leftJoin('sale_items', 'products.id', '=', 'sale_items.product_id')
+                ->whereMonth('sale_items.created_at', $month)
+                ->whereYear('sale_items.created_at', $year)
+                ->selectRaw('products.*, COALESCE(sum(sale_items.sub_total),0) grand_total')
+                ->selectRaw('products.*, COALESCE(sum(sale_items.quantity),0) total_quantity')
+                ->groupBy('products.id')
+                ->orderBy('total_quantity', 'desc')
+                ->latest()
+                ->take(5)
+                ->get();
+            $data = [];
+            foreach ($topSellings as $topSelling) {
+                try {
+                    $data[] = $topSelling->prepareTopSelling();
+                } catch (\Exception $e) {
+                    // Fallback if prepareTopSelling fails
+                    $data[] = [
+                        'name' => $topSelling->name ?? 'Unknown Product',
+                        'total_quantity' => $topSelling->total_quantity ?? 0,
+                        'grand_total' => $topSelling->grand_total ?? 0,
+                        'sale_unit' => null,
+                        'image' => $topSelling->image_url ?? null,
+                    ];
+                }
+            }
 
-        return $this->sendResponse($data, 'Top Selling Products Retrieved Successfully');
+            return $this->sendResponse($data, 'Top Selling Products Retrieved Successfully');
+        } catch (\Exception $e) {
+            Log::error('Error in getTopSellingProducts: ' . $e->getMessage());
+            return $this->sendResponse([], 'No top selling products found');
+        }
     }
 
     public function getWeekSalePurchases(): JsonResponse
@@ -147,22 +164,27 @@ class DashboardAPIController extends AppBaseController
 
     public function getYearlyTopSelling(): JsonResponse
     {
-        $year = Carbon::now()->year;
-        $topSellings = Product::leftJoin('sale_items', 'products.id', '=', 'sale_items.product_id')
-            ->whereYear('sale_items.created_at', $year)
-            ->selectRaw('products.*, COALESCE(sum(sale_items.sub_total),0) grand_total')
-            ->selectRaw('products.*, COALESCE(sum(sale_items.quantity),0) total_quantity')
-            ->groupBy('products.id')
-            ->orderBy('total_quantity', 'desc')
-            ->take(5)
-            ->get();
-        $data = [];
-        foreach ($topSellings as $topSelling) {
-            $data['name'][] = $topSelling->name;
-            $data['total_quantity'][] = $topSelling->total_quantity;
-        }
+        try {
+            $year = Carbon::now()->year;
+            $topSellings = Product::leftJoin('sale_items', 'products.id', '=', 'sale_items.product_id')
+                ->whereYear('sale_items.created_at', $year)
+                ->selectRaw('products.*, COALESCE(sum(sale_items.sub_total),0) grand_total')
+                ->selectRaw('products.*, COALESCE(sum(sale_items.quantity),0) total_quantity')
+                ->groupBy('products.id')
+                ->orderBy('total_quantity', 'desc')
+                ->take(5)
+                ->get();
+            $data = [];
+            foreach ($topSellings as $topSelling) {
+                $data['name'][] = $topSelling->name ?? 'Unknown Product';
+                $data['total_quantity'][] = $topSelling->total_quantity ?? 0;
+            }
 
-        return $this->sendResponse($data, 'Yearly TopSelling Products Retrieved Successfully');
+            return $this->sendResponse($data, 'Yearly TopSelling Products Retrieved Successfully');
+        } catch (\Exception $e) {
+            Log::error('Error in getYearlyTopSelling: ' . $e->getMessage());
+            return $this->sendResponse(['name' => [], 'total_quantity' => []], 'No yearly top selling products found');
+        }
     }
 
     public function getTopCustomer(): JsonResponse

@@ -57,6 +57,18 @@ mix.webpackConfig({
     output: {
         chunkFilename: 'js/chunks/[name].js',
     },
+    plugins: [
+        new (require('webpack')).DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development')
+            }
+        }),
+        // Only include the moment locales we need
+        new (require('webpack')).ContextReplacementPlugin(
+            /moment[\/\\]locale$/,
+            /(en|id)\.js/
+        )
+    ]
 }).react();
 
 mix.js('resources/js/app.js', 'public/js');

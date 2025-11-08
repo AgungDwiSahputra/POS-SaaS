@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Contracts\JsonResourceful;
+use App\Models\Unit;
 use App\Traits\HasJsonResourcefulData;
 use App\Traits\Multitenantable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

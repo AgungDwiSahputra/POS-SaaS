@@ -13,7 +13,7 @@ class LanguageDetection
     /**
      * Available locales in the application
      */
-    private const AVAILABLE_LOCALES = ['id', 'en', 'ar', 'cn', 'fr', 'gr', 'tr', 'vi'];
+    private const AVAILABLE_LOCALES = ['id', 'en'];
 
     /**
      * Default locale

@@ -14,7 +14,7 @@ import {useSelector} from "react-redux";
 
 const DateRangePicker = ( props ) => {
     const {onDateSelector, isProfitReport} = props;
-    const [date, setDate] = useState();
+    const [date, setDate] = useState('');
     const [selectedMinDate, setSelectedMinDate] = useState( moment().locale("en").startOf( 'month' ).toDate() );
     const [selectedMaxDate, setSelectedMaxDate] = useState( moment().locale("en").endOf( 'month' ).toDate() );
     const [popoverOpen, setPopoverOpen] = useState( false );
@@ -228,7 +228,7 @@ const DateRangePicker = ( props ) => {
             </div>
             <div className={`${popoverOpen === true ? 'custom-overlay' : ''}`}>
                 <Popover trigger='click' placement='bottom' isOpen={popoverOpen}
-                    target='Popover1' toggle={toggle} >
+                    target='Popover1' toggle={toggle} transition={{ timeout: 150 }} >
                     <PopoverBody className='date-picker-popover'>
                         <ListGroup>
                             <ListGroupItem className={`${dateColor === 'today' ? 'bg-primary text-white' : null} border-0 rounded`}
@@ -256,7 +256,7 @@ const DateRangePicker = ( props ) => {
                                     {getFormattedMessage( 'date-picker.filter.Custom-Range.label' )}
                                 </span>
                                 <Popover trigger='legacy' placement='left' className='date-picker__child-popover'
-                                    isOpen={childPopoverOpen} target='Popover2' toggle={toggleChild} >
+                                    isOpen={childPopoverOpen} target='Popover2' toggle={toggleChild} transition={{ timeout: 150 }} >
                                     <PopoverBody>
                                         <Row>
                                             <Col md={6} xs={12}>

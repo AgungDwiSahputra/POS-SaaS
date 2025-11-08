@@ -1,5 +1,5 @@
 {
-    "/js/app.js": "/js/app.js?id=b806a6b09c130515a09723c1619ec08f",
+    "/js/app.js": "/js/app.js?id=423b2a5ed1366d676275189620e0c76d",
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.eot?23f19bb08961f37aaf692ff943823453": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.eot?23f19bb08961f37aaf692ff943823453?id=0868992b7c56298026b76b22c534eab9",
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.woff2?d878b0a6a1144760244ff0665888404c": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.woff2?d878b0a6a1144760244ff0665888404c?id=4ec8652aef2ce3e636bf32c24dd5ce86",
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.woff?2285773e6b4b172f07d9b777c81b0775": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.woff?2285773e6b4b172f07d9b777c81b0775?id=66ea863732752673548b3b6537b6465b",
@@ -35,8 +35,6 @@
     "/images/avatar.png": "/images/avatar.png?id=2b584018f353b28bb484189b38ab6f1a",
     "/images/brand_logo.png": "/images/brand_logo.png?id=a1500976e031ab423ea90430e4134ac4",
     "/images/click_audio.mp3": "/images/click_audio.mp3?id=b0e3f1a6f8ddac92369908d05e7bd27c",
-    "/images/cn.svg": "/images/cn.svg?id=b12ec1edfb8dbf2cd2d21396ebfab262",
-    "/images/de.svg": "/images/de.svg?id=f1193d6a15920746e76492776b2dd92f",
     "/images/default/choose-1.png": "/images/default/choose-1.png?id=77354336bc99d04be061164d6f2989ac",
     "/images/default/choose-2.png": "/images/default/choose-2.png?id=c4c87fa707e20fc7e462802634fdd0ea",
     "/images/default/choose-3.png": "/images/default/choose-3.png?id=d065f4f691a3bbe16179c7a8935221d2",
@@ -67,7 +65,6 @@
     "/images/download.svg": "/images/download.svg?id=93183144a85f683e3eb8e94f3a751199",
     "/images/es.svg": "/images/es.svg?id=ed3212920479e635101e24cd84e8e86b",
     "/images/favicon.ico": "/images/favicon.ico?id=b813881ffe7b1199eee34977e7a31bf9",
-    "/images/fr.svg": "/images/fr.svg?id=fc9f285773d5841c0672cdddf667f963",
     "/images/gb.svg": "/images/gb.svg?id=cbb9afb370b2e7aa03dd4d28864694b4",
     "/images/home/service.png": "/images/home/service.png?id=f597a81a4c811daa34e0261ffa8e91b5",
     "/images/infycare-logo.png": "/images/infycare-logo.png?id=92c7108552a4832001d49bb262794c78",
@@ -85,7 +82,5 @@
     "/images/reset.png": "/images/reset.png?id=052d6255baca6c2c85990e207b67dd7d",
     "/images/sa.svg": "/images/sa.svg?id=3b04dccea99101838613b5df127e447e",
     "/images/stripe.svg": "/images/stripe.svg?id=9ec150a5096e4e42c94a8095e8385ccf",
-    "/images/tr.svg": "/images/tr.svg?id=0b3ec2d7462be44e10010a5c725552b6",
-    "/images/vn.svg": "/images/vn.svg?id=7e156d1d24f51aca6179f2e54dec5c7c",
     "/images/warning.png": "/images/warning.png?id=b294aefad77f7480e6bc819fa9f28f8c"
 }
