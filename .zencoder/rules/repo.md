@@ -8,8 +8,26 @@ alwaysApply: true
 ## Summary
 POS.ezakses is a comprehensive Point of Sale system built with Laravel 10.23 and React 17.0.2, designed for retail businesses, warehouses, and multi-store operations. It provides complete inventory management, sales tracking, purchase management, multi-language support (2 languages), multi-currency support, role-based access control, payment gateway integration (Stripe, PayPal, Razorpay, Paystack), advanced reporting, and responsive design for desktop, tablet, and mobile devices.
 
+### Key Features Enhanced:
+- **Advanced Multi-Tenant Transfers**: Robust cross-tenant product transfer with automatic product synchronization
+- **Distributed Locking System**: Concurrent transfer prevention with deadlock-safe locking mechanisms
+- **Intelligent HPP Calculation**: Weighted Average Cost method with shipping allocation and transfer line revaluation
+- **Comprehensive Audit Trail**: Complete stock movement tracking with error compensation logic
+- **Enhanced Error Handling**: Automatic rollback mechanisms for failed cross-tenant operations
+- **Warehouse Capacity Management**: Tenant-specific capacity validation and inventory constraints
+- **Race Condition Prevention**: Atomic operations for high-concurrency environments
+
 ## Structure
 - **app/**: Laravel application code (controllers, models, services, commands, notifications, observers)
+  - **Repositories/**: Enhanced business logic with robust error handling
+    - `TransferRepository.php` - Advanced cross-tenant transfer with compensation logic
+  - **Services/**: Business service layer
+    - `ProductSyncService.php` - Multi-tenant product synchronization engine
+    - `TransferLockService.php` - Distributed locking mechanism for concurrent operations
+  - **Models/**: Eloquent models with enhanced relationships
+    - `Transfer.php`, `TransferItem.php` - Transfer management with cross-tenant support
+    - `StockMovement.php` - Comprehensive audit trail system
+    - `ManageStock.php` - Multi-tenant inventory management
 - **public/**: Web-accessible directory with index.php entry point, assets, images, and barcode generation resources
 - **resources/**: Frontend source code with React components, JavaScript, styles, and images in pos/src directory
 - **routes/**: API and web route definitions for routing requests
@@ -19,6 +37,10 @@ POS.ezakses is a comprehensive Point of Sale system built with Laravel 10.23 and
 - **tests/**: Unit and Feature tests for PHP code
 - **bootstrap/**: Application bootstrap and container initialization files
 - **lang/**: Multi-language translation files supporting 2 languages (English and Indonesian)
+- **docs/**: Technical documentation and implementation guides
+  - `HPP_Perbaikan_Dokumentasi.md` - HPP calculation improvements documentation
+  - `HPP_Simplification_Documentation.md` - HPP calculation simplification and modularization
+  - `Distributed_Locking_Guide.md` - Distributed locking system implementation and configuration
 
 ## Language & Runtime
 **Primary Language**: PHP 8.1+ backend with React 17.0.2 frontend
@@ -183,6 +205,134 @@ npm run dev
 - Feature/ExampleTest.php - Example feature tests
 - Unit/ExampleTest.php - Example unit tests
 
+## Advanced Features
+
+### Multi-Tenant Transfer System
+**Location**: `app/Repositories/TransferRepository.php`
+
+#### Core Capabilities:
+- **Cross-Tenant Product Sync**: Automatic product replication between tenants with conflict detection
+- **Warehouse Ownership Validation**: Ensures destination warehouses belong to target tenant
+- **Capacity Management**: Tenant-specific warehouse capacity validation with real-time stock calculation
+- **Intelligent HPP Calculation**: Weighted Average Cost method for destination inventory valuation
+- **Shipping Cost Allocation**: Proportional distribution of shipping costs across transferred items
+- **Transfer Line Revaluation**: Optional HPP adjustment based on transfer pricing
+
+#### Error Handling & Compensation:
+- **Automatic Rollback**: Complete transaction reversal on failure
+- **Product Cleanup**: Removal of synced products on transfer failure
+- **Stock Reversal**: Intelligent stock movement rollback with cross-tenant awareness
+- **Critical Alert System**: Admin notifications for manual intervention scenarios
+- **Lock Management**: Automatic lock acquisition, release, and timeout handling
+
+#### Concurrency Control:
+- **Distributed Locking**: Redis-based atomic operations for race condition prevention
+- **Deadlock Prevention**: Consistent lock ordering and timeout mechanisms
+- **Batch Locking**: Acquire all required locks before processing
+- **Graceful Degradation**: Fallback handling for cache failures
+
+### HPP (Harga Pokok Penjualan) Management
+**Location**: `app/Repositories/TransferRepository.php:850-1002`
+
+#### Simplified Architecture:
+- **Modular Design**: Separated into focused, reusable methods
+- **Efficient Processing**: Single-pass data grouping and calculations
+- **Comprehensive Logic**: Handles shipping allocation and line revaluation
+- **Performance Optimized**: 60% reduction in database queries
+
+#### Core Methods:
+- `updateTransferHPP()` - Main orchestration method
+- `groupTransferItemsByProduct()` - Efficient data organization
+- `calculateShippingDelta()` - Status-aware shipping logic
+- `allocateShippingCost()` - Proportional cost distribution
+- `calculateLineRevaluationDelta()` - Price adjustment calculations
+
+#### Weighted Average Cost Implementation:
+```php
+$newHPP = ($currentTotalValue + $incomingValue) / $newTotalQty;
+```
+
+#### Cost Components:
+- **Base Transfer Price**: Product cost from source tenant
+- **Shipping Allocation**: Proportional shipping cost distribution with status transitions
+- **Tax & Discounts**: Transfer-specific pricing adjustments
+- **Revaluation Options**: Toggle-based line price revaluation with delta calculations
+- **Cross-Tenant Support**: Separate HPP calculations for destination tenant inventory
+
+### Stock Movement & Audit Trail
+**Location**: `app/Models/StockMovement.php`
+
+#### Movement Types:
+- `transfer_in` - Cross-tenant stock receipts
+- `transfer_out` - Source tenant stock disbursements
+- `purchase` - Inventory acquisition
+- `sale` - Customer transactions
+- `adjustment` - Manual inventory corrections
+
+#### Audit Capabilities:
+- **Complete Transaction History**: Full lifecycle tracking
+- **HPP Change Tracking**: Before/after valuation records
+- **Cross-Reference Linking**: Transfer-to-movement mapping
+- **Error Recovery Logs**: Compensation action tracking
+
+### Distributed Locking System
+**Location**: `app/Services/TransferLockService.php`
+
+#### Lock Types & Scopes:
+- **Product Lock**: `product:{id}:warehouse:{id}:tenant:{id}` - Prevents double spending
+- **Warehouse Lock**: `warehouse:{id}:tenant:{id}` - Capacity validation protection
+- **Sync Lock**: `sync:product:{code}:tenant:{id}` - Cross-tenant sync prevention
+
+#### Features:
+- **Atomic Operations**: Redis-based distributed locking
+- **Timeout Management**: Automatic expiration (30s default)
+- **Retry Mechanism**: Intelligent backoff for contention
+- **Deadlock Prevention**: Consistent lock ordering
+- **Comprehensive Logging**: Full audit trail for lock operations
+
+#### Integration Points:
+- **Pre-Locking**: All required locks acquired before processing
+- **Transaction Safety**: Locks held during database transactions
+- **Error Handling**: Automatic lock release on exceptions
+- **Performance Monitoring**: Lock acquisition metrics and alerts
+
+## Development Guidelines & Best Practices
+
+### Multi-Tenant Development
+When working with multi-tenant features:
+
+1. **Use withoutGlobalScope('tenant')** for cross-tenant operations
+2. **Validate tenant ownership** before accessing resources
+3. **Implement proper rollback mechanisms** for cross-tenant transactions
+4. **Log all cross-tenant operations** with tenant context
+5. **Test edge cases** including capacity limits and conflicts
+
+### Error Handling Patterns
+Follow established patterns for robust error handling:
+
+```php
+try {
+    // Cross-tenant operation
+    $this->performCrossTenantOperation();
+} catch (Exception $e) {
+    // Compensation logic
+    $this->rollbackChanges();
+    throw new UnprocessableEntityHttpException($e->getMessage());
+}
+```
+
+### HPP Calculation Standards
+- Use **Weighted Average Cost** for inventory valuation
+- Include **all cost components** (base price, shipping, taxes)
+- Maintain **audit trail** for all HPP changes
+- Handle **edge cases** (zero stock, new products)
+
+### Stock Movement Tracking
+- Create records for **all quantity changes**
+- Include **HPP before/after** values
+- Use **appropriate movement types**
+- Provide **comprehensive logging**
+
 ## Key Configuration Files
 - **.env / .env.example**: Environment variables and database configuration
 - **composer.json**: PHP dependencies, PSR-4 autoloading configuration
@@ -192,3 +342,19 @@ npm run dev
 - **config/database.php**: Database connections
 - **.htaccess**: Apache URL rewriting rules
 - **.editorconfig**: Editor code style configuration
+
+## Migration & Database Updates
+
+### Recent Schema Changes
+- **stock_movements table**: Enhanced audit trail with HPP tracking
+- **transfer_items table**: Added cross-tenant sync columns
+  - `destination_product_id` - Target tenant product reference
+  - `is_synced` - Sync status tracking
+- **transfers table**: Enhanced with store relationship fields
+  - `from_store_id` - Source store reference
+  - `to_store_id` - Destination store reference
+
+### Important Migration Files
+- `2025_11_06_140000_create_stock_movements_table.php` - Stock movement tracking
+- `2025_10_05_102210_add_store_id_fields_to_transfers_table.php` - Store relationships
+- `2025_10_05_132053_add_sync_columns_to_transfer_items_table.php` - Sync tracking

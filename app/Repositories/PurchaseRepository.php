@@ -3,12 +3,14 @@
 namespace App\Repositories;
 
 use App\Models\ManageStock;
+use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
-use App\Models\Product;
+use App\Models\StockMovement;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -77,9 +79,12 @@ class PurchaseRepository extends BaseRepository
 
             // Siapkan stok awal per produk (sebelum penambahan) untuk perhitungan HPP rata-rata tertimbang
             $initialQtyByProduct = [];
+            $initialHppByProduct = [];
             $uniqueProductIds = collect($input['purchase_items'])->pluck('product_id')->unique();
             foreach ($uniqueProductIds as $pid) {
                 $initialQtyByProduct[$pid] = ManageStock::where('product_id', $pid)->sum('quantity');
+                $product = Product::find($pid);
+                $initialHppByProduct[$pid] = (float) ($product->hpp ?? 0);
             }
 
             $purchaseInputArray = Arr::only($input, [
@@ -114,27 +119,74 @@ class PurchaseRepository extends BaseRepository
                 $purchasedCost[$pid] = ($purchasedCost[$pid] ?? 0) + $pItem->sub_total; // sub_total sudah net of tax sesuai jenis pajak
             }
 
+            // Tambahkan biaya shipping secara proporsional ke setiap produk
+            $shippingCost = (float) ($input['shipping'] ?? 0);
+            if ($shippingCost > 0 && count($purchasedCost) > 0) {
+                $totalSubTotal = array_sum($purchasedCost);
+                foreach ($purchasedCost as $pid => $cost) {
+                    // Alokasi shipping proporsional berdasarkan nilai subtotal
+                    $shippingAllocation = $shippingCost * ($cost / $totalSubTotal);
+                    $purchasedCost[$pid] += $shippingAllocation;
+                }
+            }
+
             // manage stock
             foreach ($input['purchase_items'] as $purchaseItem) {
                 manageStock($input['warehouse_id'], $purchaseItem['product_id'], $purchaseItem['quantity']);
             }
 
-            // Update HPP rata-rata tertimbang per produk
+            // Update HPP rata-rata tertimbang per produk (Weighted Average Cost)
             foreach ($uniqueProductIds as $pid) {
                 $oldQty = (float) ($initialQtyByProduct[$pid] ?? 0);
+                $oldHpp = (float) ($initialHppByProduct[$pid] ?? 0);
                 $addedQty = (float) ($purchasedQty[$pid] ?? 0);
+                $addedCost = (float) ($purchasedCost[$pid] ?? 0);
                 $totalQty = $oldQty + $addedQty;
+                
                 if ($totalQty <= 0) {
                     continue; // tidak ada stok, lewati
                 }
 
+                // Hitung total nilai lama dan tambahkan biaya baru
+                $oldTotalValue = $oldQty * $oldHpp;
+                $newTotalValue = $oldTotalValue + $addedCost;
+                
+                // HPP baru = Total Nilai / Total Quantity
+                $newHpp = $newTotalValue / $totalQty;
+
                 /** @var Product $prod */
                 $prod = Product::find($pid);
-                $oldHpp = (float) ($prod->hpp ?? 0);
-                $oldTotalCost = $oldQty * $oldHpp;
-                $addedTotalCost = (float) ($purchasedCost[$pid] ?? 0);
-                $newHpp = ($oldTotalCost + $addedTotalCost) / $totalQty;
+                $oldHppValue = $prod->hpp;
                 $prod->update(['hpp' => (int) round($newHpp)]);
+                
+                // Log perubahan HPP untuk debugging
+                Log::info("HPP Updated for Product {$pid}", [
+                    'old_qty' => $oldQty,
+                    'old_hpp' => $oldHpp,
+                    'old_total_value' => $oldTotalValue,
+                    'added_qty' => $addedQty,
+                    'added_cost' => $addedCost,
+                    'new_qty' => $totalQty,
+                    'new_hpp' => $newHpp,
+                    'rounded_hpp' => (int) round($newHpp)
+                ]);
+
+                // Create stock movement record for HPP change
+                try {
+                    StockMovement::createMovement([
+                        'product_id' => $pid,
+                        'warehouse_id' => $input['warehouse_id'],
+                        'quantity' => $addedQty,
+                        'type' => StockMovement::TYPE_PURCHASE,
+                        'reference_type' => 'purchase',
+                        'reference_id' => $purchase->id,
+                        'old_hpp' => $oldHppValue,
+                        'new_hpp' => (int) round($newHpp),
+                        'notes' => "HPP updated from purchase {$purchase->reference_code}"
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error("Failed to create stock movement record for HPP change: " . $e->getMessage());
+                }
             }
 
             DB::commit();
@@ -264,6 +316,28 @@ class PurchaseRepository extends BaseRepository
                 $newTotalsCost[$pid] = ($newTotalsCost[$pid] ?? 0) + $calc['sub_total'];
             }
 
+            // Tambahkan biaya shipping lama dan baru secara proporsional
+            $oldShipping = (float) ($purchase->shipping ?? 0);
+            $newShipping = (float) ($input['shipping'] ?? 0);
+            
+            // Alokasi shipping lama
+            if ($oldShipping > 0 && count($oldTotalsCost) > 0) {
+                $totalOldSubTotal = array_sum($oldTotalsCost);
+                foreach ($oldTotalsCost as $pid => $cost) {
+                    $oldShippingAllocation = $oldShipping * ($cost / $totalOldSubTotal);
+                    $oldTotalsCost[$pid] += $oldShippingAllocation;
+                }
+            }
+            
+            // Alokasi shipping baru
+            if ($newShipping > 0 && count($newTotalsCost) > 0) {
+                $totalNewSubTotal = array_sum($newTotalsCost);
+                foreach ($newTotalsCost as $pid => $cost) {
+                    $newShippingAllocation = $newShipping * ($cost / $totalNewSubTotal);
+                    $newTotalsCost[$pid] += $newShippingAllocation;
+                }
+            }
+
             $affectedProductIds = collect(array_unique(array_merge(array_keys($oldTotalsQty), array_keys($newTotalsQty))))->values();
             $initialStockByProduct = [];
             $initialHppByProduct = [];
@@ -339,16 +413,60 @@ class PurchaseRepository extends BaseRepository
             foreach ($affectedProductIds as $pid) {
                 $oldQtyStock = (float) ($initialStockByProduct[$pid] ?? 0);
                 $oldHpp = (float) ($initialHppByProduct[$pid] ?? 0);
-                $deltaQty = (float) (($newTotalsQty[$pid] ?? 0) - ($oldTotalsQty[$pid] ?? 0));
-                $deltaCost = (float) (($newTotalsCost[$pid] ?? 0) - ($oldTotalsCost[$pid] ?? 0));
+                $oldQty = (float) ($oldTotalsQty[$pid] ?? 0);
+                $newQty = (float) ($newTotalsQty[$pid] ?? 0);
+                $oldCost = (float) ($oldTotalsCost[$pid] ?? 0);
+                $newCost = (float) ($newTotalsCost[$pid] ?? 0);
 
-                $den = $oldQtyStock + $deltaQty;
-                if ($den <= 0) {
+                // Hitung delta quantity dan cost
+                $deltaQty = $newQty - $oldQty;
+                $deltaCost = $newCost - $oldCost;
+                
+                // Total quantity setelah perubahan
+                $totalQty = $oldQtyStock + $deltaQty;
+                
+                if ($totalQty <= 0) {
                     continue;
                 }
 
-                $newHpp = (($oldQtyStock * $oldHpp) + $deltaCost) / $den;
+                // Hitung HPP baru menggunakan Weighted Average
+                $oldTotalValue = $oldQtyStock * $oldHpp;
+                $newTotalValue = $oldTotalValue + $deltaCost;
+                $newHpp = $newTotalValue / $totalQty;
+                
+                $product = \App\Models\Product::find($pid);
+                $oldHppValue = $product->hpp;
                 \App\Models\Product::where('id', $pid)->update(['hpp' => (int) round($newHpp)]);
+                
+                // Log perubahan HPP untuk debugging
+                Log::info("HPP Updated for Product {$pid} (Purchase Update)", [
+                    'old_stock_qty' => $oldQtyStock,
+                    'old_hpp' => $oldHpp,
+                    'old_total_value' => $oldTotalValue,
+                    'delta_qty' => $deltaQty,
+                    'delta_cost' => $deltaCost,
+                    'new_total_qty' => $totalQty,
+                    'new_total_value' => $newTotalValue,
+                    'new_hpp' => $newHpp,
+                    'rounded_hpp' => (int) round($newHpp)
+                ]);
+
+                // Create stock movement record for HPP change
+                try {
+                    StockMovement::createMovement([
+                        'product_id' => $pid,
+                        'warehouse_id' => $input['warehouse_id'],
+                        'quantity' => $deltaQty,
+                        'type' => StockMovement::TYPE_PURCHASE_RETURN, // Using return type for negative delta
+                        'reference_type' => 'purchase_update',
+                        'reference_id' => $id,
+                        'old_hpp' => $oldHppValue,
+                        'new_hpp' => (int) round($newHpp),
+                        'notes' => "HPP updated from purchase update {$id}"
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error("Failed to create stock movement record for HPP change: " . $e->getMessage());
+                }
             }
             DB::commit();
 

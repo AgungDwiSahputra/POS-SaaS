@@ -400,6 +400,24 @@ class Product extends BaseModel implements HasMedia, JsonResourceful
         return $totalQuantity;
     }
 
+    /**
+     * Get total quantity accessor for consistency across the application
+     * @return float
+     */
+    public function getTotalQuantityAttribute()
+    {
+        return $this->inStock($this->id);
+    }
+
+    /**
+     * Get grand total accessor for consistency across the application
+     * @return float
+     */
+    public function getGrandTotalAttribute()
+    {
+        return $this->total_quantity * $this->product_price;
+    }
+
     public function stocks(): HasMany
     {
         return $this->hasMany(ManageStock::class, 'product_id', 'id');

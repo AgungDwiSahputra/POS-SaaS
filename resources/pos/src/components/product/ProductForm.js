@@ -903,17 +903,27 @@ const ProductForm = (props) => {
                     singleProductTypeData.add_stock
                 );
             } else {
-                formData.append(
-                    "variation_data",
-                    JSON.stringify(
-                        variationTypesData.map((variationType) => ({
-                            ...variationType,
-                            tax_type: variationType.tax_type.value,
-                            purchase_quantity: variationType.add_stock,
-                            code: variationType.product_variation_code,
-                        }))
-                    )
-                );
+                // Fix: Add validation to prevent undefined/null values
+                const validVariationData = variationTypesData
+                    .filter(variationType => variationType && variationType.variation_type_id)
+                    .map((variationType) => ({
+                        variation_id: variationType.variation_id,
+                        variation_type_id: variationType.variation_type_id,
+                        product_cost: parseFloat(variationType.product_cost) || 0,
+                        product_price: parseFloat(variationType.product_price) || 0,
+                        stock_alert: parseInt(variationType.stock_alert) || 0,
+                        order_tax: parseFloat(variationType.order_tax) || 0,
+                        tax_type: variationType.tax_type?.value || 1,
+                        add_stock: parseFloat(variationType.add_stock) || 0,
+                        product_variation_code: variationType.product_variation_code || '',
+                    }));
+
+                if (validVariationData.length > 0) {
+                    formData.append(
+                        "variation_data",
+                        JSON.stringify(validVariationData)
+                    );
+                }
             }
         }
         if (multipleFiles) {
@@ -929,21 +939,31 @@ const ProductForm = (props) => {
         event.preventDefault();
         const valid = handleValidation();
         productValue.images = multipleFiles;
-        if (
-            singleProduct &&
-            valid &&
-            isClearDropdown === true &&
-            isDropdown === true
-        ) {
-            if (!disabled) {
-                editMainProduct(id, prepareFormData(), navigate);
+
+        // Fix: Add try-catch for form submission
+        try {
+            if (
+                singleProduct &&
+                valid &&
+                isClearDropdown === true &&
+                isDropdown === true
+            ) {
+                if (!disabled) {
+                    editMainProduct(id, prepareFormData(), navigate);
+                }
+            } else {
+                if (valid) {
+                    productValue.images = multipleFiles;
+                    setProductValue(productValue);
+                    addProductData(prepareFormData());
+                }
             }
-        } else {
-            if (valid) {
-                productValue.images = multipleFiles;
-                setProductValue(productValue);
-                addProductData(prepareFormData());
-            }
+        } catch (error) {
+            console.error('Product form submission error:', error);
+            // Add user feedback for the error
+            setErrors({
+                submit: 'Failed to submit product data. Please check all fields and try again.'
+            });
         }
     };
 

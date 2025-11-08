@@ -36,25 +36,10 @@ class UpdateMainProductRequest extends FormRequest
         return [
             'name' => 'required',
             'product_code' => 'required|unique:main_products,code,' . $this->route('id') . ',id,tenant_id,' . Auth::user()->tenant_id,
-            'product_category_id' => 'required|exists:product_categories,id',
-            'brand_id' => 'required|exists:brands,id',
-            // 'product_cost' => 'required|numeric', //
-            // 'product_price' => 'required|numeric', //
             'product_unit' => 'required',
-            'sale_unit' => 'nullable',
-            'purchase_unit' => 'nullable',
-            // 'stock_alert' => 'nullable', //
-            'quantity_limit' => 'nullable',
-            // 'order_tax' => 'nullable|numeric', //
-            // 'tax_type' => 'nullable', //
+            'product_type' => 'required|in:1,2',
             'notes' => 'nullable',
-            'barcode_symbol' => 'required',
             'images.*' => 'image|mimes:jpg,jpeg,png,svg',
-            // 'variation_data.*.product_cost' => 'required|numeric',
-            // 'variation_data.*.product_price' => 'required|numeric',
-            // 'variation_data.*.stock_alert' => 'nullable',
-            // 'variation_data.*.order_tax' => 'nullable|numeric',
-            // 'variation_data.*.tax_type' => 'nullable',
         ];
         // }
 

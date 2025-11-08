@@ -5,6 +5,7 @@ use App\Models\Language;
 use App\Models\ManageStock;
 use App\Models\SadminSetting;
 use App\Models\Setting;
+use App\Models\StockMovement;
 use App\Models\Store;
 use App\Models\Subscription;
 use App\Models\Supplier;
@@ -12,6 +13,7 @@ use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 if (! function_exists('getPageSize')) {
@@ -145,17 +147,55 @@ if (! function_exists('manageStock')) {
             ->first();
 
         if ($product) {
-            $totalQuantity = $product->quantity + $qty;
+            $oldQuantity = $product->quantity;
+            $newQuantity = $oldQuantity + $qty;
 
-            if (($product->quantity + $qty) < 0) {
-                $totalQuantity = 0;
+            // Validasi stok tidak boleh negatif
+            if ($newQuantity < 0) {
+                throw new \Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException(
+                    "Insufficient stock for Product ID {$productID} in Warehouse {$warehouseID}. " .
+                    "Available: {$oldQuantity}, Requested: " . abs($qty)
+                );
             }
+
             $product->update([
-                'quantity' => $totalQuantity,
+                'quantity' => $newQuantity,
             ]);
+
+            // Log perubahan stok untuk audit trail
+            Log::info("Stock Updated", [
+                'warehouse_id' => $warehouseID,
+                'product_id' => $productID,
+                'old_quantity' => $oldQuantity,
+                'new_quantity' => $newQuantity,
+                'change' => $qty,
+                'change_type' => $qty >= 0 ? 'IN' : 'OUT',
+                'timestamp' => now()->toISOString()
+            ]);
+
+            // Create stock movement record for audit trail
+            try {
+                $product = \App\Models\Product::find($productID);
+                StockMovement::createMovement([
+                    'product_id' => $productID,
+                    'warehouse_id' => $warehouseID,
+                    'quantity' => $qty,
+                    'type' => $qty >= 0 ? StockMovement::TYPE_PURCHASE : StockMovement::TYPE_SALE,
+                    'reference_type' => 'stock_update',
+                    'reference_id' => null,
+                    'old_hpp' => $product ? $product->hpp : null,
+                    'new_hpp' => $product ? $product->hpp : null, // HPP doesn't change in stock update
+                    'notes' => 'Stock quantity updated by manageStock function'
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to create stock movement record: " . $e->getMessage());
+            }
         } else {
+            // Jika qty negatif untuk produk yang belum ada, throw error
             if ($qty < 0) {
-                $qty = 0;
+                throw new \Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException(
+                    "Cannot create negative stock for Product ID {$productID} in Warehouse {$warehouseID}"
+                );
             }
 
             ManageStock::create([
@@ -163,6 +203,33 @@ if (! function_exists('manageStock')) {
                 'product_id' => $productID,
                 'quantity' => $qty,
             ]);
+
+            // Log penciptaan stok baru
+            Log::info("Stock Created", [
+                'warehouse_id' => $warehouseID,
+                'product_id' => $productID,
+                'quantity' => $qty,
+                'change_type' => 'INITIAL',
+                'timestamp' => now()->toISOString()
+            ]);
+
+            // Create stock movement record for audit trail
+            try {
+                $product = \App\Models\Product::find($productID);
+                StockMovement::createMovement([
+                    'product_id' => $productID,
+                    'warehouse_id' => $warehouseID,
+                    'quantity' => $qty,
+                    'type' => StockMovement::TYPE_INITIAL,
+                    'reference_type' => 'initial_stock',
+                    'reference_id' => null,
+                    'old_hpp' => null,
+                    'new_hpp' => $product ? $product->hpp : null,
+                    'notes' => 'Initial stock created'
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to create stock movement record: " . $e->getMessage());
+            }
         }
     }
 }

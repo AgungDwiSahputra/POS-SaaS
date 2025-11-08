@@ -70,6 +70,7 @@ return [
         'paid' => 'Paid',
         'due' => 'Due',
         'cost' => 'Cost',
+        'hpp' => 'HPP',
         'current_stock' => 'Current Stock',
         'product_code' => 'Product Code',
         'product_name' => 'Product Name',
@@ -525,6 +526,11 @@ return [
     'globally' => [
         'cancel-btn' => 'Cancel',
         'delete-btn' => 'Delete',
+        'input' => [
+            'hpp' => [
+                'label' => 'HPP',
+            ],
+        ],
     ],
 
     'digital-product' => [

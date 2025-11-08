@@ -134,67 +134,103 @@ class MainProductAPIController extends AppBaseController
             throw new UnprocessableEntityHttpException($e->getMessage());
         }
 
-        return new MainProductResource($product);
+        return new MainProductResource($mainProduct);
     }
 
     public function update(UpdateMainProductRequest $request, $id): MainProductResource
     {
-        $input = $request->all();
-        $mainProduct = MainProduct::find($id);
+        try {
+            $input = $request->all();
+            $mainProduct = MainProduct::find($id);
 
-        // Validasi kode produk untuk single product dalam tenant yang sama
-        // Pastikan kode tidak digunakan oleh produk lain dalam tenant yang sama dengan main_product_id yang berbeda
-        if ($mainProduct->product_type == MainProduct::SINGLE_PRODUCT) {
-            $existingProduct = Product::where('code', $input['product_code'])
-                ->where('tenant_id', Auth::user()->tenant_id)
-                ->where('main_product_id', '!=', $mainProduct->id)
-                ->first();
-                
-            if ($existingProduct) {
-                throw new UnprocessableEntityHttpException(__('messages.error.code_taken'));
+            if (!$mainProduct) {
+                throw new UnprocessableEntityHttpException('Product not found');
             }
-        }
-        
-        // Untuk variation product, tidak perlu validasi kode unik karena setiap variasi memiliki kode sendiri
 
-        $mainProduct->update([
-            'name' => $input['name'],
-            'code' => $input['product_code'],
-            'product_unit' => $input['product_unit'],
-        ]);
+            // Validasi kode produk untuk single product dalam tenant yang sama
+            if ($mainProduct->product_type == MainProduct::SINGLE_PRODUCT) {
+                $existingProduct = Product::where('code', $input['product_code'])
+                    ->where('tenant_id', Auth::user()->tenant_id)
+                    ->where('main_product_id', '!=', $mainProduct->id)
+                    ->first();
 
-
-        if (isset($input['images']) && !empty($input['images'])) {
-            foreach ($input['images'] as $image) {
-                $product['image_url'] = $mainProduct->addMedia($image)->toMediaCollection(
-                    MainProduct::PATH,
-                    config('app.media_disc')
-                );
+                if ($existingProduct) {
+                    throw new UnprocessableEntityHttpException(__('messages.error.code_taken'));
+                }
             }
-        }
 
-        $products = Product::with('variationType')->where('main_product_id', $id)->get();
+            // Update MainProduct fields only
+            $mainProduct->update([
+                'name' => $input['name'],
+                'code' => $input['product_code'],
+                'product_unit' => $input['product_unit'],
+            ]);
 
-        foreach ($products as $product) {
-            if ($mainProduct->product_type == MainProduct::VARIATION_PRODUCT) {
-                $input['code'] = $product->code ?? $input['product_code'];
-            } else {
-                $input['code'] = $input['product_code'];
+            // Handle image uploads
+            if (isset($input['images']) && !empty($input['images'])) {
+                foreach ($input['images'] as $image) {
+                    $mainProduct->addMedia($image)->toMediaCollection(
+                        MainProduct::PATH,
+                        config('app.media_disc')
+                    );
+                }
             }
-            $productRepo = app(ProductRepository::class);
-            $product = $productRepo->updateProduct($input, $product->id);
-        }
 
-        return new MainProductResource($product);
+            // Update related Products
+            $products = Product::where('main_product_id', $id)->get();
+
+            foreach ($products as $product) {
+                // Prepare input for product update
+                $productInput = array_merge($input, [
+                    'main_product_id' => $mainProduct->id,
+                    'name' => $mainProduct->name,
+                    'product_unit' => $mainProduct->product_unit,
+                ]);
+
+                if ($mainProduct->product_type == MainProduct::VARIATION_PRODUCT) {
+                    // Keep existing code for variation products
+                    $productInput['code'] = $product->code;
+                } else {
+                    $productInput['code'] = $input['product_code'];
+                }
+
+                $productRepo = app(ProductRepository::class);
+                $productRepo->updateProduct($productInput, $product->id);
+            }
+
+            return new MainProductResource($mainProduct->load('products'));
+        } catch (\Exception $e) {
+            \Log::error('MainProduct update failed: ' . $e->getMessage(), [
+                'id' => $id,
+                'input' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new UnprocessableEntityHttpException($e->getMessage());
+        }
     }
 
     public function destroy($id): JsonResponse
     {
         try {
+            \Log::info('Starting delete process for main product ID: ' . $id);
+
             DB::beginTransaction();
+
+            // Find main product first
+            $mainProduct = MainProduct::find($id);
+            if (!$mainProduct) {
+                \Log::error('Main product not found: ' . $id);
+                DB::rollBack();
+                return $this->sendError('Product not found');
+            }
+
+            \Log::info('Found main product: ' . $mainProduct->name);
+
             $products = Product::where('main_product_id', $id)->get();
+            \Log::info('Found ' . $products->count() . ' related products');
 
             foreach ($products as $product) {
+                \Log::info('Checking product ID: ' . $product->id . ' - ' . $product->name);
 
                 $purchaseItemModels = [
                     PurchaseItem::class,
@@ -206,6 +242,9 @@ class MainProductAPIController extends AppBaseController
                 $purchaseResult = canDelete($purchaseItemModels, 'product_id', $product->id);
                 $saleResult = canDelete($saleItemModels, 'product_id', $product->id);
 
+                \Log::info('Purchase relations: ' . ($purchaseResult ? 'FOUND' : 'NONE'));
+                \Log::info('Sale relations: ' . ($saleResult ? 'FOUND' : 'NONE'));
+
                 if ($purchaseResult || $saleResult) {
                     // Provide specific error message based on why the product can't be deleted
                     if ($purchaseResult && $saleResult) {
@@ -215,21 +254,39 @@ class MainProductAPIController extends AppBaseController
                     } else {
                         $errorMessage = __('messages.error.product_cant_deleted_sales');
                     }
-                    
+
+                    \Log::warning('Cannot delete product due to relations: ' . $errorMessage);
+                    DB::rollBack();
                     return $this->sendError($errorMessage);
                 }
 
+                // Delete barcode file
                 if (File::exists(Storage::path('product_barcode/barcode-PR_' . $product->id . '.png'))) {
                     File::delete(Storage::path('product_barcode/barcode-PR_' . $product->id . '.png'));
+                    \Log::info('Deleted barcode for product: ' . $product->id);
                 }
-                $product->delete();
+
+                // Delete product
+                $deleted = $product->delete();
+                \Log::info('Product deletion result: ' . ($deleted ? 'SUCCESS' : 'FAILED'));
             }
 
-            VariationProduct::where('main_product_id', $id)->delete();
+            // Delete variation products
+            $variationDeleted = VariationProduct::where('main_product_id', $id)->delete();
+            \Log::info('Deleted variation products: ' . $variationDeleted . ' records');
 
-            $this->mainProductRepository->delete($id);
+            // Delete main product - use direct delete instead of repository
+            $mainProductDeleted = $mainProduct->delete();
+            \Log::info('Main product deletion result: ' . ($mainProductDeleted ? 'SUCCESS' : 'FAILED'));
+
             DB::commit();
+            \Log::info('Transaction committed successfully');
+
         } catch (\Exception $e) {
+            \Log::error('Delete failed: ' . $e->getMessage(), [
+                'id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
             DB::rollBack();
             return $this->sendError($e->getMessage());
         }

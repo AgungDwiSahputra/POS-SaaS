@@ -16,7 +16,7 @@
         <th style="width: 200%">{{ __('messages.pdf.warehouse') }}</th>
         <th style="width: 200%">{{ __('messages.pdf.code') }}</th>
         <th style="width: 300%">{{ __('messages.pdf.name') }}</th>
-        <th style="width: 200%">{{ __('messages.pdf.cost') }}</th>
+        <th style="width: 200%">{{ __('messages.pdf.hpp') }}</th>
         <th style="width: 200%">{{ __('messages.pdf.price') }}</th>
         <th style="width: 250%">{{ __('messages.pdf.current_stock') }}</th>
     </tr>
@@ -27,7 +27,7 @@
             <td>{{$stock->warehouse->name}}</td>
             <td>{{$stock->product->code}}</td>
             <td>{{$stock->product->name}}</td>
-            <td>{{ round(floatval($stock->product->product_cost), 2) }}</td>
+            <td>{{ round(floatval($stock->product->hpp ?? $stock->product->product_cost), 2) }}</td>
             <td>{{ round(floatval($stock->product->product_price), 2) }}</td>
             <td>{{ $stock->quantity }}</td>
         </tr>
