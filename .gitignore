@@ -14,3 +14,5 @@ yarn-error.log
 node_modules
 public/uploads/*
 public/storage/*
+.kilocode
+.zencoder
