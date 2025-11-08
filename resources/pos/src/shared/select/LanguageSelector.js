@@ -26,12 +26,6 @@ const LanguageSelector = (props) => {
     const languages = useMemo(() => [
         { value: 'id', label: '🇮🇩 Bahasa Indonesia', nativeName: 'Indonesia' },
         { value: 'en', label: '🇺🇸 English', nativeName: 'English' },
-        { value: 'ar', label: '🇸🇦 العربية', nativeName: 'العربية' },
-        { value: 'cn', label: '🇨🇳 中文', nativeName: '中文' },
-        { value: 'fr', label: '🇫🇷 Français', nativeName: 'Français' },
-        { value: 'gr', label: '🇩🇪 Deutsch', nativeName: 'Deutsch' },
-        { value: 'tr', label: '🇹🇷 Türkçe', nativeName: 'Türkçe' },
-        { value: 'vi', label: '🇻🇳 Tiếng Việt', nativeName: 'Tiếng Việt' },
     ], []);
 
     const handleChange = (selectedOption) => {

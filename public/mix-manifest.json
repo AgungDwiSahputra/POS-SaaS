@@ -1,6 +1,8 @@
 {
-    "/js/app.js": "/js/app.js?id=b806a6b09c130515a09723c1619ec08f",
+    "/js/app.js": "/js/app.js?id=cbd1e27151259a3f0e29695252d741e2",
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.eot?23f19bb08961f37aaf692ff943823453": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.eot?23f19bb08961f37aaf692ff943823453?id=0868992b7c56298026b76b22c534eab9",
+    "/fonts/vendor/bootstrap-icons/bootstrap-icons.woff2?92ea18a81d737146ff044ddb52010366": "/fonts/vendor/bootstrap-icons/bootstrap-icons.woff2?92ea18a81d737146ff044ddb52010366?id=9ad5aa740d7d5e6a0191b309b9b1986c",
+    "/fonts/vendor/bootstrap-icons/bootstrap-icons.woff?1295669cd4e305c97f2cfc16d56614b8": "/fonts/vendor/bootstrap-icons/bootstrap-icons.woff?1295669cd4e305c97f2cfc16d56614b8?id=d1af9af6052c51b169be6c628ae99bb5",
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.woff2?d878b0a6a1144760244ff0665888404c": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.woff2?d878b0a6a1144760244ff0665888404c?id=4ec8652aef2ce3e636bf32c24dd5ce86",
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.woff?2285773e6b4b172f07d9b777c81b0775": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.woff?2285773e6b4b172f07d9b777c81b0775?id=66ea863732752673548b3b6537b6465b",
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.ttf?527940b104eb2ea366c8630f3f038603": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-brands-400.ttf?527940b104eb2ea366c8630f3f038603?id=9fefebd385ff8e0973f14d0ee1a28601",
@@ -15,8 +17,6 @@
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-solid-900.woff?eeccf4f66002c6f2ba24d3d22f2434c2": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-solid-900.woff?eeccf4f66002c6f2ba24d3d22f2434c2?id=26f963f67e793d91cc76426d43836849",
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-solid-900.ttf?be9ee23c0c6390141475d519c2c5fb8f": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-solid-900.ttf?be9ee23c0c6390141475d519c2c5fb8f?id=d44877cb1fa07af67d56e4d86d39dd96",
     "/fonts/vendor/@fortawesome/fontawesome-free/webfa-solid-900.svg?7a8b4f130182d19a2d7c67d80c090397": "/fonts/vendor/@fortawesome/fontawesome-free/webfa-solid-900.svg?7a8b4f130182d19a2d7c67d80c090397?id=37bc7099f6f1ba80236164f22e905837",
-    "/fonts/vendor/bootstrap-icons/bootstrap-icons.woff2?92ea18a81d737146ff044ddb52010366": "/fonts/vendor/bootstrap-icons/bootstrap-icons.woff2?92ea18a81d737146ff044ddb52010366?id=9ad5aa740d7d5e6a0191b309b9b1986c",
-    "/fonts/vendor/bootstrap-icons/bootstrap-icons.woff?1295669cd4e305c97f2cfc16d56614b8": "/fonts/vendor/bootstrap-icons/bootstrap-icons.woff?1295669cd4e305c97f2cfc16d56614b8?id=d1af9af6052c51b169be6c628ae99bb5",
     "/images/paymentFailed.png?eeecd24f48ede14d21810ba2596cdbe6": "/images/paymentFailed.png?eeecd24f48ede14d21810ba2596cdbe6?id=3facdf173bd5534e436ad687c8edd216",
     "/images/paymentSuccessful.png?7eeef6e080de4147d9a1eba96aad7ca0": "/images/paymentSuccessful.png?7eeef6e080de4147d9a1eba96aad7ca0?id=d1a65bb335f6a2de534b3df802f57380",
     "/images/brand_logo.png?c77aff19bcd1d22cef86b3eb70e74e96": "/images/brand_logo.png?c77aff19bcd1d22cef86b3eb70e74e96?id=a1500976e031ab423ea90430e4134ac4",
@@ -35,8 +35,6 @@
     "/images/avatar.png": "/images/avatar.png?id=2b584018f353b28bb484189b38ab6f1a",
     "/images/brand_logo.png": "/images/brand_logo.png?id=a1500976e031ab423ea90430e4134ac4",
     "/images/click_audio.mp3": "/images/click_audio.mp3?id=b0e3f1a6f8ddac92369908d05e7bd27c",
-    "/images/cn.svg": "/images/cn.svg?id=b12ec1edfb8dbf2cd2d21396ebfab262",
-    "/images/de.svg": "/images/de.svg?id=f1193d6a15920746e76492776b2dd92f",
     "/images/default/choose-1.png": "/images/default/choose-1.png?id=77354336bc99d04be061164d6f2989ac",
     "/images/default/choose-2.png": "/images/default/choose-2.png?id=c4c87fa707e20fc7e462802634fdd0ea",
     "/images/default/choose-3.png": "/images/default/choose-3.png?id=d065f4f691a3bbe16179c7a8935221d2",
@@ -67,7 +65,6 @@
     "/images/download.svg": "/images/download.svg?id=93183144a85f683e3eb8e94f3a751199",
     "/images/es.svg": "/images/es.svg?id=ed3212920479e635101e24cd84e8e86b",
     "/images/favicon.ico": "/images/favicon.ico?id=b813881ffe7b1199eee34977e7a31bf9",
-    "/images/fr.svg": "/images/fr.svg?id=fc9f285773d5841c0672cdddf667f963",
     "/images/gb.svg": "/images/gb.svg?id=cbb9afb370b2e7aa03dd4d28864694b4",
     "/images/home/service.png": "/images/home/service.png?id=f597a81a4c811daa34e0261ffa8e91b5",
     "/images/infycare-logo.png": "/images/infycare-logo.png?id=92c7108552a4832001d49bb262794c78",
@@ -85,7 +82,5 @@
     "/images/reset.png": "/images/reset.png?id=052d6255baca6c2c85990e207b67dd7d",
     "/images/sa.svg": "/images/sa.svg?id=3b04dccea99101838613b5df127e447e",
     "/images/stripe.svg": "/images/stripe.svg?id=9ec150a5096e4e42c94a8095e8385ccf",
-    "/images/tr.svg": "/images/tr.svg?id=0b3ec2d7462be44e10010a5c725552b6",
-    "/images/vn.svg": "/images/vn.svg?id=7e156d1d24f51aca6179f2e54dec5c7c",
     "/images/warning.png": "/images/warning.png?id=b294aefad77f7480e6bc819fa9f28f8c"
 }
