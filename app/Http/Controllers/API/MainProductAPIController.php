@@ -148,7 +148,8 @@ class MainProductAPIController extends AppBaseController
             }
 
             // Validasi kode produk untuk single product dalam tenant yang sama
-            if ($mainProduct->product_type == MainProduct::SINGLE_PRODUCT) {
+            // Hanya validasi jika kode produk berubah
+            if ($mainProduct->product_type == MainProduct::SINGLE_PRODUCT && $mainProduct->code != $input['product_code']) {
                 $existingProduct = Product::where('code', $input['product_code'])
                     ->where('tenant_id', Auth::user()->tenant_id)
                     ->where('main_product_id', '!=', $mainProduct->id)
