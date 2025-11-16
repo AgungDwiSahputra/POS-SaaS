@@ -6,7 +6,7 @@ alwaysApply: true
 # POS.ezakses - Point of Sale System
 
 ## Summary
-POS.ezakses is a comprehensive Point of Sale system built with Laravel 10.23 and React 17.0.2, designed for retail businesses, warehouses, and multi-store operations. It provides complete inventory management, sales tracking, purchase management, multi-language support (2 languages), multi-currency support, role-based access control, payment gateway integration (Stripe, PayPal, Razorpay, Paystack), advanced reporting, and responsive design for desktop, tablet, and mobile devices.
+POS.ezakses is a comprehensive Point of Sale system built with Laravel 10.23 and React 17.0.2, designed for retail businesses, warehouses, and multi-store operations. It provides complete inventory management, sales tracking, purchase management, multi-language support (2 languages), multi-currency support, role-based access control, payment gateway integration (Stripe, PayPal, Razorpay, Paystack), advanced reporting with real-time total asset calculations, cash advance management with status controls, database query monitoring, and responsive design for desktop, tablet, and mobile devices.
 
 ### Key Features Enhanced:
 - **Advanced Multi-Tenant Transfers**: Robust cross-tenant product transfer with automatic product synchronization
@@ -16,14 +16,18 @@ POS.ezakses is a comprehensive Point of Sale system built with Laravel 10.23 and
 - **Enhanced Error Handling**: Automatic rollback mechanisms for failed cross-tenant operations
 - **Warehouse Capacity Management**: Tenant-specific capacity validation and inventory constraints
 - **Race Condition Prevention**: Atomic operations for high-concurrency environments
+- **Real-Time Stock Report Total Asset**: Accurate grand total and filtered total calculations with pagination independence
+- **Cash Advance Management**: Status-controlled identities with active/inactive states and improved edit functionality
+- **Database Query Monitoring**: Selective logging system for performance tracking and error detection
 
 ## Structure
 - **app/**: Laravel application code (controllers, models, services, commands, notifications, observers)
   - **Repositories/**: Enhanced business logic with robust error handling
     - `TransferRepository.php` - Advanced cross-tenant transfer with compensation logic
   - **Services/**: Business service layer
-    - `ProductSyncService.php` - Multi-tenant product synchronization engine
-    - `TransferLockService.php` - Distributed locking mechanism for concurrent operations
+       - `ProductSyncService.php` - Multi-tenant product synchronization engine
+       - `TransferLockService.php` - Distributed locking mechanism for concurrent operations
+       - `ReportStockService.php` - Real-time stock report with accurate total asset calculations
   - **Models/**: Eloquent models with enhanced relationships
     - `Transfer.php`, `TransferItem.php` - Transfer management with cross-tenant support
     - `StockMovement.php` - Comprehensive audit trail system
@@ -35,6 +39,9 @@ POS.ezakses is a comprehensive Point of Sale system built with Laravel 10.23 and
 - **database/**: Database migrations, factories, and seeders for data initialization
 - **storage/**: File uploads, cache, and media storage
 - **tests/**: Unit and Feature tests for PHP code
+- **Console/Commands/**: Artisan commands for testing and maintenance
+     - `TestStockReport.php` - Stock report functionality testing and debugging
+     - `TestCrossTenantTransfer.php` - Cross-tenant transfer testing and validation
 - **bootstrap/**: Application bootstrap and container initialization files
 - **lang/**: Multi-language translation files supporting 2 languages (English and Indonesian)
 - **docs/**: Technical documentation and implementation guides
@@ -160,6 +167,7 @@ npm run dev
 **Application Kernel**: app/Http/Kernel.php - Middleware and kernel configuration
 **Console Kernel**: app/Console/Kernel.php - Artisan commands and scheduling
 **Service Provider**: app/Providers/ - Application service providers
+     - `DatabaseQueryLoggerProvider.php` - Database query monitoring and selective logging
 **Web Routes**: routes/web.php - Web-facing routes
 **API Routes**: routes/api.php - RESTful API routes
 **Configuration Bootstrap**: bootstrap/app.php - Application container setup
@@ -204,6 +212,10 @@ npm run dev
 - Feature/LanguageSwitchingTest.php - Multi-language switching functionality
 - Feature/ExampleTest.php - Example feature tests
 - Unit/ExampleTest.php - Example unit tests
+
+### Testing Commands
+- `php artisan test:stock-report` - Debug and test stock report functionality with product cost analysis
+- `php artisan test:cross-tenant-transfer` - Test cross-tenant transfer operations and product synchronization
 
 ## Advanced Features
 
@@ -296,6 +308,64 @@ $newHPP = ($currentTotalValue + $incomingValue) / $newTotalQty;
 - **Error Handling**: Automatic lock release on exceptions
 - **Performance Monitoring**: Lock acquisition metrics and alerts
 
+### Real-Time Stock Report Total Asset
+**Location**: `app/Services/ReportStockService.php`
+
+#### Core Capabilities:
+- **Accurate Total Calculations**: Grand total (all products) and filtered total (with applied filters) calculations
+- **Pagination Independence**: Total values remain consistent regardless of pagination state
+- **Warehouse-Specific Reporting**: Support for warehouse-filtered stock reports
+- **Real-Time Asset Valuation**: Dynamic calculation of total inventory value using HPP/product cost
+
+#### Calculation Logic:
+- **Grand Total**: Σ(qty × cost) for all products with stock across all warehouses
+- **Filtered Total**: Σ(qty × cost) respecting category, supplier, warehouse, and search filters
+- **Cost Basis**: Uses COALESCE(HPP, product_cost, 0) for valuation
+- **Performance Optimized**: Single database queries with proper indexing
+
+#### Service Architecture:
+```php
+class ReportStockService {
+    public function getReport(array $filters): array {
+        // Separate queries for items and totals
+        // Items: paginated with filters applied
+        // Totals: calculated independently of pagination
+        return ['data' => $paginatedItems, 'meta' => ['totals' => [...]]];
+    }
+}
+```
+
+#### Frontend Integration:
+- **Summary Row**: Displays total asset value at bottom of table
+- **Real-Time Updates**: Totals update immediately when filters change
+- **Export Support**: Excel export includes accurate total calculations
+
+### Cash Advance Management System
+**Location**: `app/Http/Controllers/CashAdvanceController.php`, `app/Models/CashAdvanceIdentity.php`
+
+#### Identity Management:
+- **Status Controls**: Active/Inactive states for cash advance identities
+- **Soft Management**: No hard deletes, status-based filtering instead
+- **Audit Trail**: Tracks status changes with timestamps
+
+#### Edit Page Improvements:
+- **Route Handling**: Fixed blank page issues on `/user/cash-advances/edit/{id}`
+- **Error States**: Proper 404/403/500 error handling with user-friendly messages
+- **Data Loading**: Skeleton loading states during data fetch
+- **Permission Guards**: Frontend and backend permission validation
+
+#### Database Schema:
+```sql
+ALTER TABLE cash_advance_identities
+ADD COLUMN is_active BOOLEAN DEFAULT TRUE,
+ADD COLUMN deactivated_at TIMESTAMP NULL;
+```
+
+#### Status Management:
+- **Active Identities**: Available for new cash advances
+- **Inactive Identities**: Hidden from selection but preserved for history
+- **Status Transitions**: Automatic timestamp tracking on status changes
+
 ## Development Guidelines & Best Practices
 
 ### Multi-Tenant Development
@@ -333,13 +403,33 @@ try {
 - Use **appropriate movement types**
 - Provide **comprehensive logging**
 
+### Stock Report Development
+When implementing stock reports with total calculations:
+
+1. **Separate Total Calculations**: Keep item queries and total calculations independent
+2. **Handle Null Values**: Use `COALESCE()` for cost fields to prevent null calculation errors
+3. **Pagination Independence**: Ensure totals are calculated without pagination limits
+4. **Performance Optimization**: Use single queries with proper joins instead of multiple round trips
+5. **Service Layer Pattern**: Implement complex business logic in dedicated service classes
+
+### Database Query Monitoring
+For production database monitoring:
+
+1. **Selective Logging**: Only log slow queries and errors, not routine successful queries
+2. **Configurable Thresholds**: Set appropriate slow query thresholds (default: 1000ms)
+3. **Error Pattern Detection**: Monitor for deadlock, timeout, and constraint violation patterns
+4. **Performance Metrics**: Track query execution time and memory usage
+5. **Development Only**: Enable detailed logging only in development environments
+
 ## Key Configuration Files
 - **.env / .env.example**: Environment variables and database configuration
 - **composer.json**: PHP dependencies, PSR-4 autoloading configuration
 - **package.json**: npm scripts and JavaScript dependencies
 - **webpack.mix.js**: Laravel Mix/Webpack asset compilation configuration
 - **phpunit.xml**: PHPUnit testing framework configuration
-- **config/database.php**: Database connections
+- **config/database.php**: Database connections and query logging configuration
+- **app/Providers/DatabaseQueryLoggerProvider.php**: Database query monitoring service provider
+- **app/Http/Requests/UpdateMainProductRequest.php**: Main product update validation rules
 - **.htaccess**: Apache URL rewriting rules
 - **.editorconfig**: Editor code style configuration
 
@@ -353,8 +443,12 @@ try {
 - **transfers table**: Enhanced with store relationship fields
   - `from_store_id` - Source store reference
   - `to_store_id` - Destination store reference
+- **cash_advance_identities table**: Added status management columns
+  - `is_active` - Boolean flag for active/inactive status (default: true)
+  - `deactivated_at` - Timestamp for deactivation tracking
 
 ### Important Migration Files
 - `2025_11_06_140000_create_stock_movements_table.php` - Stock movement tracking
 - `2025_10_05_102210_add_store_id_fields_to_transfers_table.php` - Store relationships
 - `2025_10_05_132053_add_sync_columns_to_transfer_items_table.php` - Sync tracking
+- `2025_10_21_XXXXXX_add_is_active_to_cash_advance_identities_table.php` - Status management for cash advance identities

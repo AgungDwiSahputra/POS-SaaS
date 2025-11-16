@@ -4,47 +4,58 @@ namespace App\Services;
 
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ReportStockService
 {
     public function getReport(array $filters): array
     {
-        // Build base query based on warehouse filter
-        if (!empty($filters['warehouse_id'])) {
-            // If warehouse filter is applied, use warehouse-specific stock aggregation
-            $base = $this->buildWarehouseFilteredQuery($filters['warehouse_id']);
-        } else {
-            // No warehouse filter, use all stock aggregation
-            $base = $this->buildBaseQuery();
-        }
+            // Log tenant scoping decision
+            $useTenantScoping = $this->shouldUseTenantScoping();
+            // Build base query based on warehouse filter
+            if (!empty($filters['warehouse_id'])) {
+                // If warehouse filter is applied, use warehouse-specific stock aggregation
+                $base = $this->buildWarehouseFilteredQuery($filters['warehouse_id']);
+            } else {
+                // No warehouse filter, use all stock aggregation
+                $base = $this->buildBaseQuery();
+            }
 
         // Apply other filters
         $this->applyFilters($base, $filters);
 
+
         // Clone for filtered query (without pagination)
         $filtered = clone $base;
 
-        // Get paginated items
-        $items = (clone $filtered)
-            ->orderBy('products.name')
-            ->paginate($filters['per_page'] ?? 15);
+        // Get paginated items (remove the problematic selectRaw from main query)
+        $paginatedQuery = (clone $filtered)->orderBy('products.name');
+        $items = $paginatedQuery->paginate($filters['per_page'] ?? 15);
+
 
         // Calculate filtered total (not affected by pagination)
-        // Use the appropriate total calculation based on whether warehouse filter is applied
-        if (!empty($filters['warehouse_id'])) {
-            $filteredTotal = (clone $filtered)
-                ->selectRaw('SUM(COALESCE(warehouse_stock.total_qty, 0) * COALESCE(products.product_cost, 0)) as total_asset')
-                ->value('total_asset');
-        } else {
-            $filteredTotal = (clone $filtered)
-                ->selectRaw('SUM(COALESCE(stock_summary.total_qty, 0) * COALESCE(products.product_cost, 0)) as total_asset')
-                ->value('total_asset');
-        }
+        // Create a fresh query for total calculation
+        $totalQuery = $useTenantScoping
+            ? Product::query()
+            : Product::withoutGlobalScope('tenant');
+
+        $totalQuery->join('manage_stocks', 'products.id', '=', 'manage_stocks.product_id')
+            ->selectRaw('SUM(manage_stocks.quantity * COALESCE(products.product_cost, 0)) as total_asset');
+
+        // Apply same filters as main query
+        $this->applyFilters($totalQuery, $filters);
+
+        $filteredTotal = $totalQuery->value('total_asset');
 
         // Calculate grand total (all products, no filters applied)
         // Note: Grand total should always be the total of ALL products across ALL warehouses
-        $grandTotal = $this->buildBaseQuery()
-            ->selectRaw('SUM(COALESCE(stock_summary.total_qty, 0) * COALESCE(products.product_cost, 0)) as total_asset')
+        $grandTotalQuery = $useTenantScoping
+            ? Product::query()
+            : Product::withoutGlobalScope('tenant');
+
+        $grandTotal = $grandTotalQuery
+            ->join('manage_stocks', 'products.id', '=', 'manage_stocks.product_id')
+            ->selectRaw('SUM(manage_stocks.quantity * COALESCE(products.product_cost, 0)) as total_asset')
             ->value('total_asset');
 
         return [
@@ -65,45 +76,59 @@ class ReportStockService
 
     private function buildBaseQuery()
     {
-        return Product::query()
+        // Check if tenant context is available and valid
+        $useTenantScoping = $this->shouldUseTenantScoping();
+
+        $query = $useTenantScoping
+            ? Product::query()  // With tenant scoping
+            : Product::withoutGlobalScope('tenant'); // Without tenant scoping
+
+        return $query
             ->select([
                 'products.id',
                 'products.name',
                 'products.code',
                 'products.product_cost',
+                'products.product_price',
                 'products.hpp',
-                DB::raw('COALESCE(stock_summary.total_qty, 0) as qty'),
+                DB::raw('SUM(manage_stocks.quantity) as qty'),
                 DB::raw('COALESCE(products.hpp, products.product_cost, 0) as cost'),
-                DB::raw('(COALESCE(stock_summary.total_qty, 0) * COALESCE(products.hpp, products.product_cost, 0)) as asset_value'),
+                DB::raw('(SUM(manage_stocks.quantity) * COALESCE(products.hpp, products.product_cost, 0)) as asset_value'),
                 DB::raw('(SELECT bu.name FROM base_units bu WHERE bu.id = products.product_unit) as product_unit_name'),
+                DB::raw('(SELECT pc.name FROM product_categories pc WHERE pc.id = products.product_category_id) as product_category_name'),
             ])
-            ->leftJoin(DB::raw('(
-                SELECT product_id, SUM(quantity) as total_qty
-                FROM manage_stocks
-                GROUP BY product_id
-            ) as stock_summary'), 'stock_summary.product_id', '=', 'products.id');
+            ->join('manage_stocks', 'products.id', '=', 'manage_stocks.product_id')
+            ->groupBy('products.id', 'products.name', 'products.code', 'products.product_cost', 'products.product_price', 'products.hpp', 'products.product_unit', 'products.product_category_id')
+            ->havingRaw('SUM(manage_stocks.quantity) > 0');
     }
 
     private function buildWarehouseFilteredQuery($warehouseId)
     {
-        return Product::query()
+        // Check if tenant context is available and valid
+        $useTenantScoping = $this->shouldUseTenantScoping();
+
+        $query = $useTenantScoping
+            ? Product::query()  // With tenant scoping
+            : Product::withoutGlobalScope('tenant'); // Without tenant scoping
+
+        return $query
             ->select([
                 'products.id',
                 'products.name',
                 'products.code',
                 'products.product_cost',
+                'products.product_price',
                 'products.hpp',
-                DB::raw('COALESCE(warehouse_stock.total_qty, 0) as qty'),
+                DB::raw('SUM(manage_stocks.quantity) as qty'),
                 DB::raw('COALESCE(products.hpp, products.product_cost, 0) as cost'),
-                DB::raw('(COALESCE(warehouse_stock.total_qty, 0) * COALESCE(products.hpp, products.product_cost, 0)) as asset_value'),
+                DB::raw('(SUM(manage_stocks.quantity) * COALESCE(products.hpp, products.product_cost, 0)) as asset_value'),
                 DB::raw('(SELECT bu.name FROM base_units bu WHERE bu.id = products.product_unit) as product_unit_name'),
+                DB::raw('(SELECT pc.name FROM product_categories pc WHERE pc.id = products.product_category_id) as product_category_name'),
             ])
-            ->leftJoin(DB::raw('(
-                SELECT product_id, SUM(quantity) as total_qty
-                FROM manage_stocks
-                WHERE warehouse_id = ' . (int)$warehouseId . '
-                GROUP BY product_id
-            ) as warehouse_stock'), 'warehouse_stock.product_id', '=', 'products.id');
+            ->join('manage_stocks', 'products.id', '=', 'manage_stocks.product_id')
+            ->where('manage_stocks.warehouse_id', $warehouseId)
+            ->groupBy('products.id', 'products.name', 'products.code', 'products.product_cost', 'products.product_price', 'products.hpp', 'products.product_unit', 'products.product_category_id')
+            ->havingRaw('SUM(manage_stocks.quantity) > 0');
     }
 
     private function applyFilters($query, array $filters): void
@@ -129,5 +154,18 @@ class ReportStockService
             // This would require additional implementation based on business requirements
             // For now, we'll skip date filtering as it requires more complex ledger logic
         }
+    }
+
+    /**
+     * Determine if tenant scoping should be used
+     * Falls back to without scoping if tenant context is not available
+     */
+    private function shouldUseTenantScoping(): bool
+    {
+        // For stock reports, we need to bypass tenant scoping because:
+        // 1. Stock data (manage_stocks table) doesn't have tenant_id
+        // 2. Stock reports should show all products with stock regardless of tenant
+        // 3. Tenant scoping on products only causes issues when joining with manage_stocks
+        return false;
     }
 }

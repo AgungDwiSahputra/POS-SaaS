@@ -122,7 +122,7 @@ class DatabaseQueryLoggerProvider extends ServiceProvider
             'timestamp' => Carbon::now()->toISOString(),
         ];
 
-        Log::debug('Database Statement Prepared', $logData);
+        // Log::debug('Database Statement Prepared', $logData);
     }
 
     /**
