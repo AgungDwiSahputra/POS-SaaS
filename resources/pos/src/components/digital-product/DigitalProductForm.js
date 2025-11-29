@@ -99,13 +99,7 @@ const DigitalProductForm = (props) => {
     const prepareFormData = () => {
         const formData = new FormData();
 
-        // Get current user tenant_id using the safe utility function
-        const currentUser = getCurrentUser();
-        const tenantId = currentUser?.tenant_id;
-
-        if (tenantId) {
-            formData.append("tenant_id", tenantId);
-        }
+        // Remove manual tenant_id sending - let backend handle it via Multitenantable trait
 
         formData.append("name", digitalProductValue.name);
         formData.append("code", digitalProductValue.code);
@@ -191,7 +185,7 @@ const DigitalProductForm = (props) => {
                         <div className="row">
                             <div className="col-xl-8">
                                 <div className="card">
-                                    <div className="card-body">
+                                    <div className="card-body p-0">
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
                                                 <label className="form-label">
@@ -314,7 +308,7 @@ const DigitalProductForm = (props) => {
                             </div>
                             <div className="col-xl-4">
                                 <div className="card">
-                                    <div className="card-body">
+                                    <div className="card-body p-0">
                                         <label className="form-label">
                                             {getFormattedMessage("product.input.multiple-image.label")}
                                             :{" "}
