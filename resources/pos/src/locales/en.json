@@ -151,6 +151,7 @@
     "variation.select.validation.error.message": "Please select a variation",
     "variation.type.select.validate.error.message": "Please select variation types",
     "products.title": "Products",
+    "digital-services.title": "Digital Services",
     "product-digital.title": "Digital Products",
     "digital-product.title": "Digital Products",
     "digital-product.create.title": "Create Digital Product",

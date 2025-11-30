@@ -72,7 +72,6 @@ export const userMenu = [
             unitsSubPath: "/user/units",
             baseUnitsSubPath: "/user/base-units",
             barcodeSubPath: "/user/print/barcode",
-            providersSubPath: "/user/providers",
         },
         subMenu: [
             {
@@ -82,22 +81,6 @@ export const userMenu = [
                 class: "d-flex",
                 fontIcon: <FontAwesomeIcon icon={faBoxes} />,
                 permission: Permissions.MANAGE_PRODUCTS,
-            },
-            {
-                title: "digital-product.title",
-                to: "/user/digital-products",
-                name: "digital-products",
-                class: "d-flex",
-                fontIcon: <FontAwesomeIcon icon={faBoxes} />,
-                permission: Permissions.MANAGE_PRODUCTS,
-            },
-            {
-                title: "providers.title",
-                to: "/user/providers",
-                name: "providers",
-                class: "d-flex",
-                fontIcon: <FontAwesomeIcon icon={faMoneyBill} />,
-                permission: Permissions.MANAGE_PROVIDERS,
             },
             {
                 title: "product.categories.title",
@@ -148,6 +131,37 @@ export const userMenu = [
                 to: "/user/print/barcode",
                 class: "d-flex",
                 permission: Permissions.MANAGE_PRODUCTS,
+            },
+        ],
+    },
+    {
+        title: "digital-services.title",
+        name: "digital-services",
+        fontIcon: <FontAwesomeIcon icon={faCube} />,
+        to: "/user/digital-services",
+        class: "d-flex",
+        is_submenu: true,
+        permission: Permissions.MANAGE_PRODUCTS || Permissions.MANAGE_PROVIDERS,
+        subPath: {
+            digitalProductsSubPath: "/user/digital-products",
+            providersSubPath: "/user/providers",
+        },
+        subMenu: [
+            {
+                title: "digital-product.title",
+                to: "/user/digital-products",
+                name: "digital-products",
+                class: "d-flex",
+                fontIcon: <FontAwesomeIcon icon={faBoxes} />,
+                permission: Permissions.MANAGE_PRODUCTS,
+            },
+            {
+                title: "providers.title",
+                to: "/user/providers",
+                name: "providers",
+                class: "d-flex",
+                fontIcon: <FontAwesomeIcon icon={faMoneyBill} />,
+                permission: Permissions.MANAGE_PROVIDERS,
             },
         ],
     },
