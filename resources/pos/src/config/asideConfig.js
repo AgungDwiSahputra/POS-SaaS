@@ -72,6 +72,7 @@ export const userMenu = [
             unitsSubPath: "/user/units",
             baseUnitsSubPath: "/user/base-units",
             barcodeSubPath: "/user/print/barcode",
+            providersSubPath: "/user/providers",
         },
         subMenu: [
             {
@@ -89,6 +90,14 @@ export const userMenu = [
                 class: "d-flex",
                 fontIcon: <FontAwesomeIcon icon={faBoxes} />,
                 permission: Permissions.MANAGE_PRODUCTS,
+            },
+            {
+                title: "providers.title",
+                to: "/user/providers",
+                name: "providers",
+                class: "d-flex",
+                fontIcon: <FontAwesomeIcon icon={faMoneyBill} />,
+                permission: Permissions.MANAGE_PROVIDERS,
             },
             {
                 title: "product.categories.title",

@@ -128,7 +128,8 @@ export const apiBaseURL = {
     DUAL_SCREEN_SETTINGS: "dual-screen-settings",
     DUAL_SCREEN_SETTINGS_UPDATE: "dual-screen-settings/update",
     PAYMENT_METHOD: "payment-methods",
-    DIGITAL_PRODUCTS: "/digital-products"
+    DIGITAL_PRODUCTS: "/digital-products",
+    PROVIDERS: "/providers"
 };
 
 export const adminApiBaseURL = {
@@ -716,6 +717,7 @@ export const Permissions = {
     MANAGE_PRODUCT_CATEGORIES: "manage_product_categories",
     MANAGE_VARIATIONS: "manage_variations",
     MANAGE_PRODUCTS: "manage_products",
+    MANAGE_PROVIDERS: "manage_providers",
     MANAGE_SUPPLIERS: "manage_suppliers",
     MANAGE_CUSTOMERS: "manage_customers",
     MANAGE_USER: "manage_users",
@@ -847,6 +849,14 @@ export const digitalProductActionType = {
     ADD_DIGITAL_PRODUCT: "ADD_DIGITAL_PRODUCT",
     EDIT_DIGITAL_PRODUCT: "EDIT_DIGITAL_PRODUCT",
     DELETE_DIGITAL_PRODUCT: "DELETE_DIGITAL_PRODUCT",
+};
+
+export const providerActionType = {
+    FETCH_PROVIDERS: "FETCH_PROVIDERS",
+    FETCH_PROVIDER: "FETCH_PROVIDER",
+    ADD_PROVIDER: "ADD_PROVIDER",
+    EDIT_PROVIDER: "EDIT_PROVIDER",
+    DELETE_PROVIDER: "DELETE_PROVIDER",
 };
 
 export const posProductActionType = {

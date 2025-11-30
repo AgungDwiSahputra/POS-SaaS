@@ -1185,5 +1185,24 @@
     "payment.method.save.success.message": "Pembayaran method berhasil dibuat",
     "payment.method.edit.success.message": "Pembayaran method edited successfully",
     "payment.method.deleted.success.message": "Pembayaran method berhasil dihapus",
-    "cash-advance-identity.dashboard.loading": "Memuat..."
-}
+    "cash-advance-identity.dashboard.loading": "Memuat...",
+    "provider.title": "Provider",
+    "provider.create.title": "Buat Provider",
+    "provider.input.nama_provider.label": "Nama Provider",
+    "provider.input.nama_provider.placeholder.label": "Masukkan Nama Provider",
+    "provider.input.saldo.label": "Saldo",
+    "provider.input.saldo.placeholder.label": "Masukkan Saldo",
+    "provider.input.deskripsi.label": "Deskripsi",
+    "provider.input.deskripsi.placeholder.label": "Masukkan Deskripsi",
+    "provider.input.status.label": "Status",
+    "provider.input.saldo.validate.label": "Silakan masukkan saldo",
+    "provider.input.status.validate.label": "Silakan pilih status",
+    "provider.edit.title": "Edit Provider",
+    "provider.modal.delete.title": "Hapus Provider!",
+    "provider.modal.delete.message": "Apakah Anda yakin ingin menghapus provider ini?",
+    "globally.input.nama_provider.validate.label": "Silakan masukkan nama provider",
+    "status.active": "Aktif",
+    "status.inactive": "Tidak Aktif",
+    "providers.title": "Providers",
+    "provider.detail.title": "Detail Provider"
+    }

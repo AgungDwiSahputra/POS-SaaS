@@ -480,6 +480,45 @@ return [
         ],
     ],
 
+    'provider' => [
+        'title' => 'Provider',
+        'create' => [
+            'title' => 'Create Provider',
+        ],
+        'input' => [
+            'nama_provider' => [
+                'label' => 'Provider Name',
+                'placeholder' => [
+                    'label' => 'Enter provider name',
+                ],
+            ],
+            'saldo' => [
+                'label' => 'Balance',
+                'placeholder' => [
+                    'label' => 'Enter balance',
+                ],
+                'validate' => [
+                    'label' => 'Balance must be a number',
+                ],
+            ],
+            'deskripsi' => [
+                'label' => 'Description',
+                'placeholder' => [
+                    'label' => 'Enter description',
+                ],
+            ],
+            'status' => [
+                'label' => 'Status',
+                'validate' => [
+                    'label' => 'Status must be selected',
+                ],
+            ],
+            'detail' => [
+                'title' => 'Provider Details',
+            ],
+        ],
+    ],
+
     'heading_discount' => 'DISCOUNT',
     'heading_total' => 'TOTAL',
     'sale_pdf' => 'Sale Pdf',
@@ -530,7 +569,17 @@ return [
             'hpp' => [
                 'label' => 'HPP',
             ],
+            'nama_provider' => [
+                'validate' => [
+                    'label' => 'Provider name is required',
+                ],
+            ],
         ],
+    ],
+
+    'status' => [
+        'active' => 'Active',
+        'inactive' => 'Inactive',
     ],
 
     'digital-product' => [

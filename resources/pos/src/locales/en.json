@@ -1194,5 +1194,24 @@
     "cash-advance-identity.input.identity_id.validate.label": "Cash Advance Identity is required",
     "cash-advance-identity.input.identity_id.placeholder.label": "Select identity...",
     "cash-advance-identity.input.employee_id.auto_generated": "Auto generated",
-    "cash-advance-identity.dashboard.loading": "Loading..."
-}
+    "cash-advance-identity.dashboard.loading": "Loading...",
+    "provider.title": "Provider",
+    "provider.create.title": "Create Provider",
+    "provider.input.nama_provider.label": "Provider Name",
+    "provider.input.nama_provider.placeholder.label": "Enter Provider Name",
+    "provider.input.saldo.label": "Balance",
+    "provider.input.saldo.placeholder.label": "Enter Balance",
+    "provider.input.deskripsi.label": "Description",
+    "provider.input.deskripsi.placeholder.label": "Enter Description",
+    "provider.input.status.label": "Status",
+    "provider.input.saldo.validate.label": "Please enter balance",
+    "provider.input.status.validate.label": "Please select status",
+    "provider.edit.title": "Edit Provider",
+    "provider.modal.delete.title": "Delete Provider!",
+    "provider.modal.delete.message": "Are you sure want to delete this provider?",
+    "globally.input.nama_provider.validate.label": "Please enter provider name",
+    "status.active": "Active",
+    "status.inactive": "Inactive",
+    "providers.title": "Providers",
+    "provider.detail.title": "Provider Details"
+    }

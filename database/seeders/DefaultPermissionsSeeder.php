@@ -130,6 +130,10 @@ class DefaultPermissionsSeeder extends Seeder
                 'name' => 'manage_variations',
                 'display_name' => 'Manage Variations'
             ],
+            [
+                'name' => 'manage_providers',
+                'display_name' => 'Manage Providers'
+            ],
         ];
 
         foreach ($permissions as $permission) {

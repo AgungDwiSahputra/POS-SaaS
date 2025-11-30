@@ -23,6 +23,7 @@ use App\Http\Controllers\API\SettingAPIController;
 use App\Http\Controllers\API\BaseUnitAPIController;
 use App\Http\Controllers\API\CustomerAPIController;
 use App\Http\Controllers\API\PurchaseAPIController;
+use App\Http\Controllers\API\ProviderAPIController;
 use App\Http\Controllers\API\SupplierAPIController;
 use App\Http\Controllers\API\TransferAPIController;
 use App\Http\Controllers\MailTemplateAPIController;
@@ -210,6 +211,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         });
         Route::get('suppliers', [SupplierAPIController::class, 'index']);
         Route::post('import-suppliers', [SupplierAPIController::class, 'importSuppliers']);
+
+        //providers route
+        Route::middleware('permission:manage_providers')->group(function () {
+            Route::resource('providers', ProviderAPIController::class);
+        });
+        Route::get('providers', [ProviderAPIController::class, 'index']);
 
         //sale
         Route::middleware('permission:manage_sale|manage_pos_screen|manage_reports')->group(function () {

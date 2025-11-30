@@ -118,7 +118,7 @@ resources/pos/src/
 - **Coupon System**: Buat diskon coupon dan promosi
 - **SMS Integration**: Kirim notifikasi SMS
 - **Email Templates**: Template email yang dapat dikustomisasi
-- **Multi-language Support**: Dukungan 9 bahasa
+- **Multi-language Support**: Dukungan 2 bahasa
 - **Product Variations**: Variasi produk multiple (ukuran, warna, dll.)
 - **Digital Products**: Dukungan produk digital yang dapat didownload dengan cost tracking
 - **Sale & Purchase Returns**: Sistem return lengkap
@@ -150,7 +150,7 @@ resources/pos/src/
 - **State Management**: Redux dengan Redux Thunk dan Redux Persist
 - **Styling**: Bootstrap 5.1.3, Custom SCSS, dukungan RTL
 - **Charts**: Chart.js, ECharts untuk analytics canggih
-- **Internationalization**: React Intl dengan dukungan 9 bahasa
+- **Internationalization**: React Intl dengan dukungan 2 bahasa
 - **Build Tool**: Laravel Mix, Webpack 5
 - **UI Components**: React Bootstrap, Custom components, FontAwesome icons
 - **Additional Libraries**: React Router, Axios, Moment.js, React Toastify
@@ -325,14 +325,7 @@ Semua gateway mendukung webhook untuk notifikasi real-time pembayaran.
 
 ### Bahasa yang Didukung
 1. **English** (en) - Bahasa utama
-2. **Arabic** (ar) - Dukungan RTL
-3. **Chinese** (cn) - Chinese Simplified
-4. **French** (fr) - Bahasa Prancis lengkap
-5. **German** (gr) - Dukungan bahasa Jerman
-6. **Indonesian** (id) - Bahasa Indonesia
-7. **Spanish** (sp) - Bahasa Spanyol
-8. **Turkish** (tr) - Dukungan bahasa Turki
-9. **Vietnamese** (vi) - Bahasa Vietnam
+2. **Indonesian** (id) - Bahasa Indonesia
 
 ## Security Features
 

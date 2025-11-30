@@ -3,6 +3,22 @@
   array (
       'cancel-btn' => 'Batal',
       'delete-btn' => 'Hapus',
+      'input' =>
+      array (
+          'nama_provider' =>
+          array (
+              'validate' =>
+              array (
+                  'label' => 'Nama provider wajib diisi',
+              ),
+          ),
+      ),
+  ),
+
+  'status' =>
+  array (
+      'active' => 'Aktif',
+      'inactive' => 'Tidak Aktif',
   ),
 
   'delete-modal' =>
@@ -568,6 +584,45 @@
           'not_found' => 'Identitas cash advance tidak ditemukan atau sudah dihapus.',
           'loading_failed' => 'Gagal memuat data cash advance identity. Silakan coba lagi.',
           'identity_not_found' => 'Identitas yang dipilih tidak ditemukan dalam daftar identitas aktif.',
+      ],
+  ],
+
+  'provider' => [
+      'title' => 'Provider',
+      'create' => [
+          'title' => 'Buat Provider',
+      ],
+      'input' => [
+          'nama_provider' => [
+              'label' => 'Nama Provider',
+              'placeholder' => [
+                  'label' => 'Masukkan nama provider',
+              ],
+          ],
+          'saldo' => [
+              'label' => 'Saldo',
+              'placeholder' => [
+                  'label' => 'Masukkan saldo',
+              ],
+              'validate' => [
+                  'label' => 'Saldo harus berupa angka',
+              ],
+          ],
+          'deskripsi' => [
+              'label' => 'Deskripsi',
+              'placeholder' => [
+                  'label' => 'Masukkan deskripsi',
+              ],
+          ],
+          'status' => [
+              'label' => 'Status',
+              'validate' => [
+                  'label' => 'Status harus dipilih',
+              ],
+          ],
+          'detail' => [
+              'title' => 'Detail Provider',
+          ],
       ],
   ],
 
