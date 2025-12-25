@@ -438,6 +438,8 @@ const mmToInches = (value) => value / 25.4;
 ### 5. Manajemen Penjualan (POS)
 **Lokasi**: `resources/pos/src/frontend/components/PosMainPage.js` (Main POS Screen)
 
+**Backend Controller**: `app/Http/Controllers/API/SaleAPIController.php`
+
 **Komponen Utama**:
 - `PosMainPage.js` - Main POS interface dengan layout 2 kolom
 - `ProductCartList.js` - Cart items display
@@ -446,6 +448,109 @@ const mmToInches = (value) => value / 25.4;
 - `HoldListModal.js` - Hold orders management
 - `RecentSaleModal.js` - Recent sales viewer
 - `RegisterDetailsModel.js` - POS register details
+
+#### Sales Search & Filtering Enhancement
+**Update**: December 2025 - Improved search functionality with join-based subquery approach
+
+**Backend Implementation** (`SaleAPIController.php:41-105`):
+
+**Search Strategy**:
+- Menggunakan subquery terpisah dengan `DB::table()` untuk menghindari konflik global scope
+- Hasil subquery digunakan dengan `whereIn()` pada main query Eloquent
+- Pendekatan ini menghindari masalah *ambiguous column* yang terjadi pada join langsung
+
+**Search Coverage**:
+| Field | Table | Search Type |
+|-------|-------|-------------|
+| reference_code | sales | LIKE %search% |
+| name | customers | LIKE %search% |
+| name | warehouses | LIKE %search% |
+| name | products | LIKE %search% |
+| name | main_products | LIKE %search% |
+
+**Code Implementation**:
+```php
+// Subquery untuk mendapatkan sale_ids yang match dengan search term
+$matchingSaleIds = DB::table('sales')
+    ->select('sales.id')
+    ->leftJoin('customers', 'sales.customer_id', '=', 'customers.id')
+    ->leftJoin('warehouses', 'sales.warehouse_id', '=', 'warehouses.id')
+    ->leftJoin('sale_items', 'sales.id', '=', 'sale_items.sale_id')
+    ->leftJoin('products', 'sale_items.product_id', '=', 'products.id')
+    ->leftJoin('main_products', 'products.main_product_id', '=', 'main_products.id')
+    ->where('sales.tenant_id', '=', currentTenantId())
+    ->where(function ($q) use ($search) {
+        $q->where('sales.reference_code', 'LIKE', "%$search%")
+            ->orWhere('customers.name', 'LIKE', "%$search%")
+            ->orWhere('warehouses.name', 'LIKE', "%$search%")
+            ->orWhere('products.name', 'LIKE', "%$search%")
+            ->orWhere('main_products.name', 'LIKE', "%$search%");
+    })
+    ->pluck('sales.id')
+    ->unique()
+    ->values();
+
+// Main query menggunakan whereIn dengan hasil subquery
+$salesQuery->whereIn('id', $matchingSaleIds);
+```
+
+**Key Benefits**:
+1. **Performance**: Single subquery lebih efisien daripada multiple `whereHas`
+2. **No Ambiguity**: Menggunakan `DB::table()` menghindari global scope conflicts
+3. **Tenant Isolation**: Explicit tenant filter dengan `currentTenantId()`
+4. **Duplicate Prevention**: `unique()->values()` menghapus duplikat dari join
+5. **Pagination**: Pagination berfungsi normal tanpa affected oleh join
+
+**API Endpoint**:
+```
+GET /api/sales?filter[search]={keyword}
+```
+
+**Example Requests**:
+- Search by product name: `/api/sales?filter[search]=flash`
+- Search by customer: `/api/sales?filter[search]=john`
+- Search by reference: `/api/sales?filter[search]=INV-001`
+- Search by warehouse: `/api/sales?filter[search]=main`
+
+**Response Format**:
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "reference_code": "INV-001",
+            "customer": { "id": 1, "name": "John Doe" },
+            "warehouse": { "id": 1, "name": "Main Warehouse" },
+            "sale_items": [
+                {
+                    "id": 1,
+                    "product": {
+                        "id": 10,
+                        "name": "Flashdisk Sandisk 64Gb",
+                        "main_product": {
+                            "id": 5,
+                            "name": "Flashdisk Sandisk"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "meta": { "total": 1, "page": 1 }
+}
+```
+
+**Troubleshooting**:
+| Error | Cause | Solution |
+|-------|-------|----------|
+| Column 'created_at' ambiguous | Prettus Repository fieldSearchable conflict | Gunakan `Sale::query()` langsung, bukan repository |
+| Column 'tenant_id' ambiguous | Global scope setelah join | Subquery dengan explicit tenant filter |
+| No results found | `currentTenantId()` returns null | Ensure user authenticated via middleware |
+
+**Related Files**:
+- `app/Http/Controllers/API/SaleAPIController.php` - Main controller
+- `app/helpers.php:309` - `currentTenantId()` function
+- `app/Models/Sale.php` - Sale model dengan global scopes
 
 **Arsitektur POS Screen**:
 ```
@@ -1502,6 +1607,12 @@ resources/pos/src/
   - CSS print media query untuk precise layout
   - RTL support untuk Arabic/Hebrew layouts
   - Updated PrintBarcode, PrintButton, dan BarcodeShow components
+- ✅ **Enhanced Sales Search & Filter** (NEW - December 26, 2025)
+  - Improved search menggunakan subquery dengan `DB::table()` untuk avoid ambiguous columns
+  - Search coverage: reference_code, customer name, warehouse name, product name, main_product name
+  - Performance: Single subquery lebih efisien daripada multiple `whereHas`
+  - Fixed issues dengan Prettus Repository fieldSearchable conflicts
+  - Tenant isolation menggunakan `currentTenantId()` helper function
 - ✅ Testing infrastructure dengan artisan commands
   - `TestCrossTenantTransfer` untuk cross-tenant transfer testing
   - `TestStockReport` untuk stock report validation
