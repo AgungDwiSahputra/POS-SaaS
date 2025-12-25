@@ -381,7 +381,7 @@ class Product extends BaseModel implements HasMedia, JsonResourceful
      */
     public function warehouse($id)
     {
-        return Managestock::where('product_id', $id)->Join(
+        return ManageStock::where('product_id', $id)->Join(
             'warehouses',
             'manage_stocks.warehouse_id',
             'warehouses.id'
@@ -396,7 +396,7 @@ class Product extends BaseModel implements HasMedia, JsonResourceful
      */
     public function inStock($id)
     {
-        $totalQuantity = Managestock::where('product_id', $id)->sum('quantity');
+        $totalQuantity = ManageStock::where('product_id', $id)->sum('quantity');
 
         return $totalQuantity;
     }
