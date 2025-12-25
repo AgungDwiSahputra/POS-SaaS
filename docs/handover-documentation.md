@@ -32,7 +32,7 @@ POS.ezakses adalah sistem Point of Sale (POS) komprehensif yang dibangun dengan 
 - 📊 Advanced Reporting & Analytics
 - 📱 Responsive Design
 - 🔄 Real-time Updates
-- 📋 Barcode Generation
+- 📋 Barcode Generation & Printing (10+ paper sizes including custom 105x120mm)
 - 💰 Cash Advance Management
 - 🏷️ Coupon System
 - 📱 SMS Integration
@@ -210,6 +210,123 @@ resources/pos/src/
 - Price range display untuk products dengan variations
 - Permission checks untuk semua CRUD operations
 - Image optimization dan thumbnail generation
+
+### 2.1. Print Barcode
+**Lokasi**: `resources/pos/src/components/printBarcode/`
+
+**Komponen**:
+- `PrintBarcode.js` - Halaman utama print barcode dengan form configuration
+- `PrintButton.js` - Komponen untuk rendering barcode labels
+- `BarcodeShow.js` - Preview tampilan barcode sebelum print
+- `PrintTable.js` - Tabel list produk yang akan dicetak barcode-nya
+
+**Fitur Lengkap**:
+
+#### Paper Size Options
+Sistem mendukung berbagai ukuran kertas untuk barcode:
+1. **40 per sheet (A4)** - 1.799" × 1.003" (45.7mm × 25.5mm)
+2. **30 per sheet** - 2.625" × 1" (66.7mm × 25.4mm)
+3. **24 per sheet (A4)** - 2.48" × 1.334" (63mm × 33.9mm)
+4. **20 per sheet** - 4" × 1" (101.6mm × 25.4mm)
+5. **18 per sheet (A4)** - 2.5" × 1.835" (63.5mm × 46.6mm)
+6. **14 per sheet** - 4" × 1.33" (101.6mm × 33.8mm)
+7. **12 per sheet (A4)** - 2.5" × 2.834" (63.5mm × 72mm)
+8. **10 per sheet** - 4" × 2" (101.6mm × 50.8mm)
+9. **Custom 105x120mm** - 6 per sheet, 33mm × 33mm per label *(NEW)*
+10. **Custom size** - Ukuran kustom yang dapat dikonfigurasi
+
+#### Custom 105x120mm Paper Size
+Paper size baru yang ditambahkan untuk kebutuhan khusus:
+- **Ukuran kertas**: 105mm × 120mm
+- **Layout**: 3 kolom × 2 baris = 6 labels per sheet
+- **Ukuran label**: 33mm × 33mm per label
+- **Gap**: 3mm antar labels (horizontal dan vertical)
+- **Font size**: 7-8px untuk teks yang compact
+- **Barcode image**: Max 22mm lebar, 16px tinggi
+
+**CSS Implementation**:
+- Class: `.barcode-paper-105x120`
+- Print media query: `@page { size: 105mm 120mm portrait; }`
+- RTL support: `.rtl.css` untuk Arabic/Hebrew layouts
+
+#### Barcode Printing Options
+- **Show Company Name**: Toggle nama perusahaan pada barcode
+- **Show Product Name**: Toggle nama produk pada barcode
+- **Show Price**: Toggle harga pada barcode
+- **Quantity Control**: Atur jumlah barcode per produk
+
+#### Custom Barcode Mode
+Mode untuk membuat barcode tanpa produk yang ada:
+- **Product Code/SKU**: Input custom code untuk barcode
+- **Product Name**: Nama custom untuk label
+- **Price**: Harga custom (opsional)
+- **Quantity**: Jumlah barcode yang ingin dicetak
+
+#### Custom Paper Size Configuration
+Untuk paper size "Custom", user dapat mengatur:
+- **Label Width** (mm) - Lebar setiap label
+- **Label Height** (mm) - Tinggi setiap label
+- **Page Width** (mm) - Lebar halaman kertas
+- **Horizontal Gap** (mm) - Jarak antar kolom
+- **Vertical Gap** (mm) - Jarak antar baris
+- **Padding** (mm) - Padding dalam setiap label
+
+**Technical Implementation**:
+```javascript
+// Layout configuration structure
+const layout = {
+    labelWidthIn: 1.799,      // Label width in inches
+    labelHeightIn: 1.003,     // Label height in inches
+    pageWidthIn: 8.27,        // Page width in inches
+    columnGapIn: 0.1,         // Horizontal gap in inches
+    rowGapIn: 0.1,            // Vertical gap in inches
+    paddingIn: 0.04,          // Padding in inches
+    pageHeightIn: 11.69,      // Page height (A4) - optional
+    bottomMarginIn: 0.591     // Bottom margin - optional
+};
+
+// mm to inches conversion
+const mmToInches = (value) => value / 25.4;
+```
+
+**CSS Print Styles**:
+```css
+/* Screen preview */
+.barcode-main.barcode-paper-105x120 {
+    width: calc((105mm - 6mm) / 3);
+    height: calc((51mm - 18mm - 3mm) / 2);
+    border: 1px dashed #666;
+}
+
+/* Print media */
+@media print {
+    @page {
+        size: 105mm 120mm portrait;
+        margin: 0;
+    }
+
+    .barcode-main.barcode-paper-105x120 .barcode-main__barcode-item {
+        width: 33mm !important;
+        height: 15mm !important;
+    }
+}
+```
+
+**Workflow**:
+1. **Select Warehouse** - Pilih warehouse untuk filter produk (mode normal)
+2. **Select Products** - Pilih produk yang akan dicetak barcode-nya
+3. **Set Quantity** - Atur jumlah barcode per produk
+4. **Choose Paper Size** - Pilih ukuran kertas atau gunakan custom
+5. **Configure Options** - Atur tampilan (company name, product name, price)
+6. **Preview** - Klik "Preview" untuk melihat hasil sebelum print
+7. **Print** - Klik "Print" untuk mencetak barcode
+
+**API Endpoints**:
+- `GET /api/products?warehouse_id={id}` - List products by warehouse
+- `POST /api/barcode/generate` - Generate barcode image dari code
+
+**Configuration File**:
+- `resources/pos/src/shared/option-lists/paperSize.json` - Daftar ukuran ketersediaan
 
 ### 3. Digital Products
 **Lokasi**: `resources/pos/src/components/digital-product/`
@@ -1317,6 +1434,7 @@ resources/pos/src/
 │   ├── admin/                # Admin panels
 │   ├── dashboard/            # Dashboard widgets
 │   ├── product/              # Product management
+│   ├── printBarcode/         # Barcode printing (105x120mm support)
 │   ├── digital-product/      # Digital products (NEW)
 │   ├── provider/             # Provider management (NEW)
 │   ├── sales/                # Sales components
@@ -1328,7 +1446,11 @@ resources/pos/src/
 ├── shared/                    # Shared utilities
 │   ├── sharedMethod.js       # Common functions
 │   ├── table/               # Data table components
+│   ├── option-lists/        # paperSize.json (barcode paper sizes)
 │   └── validation/          # Validation rules
+├── assets/css/               # Custom styles
+│   ├── custom.css           # Includes .barcode-paper-105x120
+│   └── custom.rtl.css       # RTL support for barcode
 ├── routes.js                 # Route configuration
 ├── App.js                    # Main app component
 ├── index.js                  # App entry point
@@ -1375,6 +1497,11 @@ resources/pos/src/
 - ✅ Provider management system dengan full CRUD operations
 - ✅ Enhanced digital products dengan cost tracking, license key generation
 - ✅ Digital Services menu section grouping digital products dan providers
+- ✅ **Custom 105x120mm barcode paper size support** (NEW)
+  - 6 labels per sheet (33mm × 33mm per label)
+  - CSS print media query untuk precise layout
+  - RTL support untuk Arabic/Hebrew layouts
+  - Updated PrintBarcode, PrintButton, dan BarcodeShow components
 - ✅ Testing infrastructure dengan artisan commands
   - `TestCrossTenantTransfer` untuk cross-tenant transfer testing
   - `TestStockReport` untuk stock report validation
@@ -1421,5 +1548,5 @@ resources/pos/src/
 *Dokumen handover ini dibuat untuk memastikan transisi yang smooth dan pemahaman menyeluruh tentang sistem POS.ezakses. Pastikan untuk mengupdate dokumentasi ini setiap kali ada perubahan signifikan pada sistem atau arsitektur aplikasi.*
 
 **Tanggal Terakhir Update**: December 25, 2025
-**Versi Dokumentasi**: 1.1
+**Versi Dokumentasi**: 1.2
 **Penulis**: AI Assistant - Documentation Specialist
