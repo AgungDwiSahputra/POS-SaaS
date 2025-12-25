@@ -1613,6 +1613,14 @@ resources/pos/src/
   - Performance: Single subquery lebih efisien daripada multiple `whereHas`
   - Fixed issues dengan Prettus Repository fieldSearchable conflicts
   - Tenant isolation menggunakan `currentTenantId()` helper function
+- ✅ **Bug Fix: ManageStock Class Name** (December 26, 2025)
+  - Fixed error `Class "App\Models\Managestock" not found` pada halaman user/dashboard
+  - Root cause: Nama kelas tidak sesuai - menggunakan `Managestock` (lowercase) seharusnya `ManageStock` (camel case)
+  - Files updated:
+    - `app/Models/Product.php:384` - fungsi `warehouse()` sekarang menggunakan `ManageStock`
+    - `app/Models/Product.php:399` - fungsi `inStock()` sekarang menggunakan `ManageStock`
+    - `resources/views/excel/product-excel-export.blade.php:40` - view excel export menggunakan `App\Models\ManageStock`
+  - Note: Pada sistem Linux (case-sensitive), nama kelas harus tepat sesuai nama file
 - ✅ Testing infrastructure dengan artisan commands
   - `TestCrossTenantTransfer` untuk cross-tenant transfer testing
   - `TestStockReport` untuk stock report validation
@@ -1658,6 +1666,6 @@ resources/pos/src/
 
 *Dokumen handover ini dibuat untuk memastikan transisi yang smooth dan pemahaman menyeluruh tentang sistem POS.ezakses. Pastikan untuk mengupdate dokumentasi ini setiap kali ada perubahan signifikan pada sistem atau arsitektur aplikasi.*
 
-**Tanggal Terakhir Update**: December 25, 2025
-**Versi Dokumentasi**: 1.2
+**Tanggal Terakhir Update**: December 26, 2025
+**Versi Dokumentasi**: 1.3
 **Penulis**: AI Assistant - Documentation Specialist
