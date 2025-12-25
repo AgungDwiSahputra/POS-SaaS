@@ -129,7 +129,8 @@ export const apiBaseURL = {
     DUAL_SCREEN_SETTINGS_UPDATE: "dual-screen-settings/update",
     PAYMENT_METHOD: "payment-methods",
     DIGITAL_PRODUCTS: "/digital-products",
-    PROVIDERS: "/providers"
+    PROVIDERS: "/providers",
+    BALANCE_REQUESTS: "/balance-requests"
 };
 
 export const adminApiBaseURL = {
@@ -821,6 +822,9 @@ export const Permissions = {
     VIEW_QUOTATIONS: "view_quotations",
     EDIT_QUOTATIONS: "edit_quotations",
     DELETE_QUOTATIONS: "delete_quotations",
+    CREATE_BALANCE_REQUESTS: "create_balance_requests",
+    VIEW_BALANCE_REQUESTS: "view_balance_requests",
+    APPROVE_BALANCE_REQUESTS: "approve_balance_requests",
 };
 
 //POS Screen Constants
@@ -857,6 +861,14 @@ export const providerActionType = {
     ADD_PROVIDER: "ADD_PROVIDER",
     EDIT_PROVIDER: "EDIT_PROVIDER",
     DELETE_PROVIDER: "DELETE_PROVIDER",
+};
+
+export const balanceRequestActionType = {
+    FETCH_BALANCE_REQUESTS: "FETCH_BALANCE_REQUESTS",
+    FETCH_BALANCE_REQUEST: "FETCH_BALANCE_REQUEST",
+    ADD_BALANCE_REQUEST: "ADD_BALANCE_REQUEST",
+    APPROVE_BALANCE_REQUEST: "APPROVE_BALANCE_REQUEST",
+    REJECT_BALANCE_REQUEST: "REJECT_BALANCE_REQUEST",
 };
 
 export const posProductActionType = {

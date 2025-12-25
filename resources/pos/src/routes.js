@@ -29,6 +29,7 @@ import ProviderList from "./components/provider/ProviderList";
 import CreateProvider from "./components/provider/CreateProvider";
 import EditProvider from "./components/provider/EditProvider";
 import ProviderDetail from "./components/provider/ProviderDetail";
+import BalanceRequestList from "./components/balance-request/BalanceRequestList";
 import Settings from "./components/settings/Settings";
 import ExpenseCategory from "./components/expense-category/ExpenseCategory";
 import Expenses from "./components/expense/Expenses";
@@ -314,6 +315,11 @@ export const route = [
         path: "providers/detail/:id",
         ele: <ProviderDetail />,
         permission: Permissions.VIEW_PRODUCTS,
+    },
+    {
+        path: "balance-requests",
+        ele: <BalanceRequestList />,
+        permission: Permissions.MANAGE_PRODUCTS,
     },
     {
         path: "adjustments",

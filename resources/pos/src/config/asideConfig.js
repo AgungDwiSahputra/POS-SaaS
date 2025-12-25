@@ -145,6 +145,7 @@ export const userMenu = [
         subPath: {
             digitalProductsSubPath: "/user/digital-products",
             providersSubPath: "/user/providers",
+            balanceRequestsSubPath: "/user/balance-requests",
         },
         subMenu: [
             {
@@ -162,6 +163,14 @@ export const userMenu = [
                 class: "d-flex",
                 fontIcon: <FontAwesomeIcon icon={faMoneyBill} />,
                 permission: Permissions.MANAGE_PROVIDERS,
+            },
+            {
+                title: "balance-request.title",
+                to: "/user/balance-requests",
+                name: "balance-requests",
+                class: "d-flex",
+                fontIcon: <FontAwesomeIcon icon={faMoneyCheckDollar} />,
+                permission: Permissions.MANAGE_PRODUCTS,
             },
         ],
     },

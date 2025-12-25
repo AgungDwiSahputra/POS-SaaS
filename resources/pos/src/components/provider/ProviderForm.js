@@ -75,8 +75,10 @@ const ProviderForm = (props) => {
      const prepareFormData = () => {
          const formData = new FormData();
 
-         // Remove manual tenant_id sending - let backend handle it via Multitenantable trait
-         formData.append("_method", "PATCH");
+         // Only add _method for edit operations, not for create
+         if (id) {
+             formData.append("_method", "PATCH");
+         }
 
          formData.append("nama_provider", providerValue.nama_provider);
          formData.append("saldo", parseFloat(providerValue.saldo) || 0);

@@ -49,6 +49,7 @@ use App\Http\Controllers\API\PurchaseReturnAPIController;
 use App\Http\Controllers\API\ExpenseCategoryAPIController;
 use App\Http\Controllers\API\ProductCategoryAPIController;
 use App\Http\Controllers\API\DigitalProductAPIController;
+use App\Http\Controllers\API\BalanceAPIController;
 
 /*
 |--------------------------------------------------------------------------
@@ -217,6 +218,15 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
             Route::resource('providers', ProviderAPIController::class);
         });
         Route::get('providers', [ProviderAPIController::class, 'index']);
+
+        //balance requests route
+        Route::middleware('permission:manage_balance_requests')->group(function () {
+            Route::post('balance-requests/{id}/approve', [BalanceAPIController::class, 'approve']);
+            Route::post('balance-requests/{id}/reject', [BalanceAPIController::class, 'reject']);
+            Route::post('balance-requests', [BalanceAPIController::class, 'store']);
+        });
+        Route::get('balance-requests', [BalanceAPIController::class, 'index']);
+        Route::get('balance-requests/{id}', [BalanceAPIController::class, 'show'])->name('balance-requests.show');
 
         //sale
         Route::middleware('permission:manage_sale|manage_pos_screen|manage_reports')->group(function () {

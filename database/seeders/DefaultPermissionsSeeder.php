@@ -134,6 +134,22 @@ class DefaultPermissionsSeeder extends Seeder
                 'name' => 'manage_providers',
                 'display_name' => 'Manage Providers'
             ],
+            [
+                'name' => 'manage_balance_requests',
+                'display_name' => 'Manage Balance Requests'
+            ],
+            [
+                'name' => 'create_balance_requests',
+                'display_name' => 'Create Balance Requests'
+            ],
+            [
+                'name' => 'view_balance_requests',
+                'display_name' => 'View Balance Requests'
+            ],
+            [
+                'name' => 'approve_balance_requests',
+                'display_name' => 'Approve Balance Requests'
+            ],
         ];
 
         foreach ($permissions as $permission) {
