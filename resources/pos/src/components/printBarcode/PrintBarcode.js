@@ -383,6 +383,7 @@ const PrintBarcode = () => {
                     allConfigData={allConfigData}
                     barcodeOptions={barcodeOptions}
                     updateProducts={print}
+                    paperSizeValue={printBarcodeValue.paperSizeValue}
                 />
             </div>
         );
@@ -933,6 +934,7 @@ const PrintBarcode = () => {
                     layout={paperLayout || DEFAULT_LAYOUT}
                     updated={updated}
                     allConfigData={allConfigData}
+                    paperSizeValue={printBarcodeValue.paperSizeValue}
                 />
                 }
             </div>

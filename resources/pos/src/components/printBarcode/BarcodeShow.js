@@ -20,6 +20,7 @@ const BarcodeShow = (props) => {
         frontSetting,
         allConfigData,
         barcodeOptions,
+        paperSizeValue, // Add this prop
     } = props;
 
     const companyName = frontSetting?.value?.store_name;
@@ -43,6 +44,9 @@ const BarcodeShow = (props) => {
         return DEFAULT_LAYOUT;
     })();
 
+    // Check for 105x120mm paper based on the selected option value
+    const paperSizeClass = (paperSizeValue?.value === 9) ? "barcode-paper-105x120" : "";
+
     const containerStyle = {
         width: `${effectiveLayout.pageWidthIn}in`,
         maxWidth: `${effectiveLayout.pageWidthIn}in`,
@@ -55,11 +59,14 @@ const BarcodeShow = (props) => {
         '--barcode-padding': `${effectiveLayout.paddingIn}in`,
     };
 
-    const itemStyle = {
-        width: `${effectiveLayout.labelWidthIn}in`,
-        minHeight: `${effectiveLayout.labelHeightIn}in`,
-        padding: `${effectiveLayout.paddingIn}in`,
-    };
+    // Override inline styles for 105x120 paper to force 3 columns
+    const itemStyle = paperSizeClass
+        ? {} // Let CSS handle the sizing for this paper size
+        : {
+            width: `${effectiveLayout.labelWidthIn}in`,
+            minHeight: `${effectiveLayout.labelHeightIn}in`,
+            padding: `${effectiveLayout.paddingIn}in`,
+        };
 
     const loopBarcode = (product) => {
         let indents = [];
@@ -110,7 +117,7 @@ const BarcodeShow = (props) => {
                     {updated && updateProducts
                         ? updateProducts.map((product, index) => (
                               <div
-                                  className="barcode-main"
+                                  className={`barcode-main ${paperSizeClass}`.trim()}
                                   id="demo"
                                   key={index}
                                   style={containerStyle}

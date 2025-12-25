@@ -96,6 +96,20 @@
         }
     },
     {
+        "label": "Custom 105x120mm (6 per sheet) (33 x 33mm)",
+        "value": 9,
+        "config": {
+            "labelWidthIn": 1.299,
+            "labelHeightIn": 1.299,
+            "pageWidthIn": 4.134,
+            "pageHeightIn": 4.724,
+            "columnGapIn": 0.118,
+            "rowGapIn": 0.118,
+            "paddingIn": 0.04,
+            "bottomMarginIn": 0.591
+        }
+    },
+    {
         "label": "Custom size",
         "value": "custom",
         "isCustom": true
