@@ -24,6 +24,7 @@ use App\Http\Controllers\API\BaseUnitAPIController;
 use App\Http\Controllers\API\CustomerAPIController;
 use App\Http\Controllers\API\PurchaseAPIController;
 use App\Http\Controllers\API\ProviderAPIController;
+use App\Http\Controllers\API\BalanceRequestAPIController;
 use App\Http\Controllers\API\SupplierAPIController;
 use App\Http\Controllers\API\TransferAPIController;
 use App\Http\Controllers\MailTemplateAPIController;
@@ -217,6 +218,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
             Route::resource('providers', ProviderAPIController::class);
         });
         Route::get('providers', [ProviderAPIController::class, 'index']);
+
+        //balance-requests route
+        Route::middleware('permission:manage_balance_requests')->group(function () {
+            Route::resource('balance-requests', BalanceRequestAPIController::class);
+            Route::post('balance-requests/{id}/status', [BalanceRequestAPIController::class, 'updateStatus'])->name('balance-requests.update-status');
+            Route::get('balance-requests-pending-count', [BalanceRequestAPIController::class, 'pendingCount'])->name('balance-requests.pending-count');
+        });
+        Route::get('balance-requests', [BalanceRequestAPIController::class, 'index']);
 
         //sale
         Route::middleware('permission:manage_sale|manage_pos_screen|manage_reports')->group(function () {
