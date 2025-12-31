@@ -163,7 +163,7 @@ export const userMenu = [
                 name: "providers",
                 class: "d-flex",
                 fontIcon: <FontAwesomeIcon icon={faMoneyBill} />,
-                permission: Permissions.MANAGE_PROVIDERS,
+                permission: Permissions.MANAGE_PROVIDERS || Permissions.MANAGE_BALANCE_REQUESTS,
             },
             {
                 title: "balance-request.title",

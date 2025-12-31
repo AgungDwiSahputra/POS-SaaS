@@ -112,7 +112,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::middleware('permission:manage_roles')->group(function () {
             Route::resource('roles', RoleAPIController::class);
         });
-        Route::get('roles', [RoleAPIController::class, 'index']);
 
         // product category route
         Route::middleware('permission:manage_product_categories')->group(function () {

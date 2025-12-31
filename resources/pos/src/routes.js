@@ -301,22 +301,22 @@ export const route = [
     {
         path: "providers",
         ele: <ProviderList />,
-        permission: Permissions.MANAGE_PRODUCTS,
+        permission: Permissions.MANAGE_PROVIDERS,
     },
     {
         path: "providers/create",
         ele: <CreateProvider />,
-        permission: Permissions.CREATE_PRODUCTS,
+        permission: Permissions.CREATE_PROVIDERS,
     },
     {
         path: "providers/edit/:id",
         ele: <EditProvider />,
-        permission: Permissions.EDIT_PRODUCTS,
+        permission: Permissions.EDIT_PROVIDERS,
     },
     {
         path: "providers/detail/:id",
         ele: <ProviderDetail />,
-        permission: Permissions.VIEW_PRODUCTS,
+        permission: Permissions.VIEW_PROVIDERS,
     },
     {
         path: "balance-requests",

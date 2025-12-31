@@ -719,7 +719,12 @@ export const Permissions = {
     MANAGE_VARIATIONS: "manage_variations",
     MANAGE_PRODUCTS: "manage_products",
     MANAGE_PROVIDERS: "manage_providers",
+    CREATE_PROVIDERS: "create_providers",
+    EDIT_PROVIDERS: "edit_providers",
+    VIEW_PROVIDERS: "view_providers",
+    DELETE_PROVIDERS: "delete_providers",
     MANAGE_BALANCE_REQUESTS: "manage_balance_requests",
+    VIEW_BALANCE_REQUESTS: "view_balance_requests",
     CREATE_BALANCE_REQUESTS: "create_balance_requests",
     DELETE_BALANCE_REQUESTS: "delete_balance_requests",
     MANAGE_SUPPLIERS: "manage_suppliers",
@@ -869,6 +874,7 @@ export const balanceRequestActionType = {
     ADD_BALANCE_REQUEST: "ADD_BALANCE_REQUEST",
     UPDATE_BALANCE_REQUEST_STATUS: "UPDATE_BALANCE_REQUEST_STATUS",
     DELETE_BALANCE_REQUEST: "DELETE_BALANCE_REQUEST",
+    FETCH_BALANCE_REQUEST_PENDING_COUNT: "FETCH_BALANCE_REQUEST_PENDING_COUNT",
 };
 
 export const posProductActionType = {
@@ -1174,6 +1180,14 @@ export const permissionMappings = {
     manage_sms_templates: "/user/sms-templates",
     manage_email_templates: "/user/email-templates",
     manage_store: "/user/store",
+    manage_balance_requests: "/user/balance-requests",
+    create_balance_requests: "/user/balance-requests/create",
+    delete_balance_requests: "/user/balance-requests",
+    manage_providers: "/user/providers",
+    create_providers: "/user/providers",
+    edit_providers: "/user/providers",
+    view_providers: "/user/providers",
+    delete_providers: "/user/providers",
 };
 
 export const paymentOptions = {

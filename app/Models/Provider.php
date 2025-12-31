@@ -3,11 +3,10 @@
 namespace App\Models;
 
 use App\Traits\HasJsonResourcefulData;
-use App\Traits\Multitenantable;
+use App\Traits\ScopedByStore;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Auth;
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 /**
  * App\Models\Provider
@@ -39,14 +38,14 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  */
 class Provider extends BaseModel
 {
-    use HasFactory, HasJsonResourcefulData, BelongsToTenant, Multitenantable;
+    use HasFactory, HasJsonResourcefulData, ScopedByStore;
 
     protected $table = 'providers';
 
     const JSON_API_TYPE = 'providers';
 
     protected $fillable = [
-        'tenant_id',
+        'store_id',
         'nama_provider',
         'saldo',
         'deskripsi',
@@ -91,5 +90,10 @@ class Provider extends BaseModel
     public function services(): HasMany
     {
         return $this->hasMany(Service::class, 'provider_id', 'id');
+    }
+
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id', 'id');
     }
 }

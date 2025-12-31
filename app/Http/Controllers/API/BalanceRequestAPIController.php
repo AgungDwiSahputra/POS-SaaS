@@ -32,9 +32,14 @@ class BalanceRequestAPIController extends AppBaseController
         Log::info('BalanceRequestAPIController: index called', ['request' => $request->all()]);
         $perPage = getPageSize($request);
 
-        $query = $this->balanceRequestRepository->model()
-            ->with(['provider', 'requestedBy', 'processedBy'])
+        $query = BalanceRequest::with(['provider', 'requestedBy', 'processedBy'])
             ->orderBy('created_at', 'desc');
+
+        // Filter by requested_by for non-admin users
+        $user = auth()->user();
+        if ($user && !$user->hasRole('admin')) {
+            $query->where('requested_by', $user->id);
+        }
 
         // Filter by status if provided
         if ($request->has('status') && !empty($request->input('status'))) {
@@ -69,9 +74,7 @@ class BalanceRequestAPIController extends AppBaseController
 
     public function show($id): BalanceRequestResource
     {
-        $balanceRequest = $this->balanceRequestRepository
-            ->model
-            ->with(['provider', 'requestedBy', 'processedBy'])
+        $balanceRequest = BalanceRequest::with(['provider', 'requestedBy', 'processedBy'])
             ->find($id);
 
         if (!$balanceRequest) {
@@ -112,9 +115,10 @@ class BalanceRequestAPIController extends AppBaseController
                 $message = 'Balance request rejected successfully';
             }
 
-            return $this->sendSuccess($message, [
-                'data' => new BalanceRequestResource($balanceRequest->load(['provider', 'requestedBy', 'processedBy']))
-            ]);
+            return $this->sendResponse(
+                new BalanceRequestResource($balanceRequest->load(['provider', 'requestedBy', 'processedBy'])),
+                $message
+            );
         } catch (\Exception $e) {
             Log::error('BalanceRequestAPIController: updateStatus error', ['error' => $e->getMessage()]);
             return $this->sendError($e->getMessage());

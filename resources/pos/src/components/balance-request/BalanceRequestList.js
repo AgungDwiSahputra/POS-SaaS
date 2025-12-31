@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { connect } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { Button } from "react-bootstrap-v5";
 import MasterLayout from "../MasterLayout";
-import { fetchBalanceRequests } from "../../store/action/balanceRequestAction";
-import ReactSelect from "../../shared/select/reactSelect";
+import { fetchBalanceRequests, fetchBalanceRequestPendingCount } from "../../store/action/balanceRequestAction";
 import ReactDataTable from "../../shared/table/ReactDataTable";
 import DeleteBalanceRequest from "./DeleteBalanceRequest";
 import TabTitle from "../../shared/tab-title/TabTitle";
@@ -15,9 +15,9 @@ import {
     currencySymbolHandling,
     getPermission,
 } from "../../shared/sharedMethod";
-import ActionButton from "../../shared/action-buttons/ActionButton";
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
-import { Permissions } from "../../constants";
+import { Permissions, ROLES } from "../../constants";
+import { useSelector } from "react-redux";
 
 const BalanceRequestList = (props) => {
     const {
@@ -29,28 +29,34 @@ const BalanceRequestList = (props) => {
         allConfigData,
     } = props;
 
+    const navigate = useNavigate();
+    const { loginUser } = useSelector((state) => state);
+
+    // Handle new state structure
+    const requestsList = balanceRequests?.balanceRequests || balanceRequests || [];
+
     const [deleteModel, setDeleteModel] = useState(false);
     const [isDelete, setIsDelete] = useState(null);
-    const [statusFilter, setStatusFilter] = useState(null);
+
+    // Check if user is Admin (check roles from Spatie Permission)
+    const isAdmin = loginUser?.roles?.name === ROLES.ADMIN || loginUser?.roles === ROLES.ADMIN;
 
     const onClickDeleteModel = (isDelete = null) => {
         setDeleteModel(!deleteModel);
         setIsDelete(isDelete);
     };
 
-    const onChange = (filter) => {
-        fetchBalanceRequests(filter, true);
+    const goToProcess = (id) => {
+        navigate(`/user/balance-requests/process/${id}`);
     };
 
-    // Handle status filter change
-    const handleStatusFilter = (selectedStatus) => {
-        setStatusFilter(selectedStatus);
-        const filter = { status: selectedStatus?.value || "" };
+    const onChange = (filter) => {
         fetchBalanceRequests(filter, true);
     };
 
     useEffect(() => {
         fetchBalanceRequests();
+        fetchBalanceRequestPendingCount();
     }, []);
 
     const currencySymbol =
@@ -82,8 +88,8 @@ const BalanceRequestList = (props) => {
 
     const itemsValue =
         currencySymbol &&
-        balanceRequests.length >= 0 &&
-        balanceRequests.map((request) => {
+        requestsList.length >= 0 &&
+        requestsList.map((request) => {
             // Handle JSON:API format
             const attributes = request.attributes || request;
             const provider = attributes.provider || request.provider;
@@ -168,38 +174,48 @@ const BalanceRequestList = (props) => {
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            width: "120px",
+            width: "150px",
             cell: (row) => (
-                <ActionButton
-                    item={row}
-                    isViewIcon={false}
-                    goToEditProduct={null}
-                    onClickDeleteModel={onClickDeleteModel}
-                    isDeleteMode={row.raw_status === "pending" && getPermission(allConfigData?.permissions, Permissions.DELETE_BALANCE_REQUESTS)}
-                />
+                <div className="d-flex justify-content-end gap-1">
+                    {row.raw_status === "pending" ? (
+                        <>
+                            {isAdmin && (
+                                <Button
+                                    variant="success btn-sm"
+                                    title={getFormattedMessage("balance-request.action.approve")}
+                                    onClick={() => goToProcess(row.id)}
+                                >
+                                    <i className="fas fa-check"></i>
+                                </Button>
+                            )}
+                            {getPermission(allConfigData?.permissions, Permissions.DELETE_BALANCE_REQUESTS) && (
+                                <Button
+                                    variant="danger btn-sm"
+                                    title={getFormattedMessage("react-data-table.action.delete")}
+                                    onClick={() => onClickDeleteModel(row)}
+                                >
+                                    <i className="fas fa-trash"></i>
+                                </Button>
+                            )}
+                        </>
+                    ) : (
+                        <Button
+                            variant="info btn-sm"
+                            title={getFormattedMessage("react-data-table.action.view")}
+                            onClick={() => goToProcess(row.id)}
+                        >
+                            <i className="fas fa-eye"></i>
+                        </Button>
+                    )}
+                </div>
             ),
         },
-    ];
-
-    const statusOptions = [
-        { value: "", label: getFormattedMessage("balance-request.filter.all-status") },
-        { value: "pending", label: getFormattedMessage("balance-request.status.pending") },
-        { value: "approved", label: getFormattedMessage("balance-request.status.approved") },
-        { value: "rejected", label: getFormattedMessage("balance-request.status.rejected") },
     ];
 
     return (
         <MasterLayout>
             <TopProgressBar />
             <TabTitle title={placeholderText("balance-request.title")} />
-            <div className="mb-3">
-                <ReactSelect
-                    options={statusOptions}
-                    onChange={handleStatusFilter}
-                    value={statusFilter}
-                    placeholder={getFormattedMessage("balance-request.filter.status-placeholder")}
-                />
-            </div>
             <ReactDataTable
                 columns={columns}
                 items={itemsValue}

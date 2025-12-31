@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use App\Traits\HasJsonResourcefulData;
-use App\Traits\Multitenantable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
@@ -35,7 +35,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  */
 class BalanceRequest extends BaseModel
 {
-    use HasFactory, HasJsonResourcefulData, BelongsToTenant, Multitenantable;
+    use HasFactory, HasJsonResourcefulData, BelongsToTenant;
 
     protected $table = 'balance_requests';
 
@@ -68,7 +68,6 @@ class BalanceRequest extends BaseModel
             'provider_id' => 'required|exists:providers,id',
             'requested_amount' => 'required|numeric|min:1',
             'notes' => 'nullable|string|max:500',
-            'status' => 'required|in:pending,approved,rejected',
         ];
     }
 
@@ -89,16 +88,41 @@ class BalanceRequest extends BaseModel
     public function prepareAttributes(): array
     {
         $fields = [
+            'id' => $this->id,
             'provider_id' => $this->provider_id,
+            'provider' => null,
             'requested_amount' => $this->requested_amount,
             'status' => $this->status,
-            'requested_by' => $this->requested_by,
-            'processed_by' => $this->processed_by,
+            'requested_by' => null,
+            'processed_by' => null,
             'processed_at' => $this->processed_at?->format('Y-m-d H:i:s'),
             'notes' => $this->notes,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+
+        if ($this->relationLoaded('provider') && $this->provider) {
+            $fields['provider'] = [
+                'id' => $this->provider->id,
+                'nama_provider' => $this->provider->nama_provider,
+            ];
+        }
+
+        if ($this->relationLoaded('requestedBy') && $this->requestedBy) {
+            $fields['requested_by'] = [
+                'id' => $this->requestedBy->id,
+                'name' => $this->requestedBy->name,
+                'first_name' => $this->requestedBy->first_name,
+            ];
+        }
+
+        if ($this->relationLoaded('processedBy') && $this->processedBy) {
+            $fields['processed_by'] = [
+                'id' => $this->processedBy->id,
+                'name' => $this->processedBy->name,
+                'first_name' => $this->processedBy->first_name,
+            ];
+        }
 
         return $fields;
     }

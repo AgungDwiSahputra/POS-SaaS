@@ -117,9 +117,11 @@ export const addBalanceRequest = (balanceRequest, navigate) => async (dispatch) 
     await apiConfig
         .post(apiBaseURL.BALANCE_REQUESTS, balanceRequest)
         .then((response) => {
+            // Handle nested data structure from sendResponse -> BalanceRequestResource
+            const payload = response.data?.data?.data || response.data?.data;
             dispatch({
                 type: balanceRequestActionType.ADD_BALANCE_REQUEST,
-                payload: response.data.data,
+                payload: payload,
             });
             dispatch(
                 addToast({
@@ -164,9 +166,11 @@ export const updateBalanceRequestStatus =
         apiConfig
             .post(apiBaseURL.BALANCE_REQUESTS + "/" + requestId + "/status", data)
             .then((response) => {
+                // Handle nested data structure from sendResponse -> BalanceRequestResource
+                const payload = response.data?.data?.data || response.data?.data;
                 dispatch({
                     type: balanceRequestActionType.UPDATE_BALANCE_REQUEST_STATUS,
-                    payload: response.data.data,
+                    payload: payload,
                 });
                 dispatch(
                     addToast({
@@ -231,5 +235,20 @@ export const deleteBalanceRequest = (requestId) => async (dispatch) => {
             dispatch(
                 addToast({ text: errorMessage, type: toastType.ERROR })
             );
+        });
+};
+
+export const fetchBalanceRequestPendingCount = () => async (dispatch) => {
+    apiConfig
+        .get(apiBaseURL.BALANCE_REQUESTS + "-pending-count")
+        .then((response) => {
+            dispatch({
+                type: balanceRequestActionType.FETCH_BALANCE_REQUEST_PENDING_COUNT,
+                payload: response.data.data.count,
+            });
+        })
+        .catch(({ response }) => {
+            // Silently fail for pending count
+            console.error('Failed to fetch pending count:', response);
         });
 };

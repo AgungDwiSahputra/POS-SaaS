@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import Form from "react-bootstrap/Form";
 import { InputGroup } from "react-bootstrap-v5";
@@ -8,7 +8,6 @@ import {
     getFormattedMessage,
     placeholderText,
     getFormattedText,
-    currencySymbolHandling
 } from "../../shared/sharedMethod";
 import ModelFooter from "../../shared/components/modelFooter";
 import ReactSelect from "../../shared/select/reactSelect";
@@ -18,7 +17,6 @@ const BalanceRequestForm = (props) => {
         addBalanceRequest,
         navigate,
         frontSetting,
-        allConfigData,
         providers,
         fetchProviders,
     } = props;
@@ -45,9 +43,10 @@ const BalanceRequestForm = (props) => {
     };
 
     const handleProviderChange = (selectedProvider) => {
+        // ReactSelect returns { value, label } object
         setBalanceRequestValue({
             ...balanceRequestValue,
-            provider_id: selectedProvider.value,
+            provider_id: selectedProvider ? selectedProvider.value : "",
         });
         setErrors({ ...errors, provider_id: "" });
     };
@@ -88,13 +87,21 @@ const BalanceRequestForm = (props) => {
     // Prepare provider options for React Select
     const providerOptions = providers && providers.length > 0
         ? providers.map(provider => {
-            const attributes = provider.attributes || provider;
+            // Handle JSON:API format: { id, type, attributes: { ... } }
+            const id = provider.id;
+            const nama = provider.attributes?.nama_provider || provider.nama_provider;
+
             return {
-                value: attributes.id || provider.id,
-                label: attributes.nama_provider || provider.nama_provider,
+                value: id,
+                label: nama,
             };
         })
         : [];
+
+    // Find selected provider object for ReactSelect
+    const selectedProviderOption = providerOptions.find(
+        option => String(option.value) === String(balanceRequestValue.provider_id)
+    ) || null;
 
     const currencySymbol = frontSetting?.value?.currency_symbol || '$';
 
@@ -115,11 +122,12 @@ const BalanceRequestForm = (props) => {
                                                 </label>
                                                 <span className="required" />
                                                 <ReactSelect
-                                                    options={providerOptions}
+                                                    data={providerOptions}
                                                     onChange={handleProviderChange}
                                                     placeholder={placeholderText("balance-request.input.provider.placeholder.label")}
-                                                    value={providerOptions.find(option => option.value === balanceRequestValue.provider_id)}
+                                                    value={selectedProviderOption}
                                                     isRequired
+                                                    controlId="balance-request-provider"
                                                 />
                                                 <span className="text-danger d-block fw-400 fs-small mt-2">
                                                     {errors["provider_id"] ? errors["provider_id"] : null}
@@ -186,12 +194,10 @@ const BalanceRequestForm = (props) => {
 const mapStateToProps = (state) => {
     const {
         frontSetting,
-        allConfigData,
         providers,
     } = state;
     return {
         frontSetting,
-        allConfigData,
         providers,
     };
 };

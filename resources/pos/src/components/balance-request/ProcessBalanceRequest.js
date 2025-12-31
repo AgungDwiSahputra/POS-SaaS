@@ -11,6 +11,8 @@ import {
 } from "../../shared/sharedMethod";
 import HeaderTitle from "../header/HeaderTitle";
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
+import { ROLES } from "../../constants";
+import { useSelector } from "react-redux";
 
 const ProcessBalanceRequest = (props) => {
     const {
@@ -18,15 +20,18 @@ const ProcessBalanceRequest = (props) => {
         updateBalanceRequestStatus,
         frontSetting,
         allConfigData,
-        balanceRequests,
+        singleBalanceRequest,
     } = props;
 
     const { id } = useParams();
     const navigate = useNavigate();
+    const { loginUser } = useSelector((state) => state);
 
     const [showModal, setShowModal] = useState(false);
     const [action, setAction] = useState(""); // 'approve' or 'reject'
-    const [balanceRequest, setBalanceRequest] = useState(null);
+
+    // Check if user is Admin (check roles from Spatie Permission)
+    const isAdmin = loginUser?.roles?.name === ROLES.ADMIN || loginUser?.roles === ROLES.ADMIN;
 
     useEffect(() => {
         if (id) {
@@ -34,22 +39,13 @@ const ProcessBalanceRequest = (props) => {
         }
     }, [id]);
 
-    useEffect(() => {
-        if (balanceRequests && balanceRequests.length > 0) {
-            const request = balanceRequests.find(r => {
-                const requestId = r.id || (r.attributes && r.attributes.id);
-                return String(requestId) === String(id);
-            });
-            if (request) {
-                setBalanceRequest(request);
-            }
-        }
-    }, [balanceRequests, id]);
-
     const currencySymbol = frontSetting?.value?.currency_symbol || '$';
 
+    // Extract status from the correct location (handles both JSON:API and flat formats)
+    const requestStatus = singleBalanceRequest?.attributes?.status || singleBalanceRequest?.status;
+
     const handleAction = (actionType) => {
-        if (balanceRequest?.status !== 'pending') {
+        if (requestStatus !== 'pending') {
             return;
         }
         setAction(actionType);
@@ -59,7 +55,6 @@ const ProcessBalanceRequest = (props) => {
     const confirmAction = () => {
         const formData = new FormData();
         formData.append("status", action === "approve" ? "approved" : "rejected");
-        formData.append("_method", "PUT");
 
         updateBalanceRequestStatus(id, formData, navigate);
         setShowModal(false);
@@ -79,7 +74,7 @@ const ProcessBalanceRequest = (props) => {
         );
     };
 
-    if (!balanceRequest) {
+    if (!singleBalanceRequest) {
         return (
             <MasterLayout>
                 <TopProgressBar />
@@ -92,10 +87,10 @@ const ProcessBalanceRequest = (props) => {
         );
     }
 
-    const attributes = balanceRequest.attributes || balanceRequest;
-    const provider = attributes.provider || balanceRequest.provider;
-    const requestedBy = attributes.requested_by || balanceRequest.requested_by;
-    const processedBy = attributes.processed_by || balanceRequest.processed_by;
+    const attributes = singleBalanceRequest.attributes || singleBalanceRequest;
+    const provider = attributes.provider || singleBalanceRequest.provider;
+    const requestedBy = attributes.requested_by || singleBalanceRequest.requested_by;
+    const processedBy = attributes.processed_by || singleBalanceRequest.processed_by;
 
     return (
         <MasterLayout>
@@ -157,7 +152,7 @@ const ProcessBalanceRequest = (props) => {
                                 </tbody>
                             </table>
 
-                            {attributes.status === "pending" && (
+                            {attributes.status === "pending" && isAdmin && (
                                 <div className="mt-4">
                                     <h5>{getFormattedMessage("balance-request.process.actions")}</h5>
                                     <div className="d-flex gap-2">
@@ -173,6 +168,13 @@ const ProcessBalanceRequest = (props) => {
                                         >
                                             {getFormattedMessage("balance-request.action.reject")}
                                         </Button>
+                                    </div>
+                                </div>
+                            )}
+                            {attributes.status === "pending" && !isAdmin && (
+                                <div className="mt-4">
+                                    <div className="alert alert-info">
+                                        {getFormattedMessage("balance-request.process.waiting-admin")}
                                     </div>
                                 </div>
                             )}
@@ -224,12 +226,12 @@ const mapStateToProps = (state) => {
     const {
         frontSetting,
         allConfigData,
-        balanceRequests,
+        balanceRequests: { singleBalanceRequest },
     } = state;
     return {
         frontSetting,
         allConfigData,
-        balanceRequests,
+        singleBalanceRequest,
     };
 };
 

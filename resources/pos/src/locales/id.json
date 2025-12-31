@@ -1240,5 +1240,6 @@
     "balance-request.modal.reject.message": "Apakah Anda yakin ingin menolak request saldo ini?",
     "balance-request.success.create.message": "Request saldo berhasil dibuat",
     "balance-request.success.update.message": "Status request saldo berhasil diperbarui",
-    "balance-request.success.delete.message": "Request saldo berhasil dihapus"
+    "balance-request.success.delete.message": "Request saldo berhasil dihapus",
+    "balance-request.process.waiting-admin": "Menunggu persetujuan Admin. Hanya Admin yang dapat menyetujui atau menolak request ini."
     }
