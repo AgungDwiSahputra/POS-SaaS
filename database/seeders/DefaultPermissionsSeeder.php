@@ -149,12 +149,19 @@ class DefaultPermissionsSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            $permissionExist = Permission::whereName($permission['name'])->exists();
-            if (! $permissionExist) {
+            $existingPermission = Permission::whereName($permission['name'])->first();
+
+            if (!$existingPermission) {
                 Permission::create($permission);
                 $this->command->info("Created permission: {$permission['name']}");
             } else {
-                $this->command->line("Skipped permission: {$permission['name']} (already exists)", 'fg=gray');
+                // Update display_name jika berbeda
+                if ($existingPermission->display_name !== $permission['display_name']) {
+                    $existingPermission->update(['display_name' => $permission['display_name']]);
+                    $this->command->info("Updated permission: {$permission['name']}");
+                } else {
+                    $this->command->line("Skipped permission: {$permission['name']} (already exists)", 'fg=gray');
+                }
             }
         }
 
