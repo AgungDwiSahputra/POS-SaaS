@@ -118,6 +118,12 @@ export default (
         }
         url = url + "recorded_by=" + filters.recorded_by;
     }
+    if (filters.identity_id) {
+        if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
+            url += "&";
+        }
+        url = url + "identity_id=" + filters.identity_id;
+    }
     if (filters.cash_status !== undefined && filters.cash_status !== null && filters.cash_status !== "all") {
         if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
             url += "&";
