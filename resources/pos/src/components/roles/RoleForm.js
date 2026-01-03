@@ -134,13 +134,19 @@ const RoleForm = (props) => {
     const onSubmit = (e) => {
         e.preventDefault();
         if (handleValidation()) {
+            // Format: flat array of selected permission IDs (both parent and child permissions)
             const formattedPermissions = rolesValue.permissions.flatMap(p => {
-                const selected = p.attributes.child_permissions.filter(cp => cp.selected).map(cp => cp.id);
-                return selected.length ? { id: p.id, child_permission: selected } : [];
+                // Include parent permission (manage_*) if any child is selected
+                const selectedChildren = p.attributes.child_permissions.filter(cp => cp.selected).map(cp => cp.id);
+                if (selectedChildren.length > 0) {
+                    // Include parent permission ID and all selected child permission IDs
+                    return [p.id, ...selectedChildren];
+                }
+                return [];
             });
 
             const payload = {
-                ...rolesValue,
+                name: rolesValue.name,
                 permissions: formattedPermissions
             };
 
@@ -151,19 +157,22 @@ const RoleForm = (props) => {
     const onEdit = (e) => {
         e.preventDefault();
         if (handleValidation()) {
-            const formattedPermissions = rolesValue.permissions.map(permission => {
-                const selectedChildren = permission.attributes.child_permissions
+            // Format: flat array of selected permission IDs (both parent and child permissions)
+            const formattedPermissions = rolesValue.permissions.flatMap(p => {
+                // Include parent permission (manage_*) if any child is selected
+                const selectedChildren = p.attributes.child_permissions
                     .filter(cp => cp.selected)
                     .map(cp => cp.id);
 
-                return {
-                    id: permission.id,
-                    child_permission: selectedChildren
-                };
-            }).filter(p => p.child_permission.length > 0);
+                if (selectedChildren.length > 0) {
+                    // Include parent permission ID and all selected child permission IDs
+                    return [p.id, ...selectedChildren];
+                }
+                return [];
+            });
 
             const payload = {
-                ...rolesValue,
+                name: rolesValue.name,
                 permissions: formattedPermissions
             };
             editRole(id, payload, navigate);

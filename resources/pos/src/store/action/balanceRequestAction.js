@@ -209,7 +209,7 @@ export const updateBalanceRequestStatus =
 export const deleteBalanceRequest = (requestId) => async (dispatch) => {
     apiConfig
         .delete(apiBaseURL.BALANCE_REQUESTS + "/" + requestId)
-        .then((response) => {
+        .then(() => {
             dispatch(removeFromTotalRecord(1));
             dispatch({
                 type: balanceRequestActionType.DELETE_BALANCE_REQUEST,
@@ -242,13 +242,15 @@ export const fetchBalanceRequestPendingCount = () => async (dispatch) => {
     apiConfig
         .get(apiBaseURL.BALANCE_REQUESTS + "-pending-count")
         .then((response) => {
+            // Handle different response structures
+            const count = response?.data?.data?.count ?? response?.data?.count ?? 0;
             dispatch({
                 type: balanceRequestActionType.FETCH_BALANCE_REQUEST_PENDING_COUNT,
-                payload: response.data.data.count,
+                payload: count,
             });
         })
-        .catch(({ response }) => {
-            // Silently fail for pending count
-            console.error('Failed to fetch pending count:', response);
+        .catch((error) => {
+            // Silently fail for pending count - just log, don't show to user
+            console.error('Failed to fetch pending count:', error?.message || 'Unknown error');
         });
 };

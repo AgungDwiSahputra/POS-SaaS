@@ -41,7 +41,7 @@ const UserForm = (props) => {
         phone: singleUser ? singleUser[0].phone : "",
         password: "",
         confirm_password: "",
-        role_id: singleUser ? singleUser[0].role_id.value : "",
+        role_id: singleUser && singleUser[0].role_id ? singleUser[0].role_id.value : "",
         image: singleUser ? singleUser[0].image : "",
         stores: singleUser ? singleUser[0].stores : [],
     });
@@ -85,10 +85,11 @@ const UserForm = (props) => {
         singleUser[0].email === userValue.email &&
         singleUser[0].phone === userValue.phone &&
         singleUser[0].image === userValue.image &&
+        singleUser[0].role_id && userValue.role_id &&
         singleUser[0].role_id.label === userValue.role_id.label;
 
     const [selectedRole] = useState(
-        singleUser && singleUser[0]
+        singleUser && singleUser[0] && singleUser[0].role_id
             ? [
                 {
                     label: singleUser[0].role_id.label,

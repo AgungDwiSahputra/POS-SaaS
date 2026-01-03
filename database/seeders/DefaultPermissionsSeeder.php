@@ -1,7 +1,7 @@
 <?php
 
 namespace Database\Seeders;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use App\Models\Role as RoleModel;
@@ -170,10 +170,30 @@ class DefaultPermissionsSeeder extends Seeder
             }
         }
 
+
+        // Hapus permission yang tidak ada dalam daftar
+        $definedPermissions = array_column($permissions, 'name');
+        $allPermissions = Permission::pluck('name')->toArray();
+        $permissionsToDelete = array_diff($allPermissions, $definedPermissions);
+
+        foreach ($permissionsToDelete as $permName) {
+            $permission = Permission::where('name', $permName)->first();
+            if ($permission) {
+                DB::table('role_has_permissions')->where('permission_id', $permission->id)->delete();
+                $permission->delete();
+                $this->command->info("Deleted permission: {$permName}");
+            }
+        }
         $adminRole = RoleModel::whereName(RoleModel::ADMIN)->first();
         if ($adminRole) {
             $allPermissionNames = Permission::pluck('name')->toArray();
             $adminRole->syncPermissions($allPermissionNames);
         }
+
+        // $superAdminRole = RoleModel::whereName(RoleModel::SUPER_ADMIN)->first();
+        // if ($superAdminRole) {
+        //     $allPermissionNames = Permission::pluck('name')->toArray();
+        //     $superAdminRole->syncPermissions($allPermissionNames);
+        // }
     }
 }
