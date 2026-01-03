@@ -56,17 +56,8 @@ const CashAdvances = (props) => {
             return;
         }
 
-        navigate('/user/cash-advances/create', {
-            state: {
-                prefill: {
-                    warehouse_id: cashAdvanceRow.warehouse_id,
-                    warehouse_name: cashAdvanceRow.warehouse_name,
-                    issued_to_name: cashAdvanceRow.issued_to_name,
-                    issued_to_phone: cashAdvanceRow.issued_to_phone,
-                    issued_to_email: cashAdvanceRow.issued_to_email,
-                },
-            },
-        });
+        // Navigate to create with identity_id pre-filled
+        navigate('/user/cash-advances/create?identity_id=' + cashAdvanceRow.identity_id);
     };
 
     useEffect(() => {
@@ -136,26 +127,31 @@ const CashAdvances = (props) => {
     const itemsValue =
         currencySymbol &&
         cashAdvances.length >= 0 &&
-        cashAdvances.map((cashAdvance) => ({
-            date: getFormattedDate(
-                cashAdvance.attributes.date,
-                allConfigData && allConfigData
-            ),
-            time: moment(cashAdvance.attributes.created_at).format("LT"),
-            reference_code: cashAdvance.attributes.reference_code,
-            identity_name: cashAdvance.attributes.identity_name,
-            identity_employee_id: cashAdvance.attributes.identity_employee_id,
-            recorded_by_name: cashAdvance.attributes.recorded_by_name,
-            amount: cashAdvance.attributes.amount,
-            paid_amount: cashAdvance.attributes.paid_amount,
-            outstanding_amount: cashAdvance.attributes.outstanding_amount,
-            status: cashAdvance.attributes.status,
-            status_label: cashAdvance.attributes.status_label,
-            payments_count: cashAdvance.attributes.payments_count,
-            notes: cashAdvance.attributes.notes,
-            id: cashAdvance.id,
-            currency: currencySymbol,
-        }));
+        cashAdvances.map((cashAdvance) => {
+            // Handle both flat structure and nested attributes structure
+            const data = cashAdvance.attributes || cashAdvance;
+            return {
+                date: getFormattedDate(
+                    data.date,
+                    allConfigData && allConfigData
+                ),
+                time: moment(data.created_at).format("LT"),
+                reference_code: data.reference_code,
+                identity_id: data.identity_id,
+                identity_name: data.identity_name,
+                identity_employee_id: data.identity_employee_id,
+                recorded_by_name: data.recorded_by_name,
+                amount: data.amount,
+                paid_amount: data.paid_amount,
+                outstanding_amount: data.outstanding_amount,
+                status: data.status,
+                status_label: data.status_label,
+                payments_count: data.payments_count,
+                notes: data.notes,
+                id: cashAdvance.id,
+                currency: currencySymbol,
+            };
+        });
 
     const columns = [
         {
@@ -170,27 +166,17 @@ const CashAdvances = (props) => {
         },
         {
             name: getFormattedMessage("cash-advance.table.recipient"),
-            selector: (row) => row.issued_to_name,
-            sortField: "issued_to_name",
+            selector: (row) => row.identity_name,
+            sortField: "identity_name",
             sortable: true,
-        },
-        {
-            name: getFormattedMessage("cash-advance.table.contact"),
-            selector: (row) => `${row.issued_to_phone || ""} ${row.issued_to_email || ""}`.trim(),
-            sortField: "issued_to_phone",
-            sortable: false,
             cell: (row) => (
                 <div className="d-flex flex-column">
-                    <span>{row.issued_to_phone || "-"}</span>
-                    <span>{row.issued_to_email || "-"}</span>
+                    <span className="fw-bold">{row.identity_name}</span>
+                    {row.identity_employee_id && (
+                        <small className="text-muted">ID: {row.identity_employee_id}</small>
+                    )}
                 </div>
             ),
-        },
-        {
-            name: getFormattedMessage("warehouse.title"),
-            selector: (row) => row.warehouse_name,
-            sortField: "warehouse_name",
-            sortable: false,
         },
         {
             name: getFormattedMessage("amount.title"),

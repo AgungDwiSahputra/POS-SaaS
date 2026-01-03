@@ -425,7 +425,7 @@ export const route = [
     },
     {
         path: "cash-advances",
-        ele: <CashAdvanceIdentityDashboard />,
+        ele: <CashAdvances />,
         permission: Permissions.MANAGE_CASH_ADVANCES,
     },
     {

@@ -80,7 +80,7 @@ export const fetchCashAdvances =
     };
 
 export const fetchCashAdvance = (cashAdvanceId, singleCashAdvance) => async (dispatch) => {
-    apiConfig
+    return apiConfig
         .get(apiBaseURL.CASH_ADVANCES + "/" + cashAdvanceId, singleCashAdvance)
         .then((response) => {
             dispatch({
@@ -92,7 +92,7 @@ export const fetchCashAdvance = (cashAdvanceId, singleCashAdvance) => async (dis
             const message = resolveApiErrorMessage(error);
 
             if (!message || message === getFormattedMessage("toast.error.title")) {
-                return;
+                throw error;
             }
 
             dispatch(
@@ -101,6 +101,9 @@ export const fetchCashAdvance = (cashAdvanceId, singleCashAdvance) => async (dis
                     type: toastType.ERROR,
                 })
             );
+
+            // Re-throw the error so it can be caught by the component
+            throw error;
         });
 };
 
@@ -118,7 +121,7 @@ export const addCashAdvance = (cashAdvance, navigate) => async (dispatch) => {
                     text: getFormattedMessage("cash-advance.success.create.message"),
                 })
             );
-            navigate("/user/cash-advances");
+            navigate("/user/cash-advance-identities");
             dispatch(addInToTotalRecord(1));
             dispatch(setSavingButton(false));
         })
@@ -178,7 +181,7 @@ export const editCashAdvance =
                         ),
                     })
                 );
-                navigate("/user/cash-advances");
+                navigate("/user/cash-advance-identities");
                 dispatch(setSavingButton(false));
             })
             .catch((error) => {
@@ -221,28 +224,27 @@ export const editCashAdvance =
     };
 
 export const deleteCashAdvance = (cashAdvanceId) => async (dispatch) => {
-    apiConfig
+    return apiConfig
         .delete(apiBaseURL.CASH_ADVANCES + "/" + cashAdvanceId)
-        .then(() => {
+        .then((response) => {
             dispatch(removeFromTotalRecord(1));
             dispatch({
                 type: cashAdvanceActionType.DELETE_CASH_ADVANCE,
                 payload: cashAdvanceId,
             });
             dispatch(callFetchDataApi(true));
-            // Refresh cash advances data after delete
-            dispatch(fetchCashAdvances({}, false));
             dispatch(
                 addToast({
                     text: getFormattedMessage("cash-advance.success.delete.message"),
                 })
             );
+            return response;
         })
         .catch((error) => {
             const message = resolveApiErrorMessage(error);
 
             if (!message || message === getFormattedMessage("toast.error.title")) {
-                return;
+                throw error;
             }
 
             dispatch(
@@ -251,5 +253,6 @@ export const deleteCashAdvance = (cashAdvanceId) => async (dispatch) => {
                     type: toastType.ERROR,
                 })
             );
+            throw error;
         });
 };

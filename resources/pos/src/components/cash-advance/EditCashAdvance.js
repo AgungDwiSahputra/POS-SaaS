@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { useParams } from "react-router-dom";
-import { fetchWarehouses } from "../../store/action/warehouseAction";
 import { fetchActiveIdentitiesForSelect } from "../../store/action/cashAdvanceIdentityAction";
 import HeaderTitle from "../header/HeaderTitle";
 import MasterLayout from "../MasterLayout";
@@ -16,8 +15,6 @@ const EditCashAdvance = (props) => {
         fetchCashAdvance,
         editCashAdvance,
         cashAdvances,
-        warehouses,
-        fetchWarehouses,
         frontSetting,
         activeIdentitiesForSelect,
         fetchActiveIdentitiesForSelect,
@@ -34,7 +31,6 @@ const EditCashAdvance = (props) => {
             try {
                 await Promise.all([
                     fetchCashAdvance(id),
-                    fetchWarehouses(),
                     fetchActiveIdentitiesForSelect()
                 ]);
             } catch (err) {
@@ -51,13 +47,11 @@ const EditCashAdvance = (props) => {
         cashAdvances &&
         cashAdvances.length === 1 &&
         cashAdvances.map((cashAdvance) => ({
-            date: cashAdvance.attributes.date,
-            identity_id: {
-                value: cashAdvance.attributes.identity_id,
-                label: cashAdvance.attributes.identity_name,
-            },
-            amount: cashAdvance.attributes.amount,
-            notes: cashAdvance.attributes.notes,
+            date: cashAdvance.date,
+            identity_id: cashAdvance.identity_id,
+            identity_name: cashAdvance.identity_name,
+            amount: cashAdvance.amount,
+            notes: cashAdvance.notes,
             id: cashAdvance.id,
         }));
 
@@ -67,7 +61,7 @@ const EditCashAdvance = (props) => {
                 <TopProgressBar />
                 <HeaderTitle
                     title={getFormattedMessage("cash-advance.edit.title")}
-                    to="/user/cash-advances"
+                    to="/user/cash-advance-identities"
                 />
                 <div className="card">
                     <div className="card-body">
@@ -89,7 +83,7 @@ const EditCashAdvance = (props) => {
                 <TopProgressBar />
                 <HeaderTitle
                     title={getFormattedMessage("cash-advance.edit.title")}
-                    to="/user/cash-advances"
+                    to="/user/cash-advance-identities"
                 />
                 <Alert variant="warning" className="text-center">
                     <h5>Data tidak ditemukan</h5>
@@ -105,7 +99,7 @@ const EditCashAdvance = (props) => {
                 <TopProgressBar />
                 <HeaderTitle
                     title={getFormattedMessage("cash-advance.edit.title")}
-                    to="/user/cash-advances"
+                    to="/user/cash-advance-identities"
                 />
                 <Alert variant="danger" className="text-center">
                     <h5>Akses Ditolak</h5>
@@ -121,7 +115,7 @@ const EditCashAdvance = (props) => {
                 <TopProgressBar />
                 <HeaderTitle
                     title={getFormattedMessage("cash-advance.edit.title")}
-                    to="/user/cash-advances"
+                    to="/user/cash-advance-identities"
                 />
                 <Alert variant="danger" className="text-center">
                     <h5>Terjadi Kesalahan</h5>
@@ -142,7 +136,6 @@ const EditCashAdvance = (props) => {
                 <CashAdvanceForm
                     singleCashAdvance={itemsValue}
                     id={id}
-                    warehouses={warehouses}
                     editCashAdvance={editCashAdvance}
                     frontSetting={frontSetting}
                     activeIdentitiesForSelect={activeIdentitiesForSelect}
