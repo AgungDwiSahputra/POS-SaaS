@@ -97,6 +97,7 @@ class SaleAPIController extends AppBaseController
             $salesQuery->whereIn('id', $matchingSaleIds);
         }
 
+        $salesQuery->orderBy('id', 'desc');
         $sales = $salesQuery->paginate($perPage);
 
         SaleResource::usingWithCollection();
