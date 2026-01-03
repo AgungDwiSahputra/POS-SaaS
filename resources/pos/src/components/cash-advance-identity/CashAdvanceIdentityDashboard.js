@@ -39,8 +39,17 @@ const CashAdvanceIdentityDashboard = (props) => {
 
     useEffect(() => {
         fetchIdentitiesWithSummary();
-        fetchCashAdvances();
+        // Tidak fetch semua cash advances di awal, akan di-fetch per identity saat dipilih
     }, []);
+
+    // Reset state saat tab berubah kembali ke identities
+    useEffect(() => {
+        if (activeTab === "identities" && selectedIdentity) {
+            setSelectedIdentity(null);
+            // Reset cash advances ke kosong saat kembali ke tab identities
+            // agar tidak menampilkan data identity sebelumnya
+        }
+    }, [activeTab]);
 
     const filteredIdentities = identitiesWithSummary?.filter(identity => {
         const matchesSearch = identity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -97,12 +106,13 @@ const CashAdvanceIdentityDashboard = (props) => {
         return 'danger';
     };
 
-    const filteredCashAdvances = selectedIdentity 
-        ? cashAdvances?.filter(cashAdvance => parseInt(cashAdvance.identity_id) === parseInt(selectedIdentity.id)) || []
-        : cashAdvances || [];
+    // Tidak perlu filter lokal lagi karena sudah di-filter di backend saat memilih identity
+    const filteredCashAdvances = cashAdvances || [];
 
     const handleIdentitySelect = (identity) => {
         setSelectedIdentity(identity);
+        // Fetch cash advances untuk identity ini saja dengan pageSize besar
+        fetchCashAdvances({ identity_id: identity.id, pageSize: 999 });
         setActiveTab("cash-advances");
     };
 
@@ -113,7 +123,9 @@ const CashAdvanceIdentityDashboard = (props) => {
 
     const handlePaymentSuccess = () => {
         // Refresh cash advances data after payment
-        fetchCashAdvances();
+        if (selectedIdentity) {
+            fetchCashAdvances({ identity_id: selectedIdentity.id, pageSize: 999 });
+        }
         setShowPaymentsModal(false);
         setSelectedCashAdvance(null);
     };
@@ -129,7 +141,9 @@ const CashAdvanceIdentityDashboard = (props) => {
 
     const handleDeleteSuccess = () => {
         // Refresh data after delete
-        fetchCashAdvances();
+        if (selectedIdentity) {
+            fetchCashAdvances({ identity_id: selectedIdentity.id, pageSize: 999 });
+        }
         fetchIdentitiesWithSummary();
     };
 
