@@ -103,6 +103,10 @@ class DefaultPermissionsSeeder extends Seeder
                 'display_name' => 'Manage Sale Return'
             ],
             [
+                'name' => 'manage_digital_sales',
+                'display_name' => 'Manage Digital Sales'
+            ],
+            [
                 'name' => 'manage_email_templates',
                 'display_name' => 'Manage Email Templates'
             ],

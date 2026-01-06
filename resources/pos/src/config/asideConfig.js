@@ -39,6 +39,7 @@ import {
     faMoneyCheck,
     faDisplay,
     faHandHoldingDollar,
+    faLaptopCode,
 } from "@fortawesome/free-solid-svg-icons";
 import { getFormattedMessage } from "../shared/sharedMethod";
 
@@ -245,6 +246,7 @@ export const userMenu = [
         subPath: {
             salesSubPath: "/user/sales",
             salesReturnSubPath: "/user/sale-return",
+            digitalSalesSubPath: "/user/digital-sales",
         },
         subMenu: [
             {
@@ -254,6 +256,14 @@ export const userMenu = [
                 to: "/user/sales",
                 class: "d-flex",
                 permission: Permissions.MANAGE_SALE,
+            },
+            {
+                title: "digital-sales.title",
+                name: "digital-sales",
+                fontIcon: <FontAwesomeIcon icon={faLaptopCode} />,
+                to: "/user/digital-sales",
+                class: "d-flex",
+                permission: Permissions.MANAGE_DIGITAL_SALES,
             },
             {
                 title: "sales-return.title",

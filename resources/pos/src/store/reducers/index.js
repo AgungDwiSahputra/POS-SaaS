@@ -20,6 +20,9 @@ import cashAdvanceReportReducer from "./cashAdvanceReportReducer";
 import cashAdvanceIdentityReducer from "../reducer/cashAdvanceIdentityReducer";
 import productReducers from "./productReducers";
 import digitalProductReducer from "./digitalProductReducer";
+import digitalSaleReducer from "./digitalSaleReducer";
+import digitalSaleDetailsReducer from "./digitalSaleDetailsReducer";
+import digitalSalePaymentReducer from "./digitalSalePaymentReducer";
 import providerReducer from "./providerReducer";
 import balanceRequestReducer from "./balanceRequestReducer";
 import settingReducers from "./settingReducers";
@@ -149,6 +152,8 @@ export default combineReducers({
     cashAdvanceIdentities: cashAdvanceIdentityReducer,
     products: productReducers,
     digitalProducts: digitalProductReducer,
+    digitalSales: digitalSaleReducer,
+    digitalSaleDetails: digitalSaleDetailsReducer,
     providers: providerReducer,
     balanceRequests: balanceRequestReducer,
     sales: saleReducer,
@@ -198,6 +203,7 @@ export default combineReducers({
     config: configReducer,
     warehouseDetails: warehouseDetailsReducer,
     allSalePayments: salePaymentReducer,
+    allDigitalSalePayments: digitalSalePaymentReducer,
     isCallSaleApi: saleApiReducer,
     isSaving: saveButtonReducer,
     adjustments: adjustMentReducer,

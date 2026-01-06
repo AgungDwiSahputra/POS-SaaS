@@ -50,6 +50,9 @@ use App\Http\Controllers\API\PurchaseReturnAPIController;
 use App\Http\Controllers\API\ExpenseCategoryAPIController;
 use App\Http\Controllers\API\ProductCategoryAPIController;
 use App\Http\Controllers\API\DigitalProductAPIController;
+use App\Http\Controllers\API\DigitalSaleAPIController;
+use App\Http\Controllers\API\DigitalSalesPaymentAPIController;
+use App\Http\Controllers\API\DigitalPurchaseTransactionAPIController;
 
 /*
 |--------------------------------------------------------------------------
@@ -236,6 +239,17 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
             Route::get('sales/{sale}/payments', [SalesPaymentAPIController::class, 'getAllPayments']);
             Route::post('sales/{salesPayment}/payment', [SalesPaymentAPIController::class, 'updateSalePayment']);
             Route::delete('sales/{id}/payment', [SalesPaymentAPIController::class, 'deletePayment']);
+        });
+
+        // Digital Sales
+        Route::middleware('permission:manage_sale|manage_pos_screen|manage_reports')->group(function () {
+            Route::resource('digital-sales', DigitalSaleAPIController::class);
+            Route::get('digital-sale-info/{sale}', [DigitalSaleAPIController::class, 'saleInfo'])->name('digital-sale-info');
+
+            Route::post('digital-sales/{sale}/capture-payment', [DigitalSalesPaymentAPIController::class, 'createDigitalSalePayment']);
+            Route::get('digital-sales/{sale}/payments', [DigitalSalesPaymentAPIController::class, 'getAllPayments']);
+            Route::post('digital-sales/{salesPayment}/payment', [DigitalSalesPaymentAPIController::class, 'updateDigitalSalePayment']);
+            Route::delete('digital-sales/{id}/payment', [DigitalSalesPaymentAPIController::class, 'deletePayment']);
         });
 
         Route::resource('holds', HoldAPIController::class);

@@ -23,7 +23,7 @@ const ModelFooter = ( props ) => {
                             {isSaving ? placeholderText( "globally-saving-btn-label" ) : placeholderText( "globally.save-btn" )}
                         </button>
                     }
-                    {modelhide ?
+                    {/* {modelhide ?
                         <Link to={link} onClick={() => modelhide( false )}
                             className='btn btn-secondary'>
                             {getFormattedMessage( "globally.cancel-btn" )}
@@ -33,9 +33,9 @@ const ModelFooter = ( props ) => {
                             className='btn btn-secondary'>
                             {getFormattedMessage( "globally.cancel-btn" )}
                         </Link>
-                    }
+                    } */}
                 </div> :
-                    <Modal.Footer children='justify-content-start' className='pt-0'>
+                    <Modal.Footer children='justify-content-start' className='pt-0 mt-5'>
                         {onEditRecord ?
                             <button onClick={( event ) => onSubmit( event )} className='btn btn-primary me-2' type='submit'
                                 disabled={editDisabled}>
@@ -46,10 +46,10 @@ const ModelFooter = ( props ) => {
                                 {placeholderText( "globally.save-btn" )}
                             </button>
                         }
-                        {!cancelNotShow ? <button onClick={() => clearField( false )}
+                        {/* {!cancelNotShow ? <button onClick={() => clearField( false )}
                             className='btn btn-secondary'>
                             {getFormattedMessage( "globally.cancel-btn" )}
-                        </button> : null}
+                        </button> : null} */}
 
                     </Modal.Footer>
             }

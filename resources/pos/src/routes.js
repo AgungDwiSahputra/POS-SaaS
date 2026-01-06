@@ -58,6 +58,10 @@ import CreateSaleReturn from "./components/saleReturn/CreateSaleReturn";
 import EditSaleReturn from "./components/saleReturn/EditSaleReturn";
 import SaleReturnDetails from "./components/saleReturn/SaleReturnDetails";
 import SaleDetails from "./components/sales/SaleDetails";
+import DigitalSales from "./components/digital-sales/DigitalSales";
+import CreateDigitalSale from "./components/digital-sales/CreateDigitalSale";
+import EditDigitalSale from "./components/digital-sales/EditDigitalSale";
+import DigitalSaleDetails from "./components/digital-sales/DigitalSaleDetails";
 import PurchaseReturn from "./components/purchaseReturn/PurchaseReturn";
 import CreatePurchaseReturn from "./components/purchaseReturn/CreatePurchaseReturn";
 import EditPurchaseReturn from "./components/purchaseReturn/EditPurchaseReturn";
@@ -552,6 +556,26 @@ export const route = [
         path: "sales/detail/:id",
         ele: <SaleDetails />,
         permission: Permissions.VIEW_SALES,
+    },
+    {
+        path: "digital-sales",
+        ele: <DigitalSales />,
+        permission: Permissions.MANAGE_DIGITAL_SALES,
+    },
+    {
+        path: "digital-sales/create",
+        ele: <CreateDigitalSale />,
+        permission: Permissions.CREATE_DIGITAL_SALES,
+    },
+    {
+        path: "digital-sales/edit/:id",
+        ele: <EditDigitalSale />,
+        permission: Permissions.EDIT_DIGITAL_SALES,
+    },
+    {
+        path: "digital-sales/detail/:id",
+        ele: <DigitalSaleDetails />,
+        permission: Permissions.VIEW_DIGITAL_SALES,
     },
     {
         path: "purchase-return",

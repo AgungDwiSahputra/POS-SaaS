@@ -129,6 +129,7 @@ export const apiBaseURL = {
     DUAL_SCREEN_SETTINGS_UPDATE: "dual-screen-settings/update",
     PAYMENT_METHOD: "payment-methods",
     DIGITAL_PRODUCTS: "/digital-products",
+    DIGITAL_SALES: "/digital-sales",
     PROVIDERS: "/providers",
     BALANCE_REQUESTS: "/balance-requests"
 };
@@ -477,6 +478,19 @@ export const saleActionType = {
     DELETE_SALE_PAYMENT: "DELETE_SALE_PAYMENT",
 };
 
+export const digitalSaleActionType = {
+    FETCH_DIGITAL_SALES: "FETCH_DIGITAL_SALES",
+    FETCH_DIGITAL_SALE: "FETCH_DIGITAL_SALE",
+    ADD_DIGITAL_SALE: "ADD_DIGITAL_SALE",
+    EDIT_DIGITAL_SALE: "EDIT_DIGITAL_SALE",
+    DELETE_DIGITAL_SALE: "DELETE_DIGITAL_SALE",
+    FETCH_DIGITAL_SALE_DETAILS: "FETCH_DIGITAL_SALE_DETAILS",
+    CREATE_DIGITAL_SALE_PAYMENT: "CREATE_DIGITAL_SALE_PAYMENT",
+    FETCH_DIGITAL_SALE_PAYMENT: "FETCH_DIGITAL_SALE_PAYMENT",
+    EDIT_DIGITAL_SALE_PAYMENT: "EDIT_DIGITAL_SALE_PAYMENT",
+    DELETE_DIGITAL_SALE_PAYMENT: "DELETE_DIGITAL_SALE_PAYMENT",
+};
+
 export const holdListActionType = {
     FETCH_HOLDS: "FETCH_HOLDS",
     ADD_HOLD: "ADD_HOLD",
@@ -814,6 +828,11 @@ export const Permissions = {
     VIEW_SALES: "view_sale",
     EDIT_SALES: "edit_sale",
     DELETE_SALES: "delete_sale",
+    MANAGE_DIGITAL_SALES: "manage_digital_sales",
+    CREATE_DIGITAL_SALES: "create_digital_sales",
+    VIEW_DIGITAL_SALES: "view_digital_sales",
+    EDIT_DIGITAL_SALES: "edit_digital_sales",
+    DELETE_DIGITAL_SALES: "delete_digital_sales",
     CREATE_PURCHASE_RETURN: "create_purchase_return",
     VIEW_PURCHASE_RETURN: "view_purchase_return",
     EDIT_PURCHASE_RETURN: "edit_purchase_return",
