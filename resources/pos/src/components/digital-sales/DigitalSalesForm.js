@@ -140,7 +140,7 @@ const DigitalSalesForm = (props) => {
         // Check provider balance
         if (selectedProvider && cartItems.length > 0) {
             const totalCost = calculateCartCost();
-            const providerSaldo = selectedProvider.attributes?.saldo ?? 0;
+            const providerSaldo = parseFloat(selectedProvider.attributes?.saldo ?? 0) || 0;
             if (providerSaldo < totalCost) {
                 dispatch(addToast({
                     text: getFormattedMessage('digital-sale.insufficient-balance') +
