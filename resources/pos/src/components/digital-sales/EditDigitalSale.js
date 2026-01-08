@@ -43,14 +43,11 @@ const EditDigitalSale = (props) => {
     const singleSale = digitalSaleDetails?.attributes && {
         date: digitalSaleDetails.attributes?.date,
         provider_id: digitalSaleDetails.attributes?.provider_id,
-        digital_product_id: digitalSaleDetails.attributes?.digital_product_id,
-        cost: digitalSaleDetails.attributes?.cost,
-        price: digitalSaleDetails.attributes?.price,
-        margin: digitalSaleDetails.attributes?.margin,
         note: digitalSaleDetails.attributes?.note,
         description: digitalSaleDetails.attributes?.description,
         status: digitalSaleDetails.attributes?.status,
         status_id: statusDefaultValue[0] || { label: 'Completed', value: 1 },
+        items: digitalSaleDetails.attributes?.items || [],
     };
 
     const isDataReady = digitalSaleDetails?.attributes && providers?.length > 0;

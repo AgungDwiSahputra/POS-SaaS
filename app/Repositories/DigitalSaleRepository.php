@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\DigitalSale;
+use App\Models\DigitalSaleItem;
 use App\Models\Provider;
 use Carbon\Carbon;
 use Exception;
@@ -52,19 +53,38 @@ class DigitalSaleRepository extends BaseRepository
         try {
             DB::beginTransaction();
 
+            // Get items from input
+            $items = $input['items'] ?? [];
+
+            if (empty($items)) {
+                throw new UnprocessableEntityHttpException('At least one item is required.');
+            }
+
+            // Calculate totals from items
+            $totalCost = 0;
+            $totalPrice = 0;
+            foreach ($items as $item) {
+                $totalCost += $item['cost'] * $item['quantity'];
+                $totalPrice += $item['price'] * $item['quantity'];
+            }
+
+            // Override cost and price with calculated totals
+            $input['cost'] = $totalCost;
+            $input['price'] = $totalPrice;
+
             // Get provider
             $provider = Provider::findOrFail($input['provider_id']);
 
             // Validate provider balance
-            if ($provider->saldo < $input['cost']) {
+            if ($provider->saldo < $totalCost) {
                 throw new UnprocessableEntityHttpException(
-                    'Insufficient provider balance. Required: ' . number_format($input['cost'], 2) .
+                    'Insufficient provider balance. Required: ' . number_format($totalCost, 2) .
                     ', Available: ' . number_format($provider->saldo, 2)
                 );
             }
 
             // Calculate margin
-            $input['margin'] = $input['price'] - $input['cost'];
+            $input['margin'] = $totalPrice - $totalCost;
 
             // Generate reference code
             $input['date'] = $input['date'] ?? date('Y-m-d');
@@ -79,13 +99,24 @@ class DigitalSaleRepository extends BaseRepository
             $reference_code = getSettingValue('sale_code') . '_DIG_' . $sale->id;
             $sale->update(['reference_code' => $reference_code]);
 
+            // Create digital sale items
+            foreach ($items as $item) {
+                DigitalSaleItem::create([
+                    'digital_sale_id' => $sale->id,
+                    'digital_product_id' => $item['digital_product_id'],
+                    'product_price' => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'sub_total' => $item['price'] * $item['quantity'],
+                ]);
+            }
+
             // Deduct provider balance
-            $provider->saldo -= $input['cost'];
+            $provider->saldo -= $totalCost;
             $provider->save();
 
             DB::commit();
 
-            return $sale->fresh(['provider']);
+            return $sale->fresh(['provider', 'digitalSaleItems.digitalProduct']);
         } catch (Exception $e) {
             DB::rollBack();
             throw new UnprocessableEntityHttpException($e->getMessage());
@@ -105,7 +136,27 @@ class DigitalSaleRepository extends BaseRepository
         try {
             DB::beginTransaction();
 
-            $sale = DigitalSale::with('provider')->findOrFail($id);
+            $sale = DigitalSale::with(['provider', 'digitalSaleItems'])->findOrFail($id);
+
+            // Get items from input
+            $items = $input['items'] ?? [];
+
+            if (empty($items)) {
+                throw new UnprocessableEntityHttpException('At least one item is required.');
+            }
+
+            // Calculate totals from items
+            $totalCost = 0;
+            $totalPrice = 0;
+            foreach ($items as $item) {
+                $totalCost += $item['cost'] * $item['quantity'];
+                $totalPrice += $item['price'] * $item['quantity'];
+            }
+
+            // Override cost and price with calculated totals
+            $input['cost'] = $totalCost;
+            $input['price'] = $totalPrice;
+
             $provider = Provider::findOrFail($input['provider_id']);
 
             // If provider changed, refund old provider and deduct from new provider
@@ -116,19 +167,19 @@ class DigitalSaleRepository extends BaseRepository
                 $oldProvider->save();
 
                 // Check new provider balance
-                if ($provider->saldo < $input['cost']) {
+                if ($provider->saldo < $totalCost) {
                     throw new UnprocessableEntityHttpException(
-                        'Insufficient provider balance. Required: ' . number_format($input['cost'], 2) .
+                        'Insufficient provider balance. Required: ' . number_format($totalCost, 2) .
                         ', Available: ' . number_format($provider->saldo, 2)
                     );
                 }
 
                 // Deduct from new provider
-                $provider->saldo -= $input['cost'];
+                $provider->saldo -= $totalCost;
                 $provider->save();
             } else {
                 // Same provider, adjust balance if cost changed
-                $costDifference = $input['cost'] - $sale->cost;
+                $costDifference = $totalCost - $sale->cost;
 
                 if ($costDifference > 0) {
                     // Cost increased, need to check balance
@@ -148,14 +199,27 @@ class DigitalSaleRepository extends BaseRepository
             }
 
             // Calculate margin
-            $input['margin'] = $input['price'] - $input['cost'];
+            $input['margin'] = $totalPrice - $totalCost;
 
             // Update sale
             $sale->update($input);
 
+            // Delete old items and create new ones
+            DigitalSaleItem::where('digital_sale_id', $sale->id)->delete();
+
+            foreach ($items as $item) {
+                DigitalSaleItem::create([
+                    'digital_sale_id' => $sale->id,
+                    'digital_product_id' => $item['digital_product_id'],
+                    'product_price' => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'sub_total' => $item['price'] * $item['quantity'],
+                ]);
+            }
+
             DB::commit();
 
-            return $sale->fresh(['provider']);
+            return $sale->fresh(['provider', 'digitalSaleItems.digitalProduct']);
         } catch (Exception $e) {
             DB::rollBack();
             throw new UnprocessableEntityHttpException($e->getMessage());

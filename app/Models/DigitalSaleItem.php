@@ -16,6 +16,7 @@ class DigitalSaleItem extends BaseModel implements JsonResourceful
     public const JSON_API_TYPE = 'digital_sale_items';
 
     protected $fillable = [
+        'digital_sale_id',
         'digital_product_id',
         'product_price',
         'net_unit_price',
@@ -30,6 +31,7 @@ class DigitalSaleItem extends BaseModel implements JsonResourceful
     ];
 
     public static $rules = [
+        'digital_sale_id' => 'required|exists:digital_sales,id',
         'digital_product_id' => 'required|exists:digital_products,id',
         'product_price' => 'nullable|numeric',
         'tax_type' => 'nullable|numeric',

@@ -7,7 +7,6 @@ import { editDigitalSale } from '../../store/action/digitalSaleAction';
 import {
     placeholderText,
     getFormattedMessage,
-    decimalValidate,
 } from '../../shared/sharedMethod';
 import ReactDatePicker from '../../shared/datepicker/ReactDatePicker';
 import ModelFooter from '../../shared/components/modelFooter';
@@ -17,6 +16,8 @@ import ReactSelect from '../../shared/select/reactSelect';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { ReactSearchAutocomplete } from 'react-search-autocomplete';
+import DigitalSaleProductRowTable from './DigitalSaleProductRowTable';
+import DigitalSaleMainCalculation from './DigitalSaleMainCalculation';
 
 const DigitalSalesForm = (props) => {
     const {
@@ -47,10 +48,6 @@ const DigitalSalesForm = (props) => {
     const [saleValue, setSaleValue] = useState({
         date: new Date(),
         provider_id: '',
-        digital_product_id: '',
-        cost: '',
-        price: '',
-        margin: '0.00',
         note: '',
         description: '',
         status_id: { label: 'Completed', value: 1 },
@@ -59,29 +56,53 @@ const DigitalSalesForm = (props) => {
     const [errors, setErrors] = useState({
         date: '',
         provider_id: '',
-        cost: '',
-        price: '',
-        status_id: '',
+        items: '',
     });
 
-    const [selectedProvider, setSelectedProvider] = useState(null);
-    const [selectedDigitalProduct, setSelectedDigitalProduct] = useState(null);
+    // Cart items state - array of {product, qty, price, cost, sub_total}
+    const [cartItems, setCartItems] = useState([]);
+
     const [productSearchString, setProductSearchString] = useState('');
     const [hasInitialized, setHasInitialized] = useState(false);
+    const [selectedProvider, setSelectedProvider] = useState(null);
 
+    // Calculate total from cart
+    const calculateCartTotal = () => {
+        return cartItems.reduce((sum, item) => sum + item.sub_total, 0);
+    };
+
+    // Calculate total cost from cart
+    const calculateCartCost = () => {
+        return cartItems.reduce((sum, item) => sum + (item.cost * item.qty), 0);
+    };
+
+    // Calculate margin
+    const calculateMargin = () => {
+        return calculateCartTotal() - calculateCartCost();
+    };
+
+    // Initialize form data for edit mode
     useEffect(() => {
         if (singleSale && !hasInitialized) {
-            const cost = singleSale.cost || 0;
-            const price = singleSale.price || 0;
-            const margin = (price - cost).toFixed(2);
+            // Set cart items from singleSale.items
+            const items = singleSale.items || [];
+            const initialCartItems = items.map(item => {
+                // Find full product data
+                const product = digitalProducts?.find(p => p.id === item.digital_product_id);
+                return {
+                    product: product || { id: item.digital_product_id, attributes: {} },
+                    qty: parseInt(item.quantity) || 1,
+                    price: parseFloat(item.product_price) || 0,
+                    cost: parseFloat(item.cost) || 0,
+                    sub_total: parseFloat(item.sub_total) || 0,
+                };
+            });
+
+            setCartItems(initialCartItems);
 
             setSaleValue({
                 date: moment(singleSale.date).toDate(),
                 provider_id: singleSale.provider_id,
-                digital_product_id: singleSale.digital_product_id || '',
-                cost: cost.toString(),
-                price: price.toString(),
-                margin: margin,
                 note: singleSale.note || '',
                 description: singleSale.description || '',
                 status_id: statusOptions.find(s => s.value === singleSale.status) || { label: 'Completed', value: 1 },
@@ -93,33 +114,9 @@ const DigitalSalesForm = (props) => {
                 setSelectedProvider(provider);
             }
 
-            // Set selected digital product
-            if (digitalProducts && singleSale.digital_product_id) {
-                const product = digitalProducts.find(p => p.id === singleSale.digital_product_id);
-                setSelectedDigitalProduct(product);
-                if (product) {
-                    setProductSearchString(product.attributes?.code || '');
-                }
-            }
-
             setHasInitialized(true);
         }
     }, [singleSale, providers, digitalProducts, hasInitialized]);
-
-    // Calculate margin when cost or price changes - using ref to avoid infinite loop
-    useEffect(() => {
-        const cost = parseFloat(saleValue.cost) || 0;
-        const price = parseFloat(saleValue.price) || 0;
-        const margin = price - cost;
-
-        // Only update if margin is different to avoid infinite loop
-        if (margin.toFixed(2) !== saleValue.margin) {
-            setSaleValue(prev => ({
-                ...prev,
-                margin: margin.toFixed(2),
-            }));
-        }
-    }, [saleValue.cost, saleValue.price]);
 
     const handleValidation = () => {
         let error = false;
@@ -135,24 +132,19 @@ const DigitalSalesForm = (props) => {
             error = true;
         }
 
-        if (!saleValue.cost || parseFloat(saleValue.cost) <= 0) {
-            newErrors.cost = getFormattedMessage('digital-sale.cost.required');
-            error = true;
-        }
-
-        if (!saleValue.price || parseFloat(saleValue.price) <= 0) {
-            newErrors.price = getFormattedMessage('digital-sale.price.required');
+        if (cartItems.length === 0) {
+            newErrors.items = getFormattedMessage('digital-sale.items.required');
             error = true;
         }
 
         // Check provider balance
-        if (selectedProvider && saleValue.cost) {
-            const cost = parseFloat(saleValue.cost);
+        if (selectedProvider && cartItems.length > 0) {
+            const totalCost = calculateCartCost();
             const providerSaldo = selectedProvider.attributes?.saldo ?? 0;
-            if (providerSaldo < cost) {
+            if (providerSaldo < totalCost) {
                 dispatch(addToast({
                     text: getFormattedMessage('digital-sale.insufficient-balance') +
-                          ` (Available: ${providerSaldo.toFixed(2)})`,
+                          ` (Available: ${providerSaldo.toFixed(2)}, Required: ${totalCost.toFixed(2)})`,
                     type: toastType.ERROR,
                 }));
                 error = true;
@@ -164,12 +156,20 @@ const DigitalSalesForm = (props) => {
     };
 
     const prepareFormData = (prepareData) => {
+        // Convert cartItems to items array
+        const items = cartItems.map(item => ({
+            digital_product_id: item.product.id,
+            quantity: item.qty,
+            price: item.price,
+            cost: item.cost,
+        }));
+
         const formData = {
             date: moment(prepareData.date).format('YYYY-MM-DD'),
             provider_id: prepareData.provider_id,
-            digital_product_id: prepareData.digital_product_id || null,
-            cost: parseFloat(prepareData.cost),
-            price: parseFloat(prepareData.price),
+            items: items,
+            cost: calculateCartCost(),
+            price: calculateCartTotal(),
             note: prepareData.note,
             description: prepareData.description,
             status: prepareData.status_id.value,
@@ -203,48 +203,64 @@ const DigitalSalesForm = (props) => {
         setSelectedProvider(foundProvider || null);
     };
 
-    const onChangeCost = (e) => {
-        const value = e.target.value;
-        if (value && value.match(/\./g)) {
-            const [, decimal] = value.split('.');
-            if (decimal?.length > 2) return;
-        }
-        setSaleValue((previousState) => {
-            return { ...previousState, cost: value };
-        });
-    };
-
-    const onChangePrice = (e) => {
-        const value = e.target.value;
-        if (value && value.match(/\./g)) {
-            const [, decimal] = value.split('.');
-            if (decimal?.length > 2) return;
-        }
-        setSaleValue((previousState) => {
-            return { ...previousState, price: value };
-        });
-    };
-
     const onChangeStatus = (obj) => {
         setSaleValue((previousState) => {
             return { ...previousState, status_id: obj };
         });
     };
 
-    // Handler for digital product selection
-    const onDigitalProductSelect = (product) => {
+    // Add product to cart
+    const addProductToCart = (product) => {
         if (!product) return;
 
-        const foundProduct = digitalProducts?.find(p => p.id === product.id);
-        if (foundProduct) {
-            setSelectedDigitalProduct(foundProduct);
-            setSaleValue(prev => ({
-                ...prev,
-                digital_product_id: foundProduct.id,
-                cost: foundProduct.attributes?.cost?.toString() || prev.cost,
-                price: foundProduct.attributes?.price?.toString() || prev.price,
-            }));
+        // Check if product already exists in cart
+        const existingIndex = cartItems.findIndex(item => item.product.id === product.id);
+
+        if (existingIndex >= 0) {
+            // Update qty if already exists
+            const updated = [...cartItems];
+            updated[existingIndex].qty += 1;
+            updated[existingIndex].sub_total = updated[existingIndex].qty * updated[existingIndex].price;
+            setCartItems(updated);
+        } else {
+            // Add new item
+            setCartItems([...cartItems, {
+                product: product,
+                qty: 1,
+                price: product.attributes?.price || 0,
+                cost: product.attributes?.cost || 0,
+                sub_total: product.attributes?.price || 0,
+            }]);
         }
+
+        setProductSearchString('');
+    };
+
+    // Update cart item quantity
+    const updateCartItemQty = (index, newQty) => {
+        const qty = parseInt(newQty);
+        if (qty < 1) return;
+
+        const updated = [...cartItems];
+        updated[index].qty = qty;
+        updated[index].sub_total = qty * updated[index].price;
+        setCartItems(updated);
+    };
+
+    // Update cart item price
+    const updateCartItemPrice = (index, newPrice) => {
+        const price = parseFloat(newPrice);
+        if (isNaN(price) || price < 0) return;
+
+        const updated = [...cartItems];
+        updated[index].price = price;
+        updated[index].sub_total = updated[index].qty * price;
+        setCartItems(updated);
+    };
+
+    // Remove item from cart
+    const removeCartItem = (index) => {
+        setCartItems(cartItems.filter((_, i) => i !== index));
     };
 
     // Filter digital products for search
@@ -261,8 +277,10 @@ const DigitalSalesForm = (props) => {
     };
 
     const handleProductSelect = (item) => {
-        onDigitalProductSelect(item);
-        setProductSearchString('');
+        const foundProduct = digitalProducts?.find(p => p.id === item.id);
+        if (foundProduct) {
+            addProductToCart(foundProduct);
+        }
     };
 
     const formatProductResult = (item) => {
@@ -271,30 +289,18 @@ const DigitalSalesForm = (props) => {
         );
     };
 
-    // Get provider options - safely check if providers exists
+    // Get provider options
     const providerOptions = providers && providers.length > 0
         ? providers.filter(item => item.attributes?.status === 'active')
         : [];
 
-    // Store active providers for lookup when selection changes
-    const activeProviders = providerOptions;
-
-    const providerDefaultValue = activeProviders.map((option) => {
+    const providerDefaultValue = providerOptions.map((option) => {
         return {
             value: option.id,
             label: option.attributes?.nama_provider || option.attributes?.name,
         };
     });
 
-    // Get current provider value for select
-    const getCurrentProviderValue = () => {
-        if (saleValue.provider_id && providerDefaultValue.length > 0) {
-            return providerDefaultValue.find(p => p.value === saleValue.provider_id) || null;
-        }
-        return null;
-    };
-
-    // Safely get provider balance
     const getProviderBalance = () => {
         const saldo = selectedProvider?.attributes?.saldo;
         if (typeof saldo === 'number') {
@@ -314,24 +320,25 @@ const DigitalSalesForm = (props) => {
                     <div className='row'>
                         {/* Date */}
                         <div className='col-md-4'>
-                            <ReactDatePicker
-                                onChangeDate={onChangeDate}
-                                newStartDate={saleValue.date}
-                                title={getFormattedMessage('react-data-table.date.column.label')}
-                                errors={errors[0]}
-                                isRequiredField
-                            />
+                            <label className='form-label'>
+                                {getFormattedMessage('react-data-table.date.column.label')}:
+                            </label>
+                            <span className='required' />
+                            <div className='position-relative'>
+                                <ReactDatePicker onChangeDate={onChangeDate} newStartDate={saleValue.date} />
+                            </div>
+                            <span className='text-danger d-block fw-400 fs-small mt-2'>{errors.date ? errors.date : null}</span>
                         </div>
 
                         {/* Provider */}
                         <div className='col-md-4'>
                             <ReactSelect
-                                title={getFormattedMessage('digital-sale.provider.label')}
-                                placeholder={placeholderText('digital-sale.provider.placeholder')}
+                                name='provider_id'
                                 data={providerDefaultValue}
-                                defaultValue={getCurrentProviderValue()}
                                 onChange={onProviderChange}
-                                errors={errors[0]}
+                                title={getFormattedMessage('digital-sale.provider.label')}
+                                errors={errors.provider_id}
+                                value={providerDefaultValue.find(p => p.value === saleValue.provider_id) || null}
                                 isRequiredField
                                 key={saleValue.provider_id || 'provider-select'}
                             />
@@ -346,142 +353,96 @@ const DigitalSalesForm = (props) => {
                         {/* Status */}
                         <div className='col-md-4'>
                             <ReactSelect
-                                title={getFormattedMessage('digital-sale.status.label')}
+                                name='status_id'
                                 data={statusOptions}
                                 onChange={onChangeStatus}
-                                defaultValue={saleValue.status_id}
-                                errors={errors[0]}
+                                title={getFormattedMessage('digital-sale.status.label')}
+                                value={saleValue.status_id}
+                                errors={errors.status_id}
+                                defaultValue={statusOptions[0]}
                                 isRequiredField
                             />
                         </div>
                     </div>
 
-                    <div className='row mt-4'>
-                        {/* Digital Product Search */}
-                        <div className='col-md-6'>
-                            <label className='form-label'>
-                                {getFormattedMessage('digital-sale.product.label')}:
-                            </label>
-                            <div className='position-relative custom-search'>
-                                <ReactSearchAutocomplete
-                                    items={filterDigitalProducts}
-                                    onSearch={handleProductSearch}
-                                    inputSearchString={productSearchString}
-                                    fuseOptions={{ keys: ['code', 'name'] }}
-                                    resultStringKeyName='code'
-                                    placeholder={placeholderText('digital-sale.product.placeholder')}
-                                    onSelect={handleProductSelect}
-                                    formatResult={formatProductResult}
-                                    showIcon={false}
-                                    showClear={true}
-                                />
-                                <FontAwesomeIcon icon={faSearch}
-                                    className='d-flex align-items-center top-0 bottom-0 react-search-icon my-auto text-gray-600 position-absolute' />
+                    {/* Product Search Section */}
+                    <div className='mb-2 mt-4'>
+                        <label className='form-label'>
+                            {getFormattedMessage('digital-sale.product.label')}:
+                        </label>
+                        <span className='required' />
+                        <div className='position-relative custom-search'>
+                            <ReactSearchAutocomplete
+                                items={filterDigitalProducts}
+                                onSearch={handleProductSearch}
+                                inputSearchString={productSearchString}
+                                fuseOptions={{ keys: ['code', 'name'] }}
+                                resultStringKeyName='code'
+                                placeholder={placeholderText('digital-sale.product.placeholder')}
+                                onSelect={handleProductSelect}
+                                formatResult={formatProductResult}
+                                showIcon={false}
+                                showClear={true}
+                            />
+                            <FontAwesomeIcon icon={faSearch}
+                                className='d-flex align-items-center top-0 bottom-0 react-search-icon my-auto text-gray-600 position-absolute' />
+                        </div>
+                    </div>
+
+                    {/* Product Table Section */}
+                    <div>
+                        <label className='form-label'>
+                            {getFormattedMessage('purchase.order-item.table.label')}:
+                        </label>
+                        <span className='required' />
+                        <DigitalSaleProductRowTable
+                            cartItems={cartItems}
+                            frontSetting={frontSetting}
+                            allConfigData={allConfigData}
+                            updateCartItemQty={updateCartItemQty}
+                            updateCartItemPrice={updateCartItemPrice}
+                            removeCartItem={removeCartItem}
+                        />
+                    </div>
+
+                    {errors.items && (
+                        <div className='row mt-2'>
+                            <div className='col-12'>
+                                <span className='text-danger'>{errors.items}</span>
                             </div>
-                            {selectedDigitalProduct && (
-                                <small className='text-muted ms-2 d-block mt-1'>
-                                    <FontAwesomeIcon icon={faInfoCircle} className='me-1' />
-                                    {getFormattedMessage('digital-sale.product.selected')}: {selectedDigitalProduct.attributes?.name}
-                                    ({selectedDigitalProduct.attributes?.code})
-                                </small>
-                            )}
                         </div>
+                    )}
 
-                        {/* Cost */}
-                        <div className='col-md-3'>
-                            <label className='form-label'>
-                                {getFormattedMessage('digital-sale.cost.label')}:
-                                <span className='required' />
-                            </label>
-                            <input
-                                type='text'
-                                className='form-control'
-                                placeholder={placeholderText('digital-sale.cost.placeholder')}
-                                onKeyPress={(e) => decimalValidate(e)}
-                                onChange={(e) => onChangeCost(e)}
-                                value={saleValue.cost}
-                            />
-                            <span className='text-danger d-block fw-400 fs-small mt-1'>
-                                {errors.cost ? errors.cost : null}
-                            </span>
-                        </div>
+                    {/* Calculation Summary Card */}
+                    {cartItems.length > 0 && (
+                        <DigitalSaleMainCalculation
+                            frontSetting={frontSetting}
+                            allConfigData={allConfigData}
+                            cartItems={cartItems}
+                            calculateCartCost={calculateCartCost}
+                            calculateCartTotal={calculateCartTotal}
+                            calculateMargin={calculateMargin}
+                        />
+                    )}
 
-                        {/* Price */}
-                        <div className='col-md-3'>
-                            <label className='form-label'>
-                                {getFormattedMessage('digital-sale.price.label')}:
-                                <span className='required' />
-                            </label>
-                            <input
-                                type='text'
-                                className='form-control'
-                                placeholder={placeholderText('digital-sale.price.placeholder')}
-                                onKeyPress={(e) => decimalValidate(e)}
-                                onChange={(e) => onChangePrice(e)}
-                                value={saleValue.price}
-                            />
-                            <span className='text-danger d-block fw-400 fs-small mt-1'>
-                                {errors.price ? errors.price : null}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className='row mt-4'>
-                        {/* Margin (Auto-calculated) */}
-                        <div className='col-md-4'>
-                            <label className='form-label'>
-                                {getFormattedMessage('digital-sale.margin.label')}:
-                            </label>
-                            <input
-                                type='text'
-                                className='form-control bg-light'
-                                readOnly
-                                value={saleValue.margin}
-                            />
-                            <small className='text-muted'>
-                                {getFormattedMessage('digital-sale.margin.info')}
-                            </small>
-                        </div>
-
-                        {/* Empty col for spacing */}
-                        <div className='col-md-8'></div>
-                    </div>
-
-                    <div className='row mt-4'>
-                        {/* Note */}
-                        <div className='col-md-6'>
-                            <label className='form-label'>
-                                {getFormattedMessage('digital-sale.note.label')}:
-                            </label>
-                            <textarea
-                                className='form-control'
-                                rows={2}
-                                placeholder={placeholderText('digital-sale.note.placeholder')}
-                                onChange={(e) => setSaleValue({ ...saleValue, note: e.target.value })}
-                                value={saleValue.note}
-                            />
-                        </div>
-
-                        {/* Description */}
-                        <div className='col-md-6'>
-                            <label className='form-label'>
-                                {getFormattedMessage('digital-sale.description.label')}:
-                            </label>
-                            <textarea
-                                className='form-control'
-                                rows={2}
-                                placeholder={placeholderText('digital-sale.description.placeholder')}
-                                onChange={(e) => setSaleValue({ ...saleValue, description: e.target.value })}
-                                value={saleValue.description}
-                            />
-                        </div>
+                    {/* Notes Section */}
+                    <div className='mb-3 mt-4'>
+                        <label className='form-label'>
+                            {getFormattedMessage('globally.input.note.label')}:
+                        </label>
+                        <textarea
+                            name='note'
+                            className='form-control'
+                            value={saleValue.note}
+                            placeholder={placeholderText('globally.input.note.placeholder.label')}
+                            onChange={(e) => setSaleValue({ ...saleValue, note: e.target.value })}
+                        />
                     </div>
 
                     <ModelFooter
                         onEditRecord={editSale}
                         onSubmit={onSubmit}
-                        editDisabled={false}
-                        addDisabled={false}
+                        link='/user/digital-sales'
                     />
                 </Form>
             </div>

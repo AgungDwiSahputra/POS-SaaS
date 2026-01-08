@@ -29,7 +29,7 @@ class DigitalSaleAPIController extends AppBaseController
         $perPage = getPageSize($request);
         $search = $request->filter['search'] ?? '';
 
-        $salesQuery = DigitalSale::query()->with('provider', 'user');
+        $salesQuery = DigitalSale::query()->with('provider', 'user', 'digitalSaleItems.digitalProduct');
 
         // Date range filter
         if ($request->get('start_date') && $request->get('end_date')) {
@@ -79,14 +79,14 @@ class DigitalSaleAPIController extends AppBaseController
 
     public function show($id): DigitalSaleResource
     {
-        $sale = DigitalSale::with('provider', 'user')->findOrFail($id);
+        $sale = DigitalSale::with('provider', 'user', 'digitalSaleItems.digitalProduct')->findOrFail($id);
 
         return new DigitalSaleResource($sale);
     }
 
     public function edit(DigitalSale $sale): DigitalSaleResource
     {
-        $sale->load('provider', 'user');
+        $sale->load('provider', 'user', 'digitalSaleItems.digitalProduct');
 
         return new DigitalSaleResource($sale);
     }
@@ -117,7 +117,7 @@ class DigitalSaleAPIController extends AppBaseController
 
     public function saleInfo(DigitalSale $sale): JsonResponse
     {
-        $sale = $sale->load('provider', 'user');
+        $sale = $sale->load('provider', 'user', 'digitalSaleItems.digitalProduct');
 
         return $this->sendResponse($sale, 'Digital sale information retrieved successfully');
     }

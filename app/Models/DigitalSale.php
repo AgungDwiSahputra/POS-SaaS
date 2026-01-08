@@ -19,7 +19,6 @@ class DigitalSale extends BaseModel implements JsonResourceful
     protected $fillable = [
         'date',
         'provider_id',
-        'digital_product_id',
         'cost',
         'price',
         'margin',
@@ -39,7 +38,6 @@ class DigitalSale extends BaseModel implements JsonResourceful
     public static $rules = [
         'date' => 'required|date',
         'provider_id' => 'required|exists:providers,id',
-        'digital_product_id' => 'nullable|exists:digital_products,id',
         'cost' => 'required|numeric|min:0',
         'price' => 'required|numeric|min:0',
         'margin' => 'nullable|numeric',
@@ -47,6 +45,11 @@ class DigitalSale extends BaseModel implements JsonResourceful
         'description' => 'nullable|string',
         'status' => 'required|integer|in:1,2,3',
         'reference_code' => 'nullable|string',
+        'items' => 'required|array|min:1',
+        'items.*.digital_product_id' => 'required|exists:digital_products,id',
+        'items.*.quantity' => 'required|integer|min:1',
+        'items.*.price' => 'required|numeric|min:0',
+        'items.*.cost' => 'required|numeric|min:0',
     ];
 
     protected $casts = [
@@ -69,14 +72,26 @@ class DigitalSale extends BaseModel implements JsonResourceful
         $firstName = $this->user->first_name ?? '';
         $lastName = $this->user->last_name ?? 'N/A';
 
+        // Prepare items data
+        $items = $this->digitalSaleItems->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'digital_product_id' => $item->digital_product_id,
+                'digital_product_name' => $item->digitalProduct->name ?? 'N/A',
+                'digital_product_code' => $item->digitalProduct->code ?? 'N/A',
+                'product_price' => $item->product_price,
+                'quantity' => $item->quantity,
+                'sub_total' => $item->sub_total,
+                'cost' => $item->digitalProduct->cost ?? 0,
+            ];
+        })->toArray();
+
         $fields = [
             'date' => $this->date,
             'provider_id' => $this->provider_id,
             'provider_name' => $this->provider->nama_provider ?? 'N/A',
             'provider_saldo' => $this->provider->saldo ?? 0,
-            'digital_product_id' => $this->digital_product_id,
-            'digital_product_code' => $this->digitalProduct->code ?? 'N/A',
-            'digital_product_name' => $this->digitalProduct->name ?? 'N/A',
+            'items' => $items,
             'cost' => $this->cost,
             'price' => $this->price,
             'margin' => $this->margin,
@@ -107,9 +122,9 @@ class DigitalSale extends BaseModel implements JsonResourceful
         return $this->belongsTo(Provider::class, 'provider_id', 'id');
     }
 
-    public function digitalProduct(): BelongsTo
+    public function digitalSaleItems(): HasMany
     {
-        return $this->belongsTo(DigitalProduct::class, 'digital_product_id', 'id');
+        return $this->hasMany(DigitalSaleItem::class, 'digital_sale_id', 'id');
     }
 
     public function user(): BelongsTo
