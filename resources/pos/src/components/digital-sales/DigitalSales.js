@@ -16,6 +16,8 @@ import {
 import ActionDropDownButton from "../../shared/action-buttons/ActionDropDownButton";
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
 import { fetchSetting } from "../../store/action/settingAction";
+import { fetchProviders } from "../../store/action/providerAction";
+import ProviderCard from "../provider/ProviderCard";
 import { Permissions } from "../../constants";
 
 const DigitalSales = (props) => {
@@ -27,7 +29,9 @@ const DigitalSales = (props) => {
         frontSetting,
         allConfigData,
         isCallFetchDataApi,
-        fetchSetting
+        fetchSetting,
+        providers,
+        fetchProviders
     } = props;
 
     const [deleteModel, setDeleteModel] = useState(false);
@@ -36,6 +40,7 @@ const DigitalSales = (props) => {
 
     useEffect(() => {
         fetchSetting();
+        fetchProviders();
     }, []);
 
     const currencySymbol =
@@ -300,6 +305,11 @@ const DigitalSales = (props) => {
         <MasterLayout>
             <TopProgressBar />
             <TabTitle title={placeholderText("digital-sales.title")} />
+            <ProviderCard
+                providers={providers}
+                frontSetting={frontSetting}
+                allConfigData={allConfigData}
+            />
             <div className="digital_sale_table">
                 <ReactDataTable
                     columns={columns}
@@ -334,7 +344,8 @@ const mapStateToProps = (state) => {
         isLoading,
         frontSetting,
         allConfigData,
-        isCallFetchDataApi
+        isCallFetchDataApi,
+        providers
     } = state;
     return {
         digitalSales,
@@ -342,12 +353,14 @@ const mapStateToProps = (state) => {
         isLoading,
         frontSetting,
         allConfigData,
-        isCallFetchDataApi
+        isCallFetchDataApi,
+        providers
     };
 };
 
 export default connect(mapStateToProps, {
     fetchDigitalSales,
     deleteDigitalSale,
-    fetchSetting
+    fetchSetting,
+    fetchProviders
 })(DigitalSales);

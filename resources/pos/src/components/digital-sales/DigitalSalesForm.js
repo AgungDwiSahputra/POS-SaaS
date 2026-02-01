@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form } from 'react-bootstrap-v5';
 import moment from 'moment';
+import { useIntl } from 'react-intl';
 import { connect, useDispatch } from 'react-redux';
 import { editDigitalSale } from '../../store/action/digitalSaleAction';
 import {
@@ -37,6 +38,7 @@ const DigitalSalesForm = (props) => {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const intl = useIntl();
 
     // Status options
     const statusOptions = [
@@ -141,10 +143,11 @@ const DigitalSalesForm = (props) => {
         if (selectedProvider && cartItems.length > 0) {
             const totalCost = calculateCartCost();
             const providerSaldo = parseFloat(selectedProvider.attributes?.saldo ?? 0) || 0;
+            const currencySymbol = frontSetting.value?.currency_symbol || 'Rp';
             if (providerSaldo < totalCost) {
                 dispatch(addToast({
-                    text: getFormattedMessage('digital-sale.insufficient-balance') +
-                          ` (Available: ${providerSaldo.toFixed(2)}, Required: ${totalCost.toFixed(2)})`,
+                    text: intl.formatMessage({ id: 'digital-sale.insufficient-balance' }) +
+                          ` (Available: ${currencySymbol} ${providerSaldo.toFixed(2)}, Required: ${currencySymbol} ${totalCost.toFixed(2)})`,
                     type: toastType.ERROR,
                 }));
                 error = true;

@@ -68,10 +68,12 @@ const DigitalSaleProductTableBody = (props) => {
             {/* Sale Price (editable) */}
             <td>
                 <input
-                    type="text"
+                    type="number"
                     className="form-control form-control-sm"
-                    value={formatNumber(item.price)}
+                    value={item.price}
                     onChange={handlePriceChange}
+                    step="0.01"
+                    min="0"
                 />
             </td>
 

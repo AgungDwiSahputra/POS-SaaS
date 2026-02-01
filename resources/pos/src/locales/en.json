@@ -1284,5 +1284,6 @@
     "balance-request.success.create.message": "Balance request created successfully",
     "balance-request.success.update.message": "Balance request status updated successfully",
     "balance-request.success.delete.message": "Balance request deleted successfully",
-    "balance-request.process.waiting-admin": "Waiting for Admin approval. Only Admin can approve or reject this request."
+    "balance-request.process.waiting-admin": "Waiting for Admin approval. Only Admin can approve or reject this request.",
+    "provider.no.providers.available": "No providers available"
     }
