@@ -10,6 +10,7 @@ const DigitalSaleProductRowTable = (props) => {
         allConfigData,
         updateCartItemQty,
         updateCartItemPrice,
+        updateCartItemCost,
         removeCartItem,
     } = props;
 
@@ -35,6 +36,7 @@ const DigitalSaleProductRowTable = (props) => {
                         allConfigData={allConfigData}
                         updateCartItemQty={updateCartItemQty}
                         updateCartItemPrice={updateCartItemPrice}
+                        updateCartItemCost={updateCartItemCost}
                         removeCartItem={removeCartItem}
                     />
                 ))}

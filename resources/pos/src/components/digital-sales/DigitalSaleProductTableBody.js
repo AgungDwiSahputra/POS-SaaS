@@ -17,6 +17,7 @@ const DigitalSaleProductTableBody = (props) => {
         allConfigData,
         updateCartItemQty,
         updateCartItemPrice,
+        updateCartItemCost,
         removeCartItem,
     } = props;
 
@@ -44,6 +45,13 @@ const DigitalSaleProductTableBody = (props) => {
         }
     };
 
+    const handleCostChange = (e) => {
+        const newCost = parseFloat(e.target.value);
+        if (!isNaN(newCost) && newCost >= 0) {
+            updateCartItemCost(index, newCost);
+        }
+    };
+
     return (
         <tr key={index} className="align-middle text-nowrap">
             {/* Product Name & Code */}
@@ -56,13 +64,16 @@ const DigitalSaleProductTableBody = (props) => {
                 </div>
             </td>
 
-            {/* Cost Price */}
+            {/* Cost Price (editable) */}
             <td>
-                {currencySymbolHandling(
-                    allConfigData,
-                    frontSetting.value?.currency_symbol,
-                    formatNumber(item.cost)
-                )}
+                <input
+                    type="number"
+                    className="form-control form-control-sm"
+                    value={item.cost}
+                    onChange={handleCostChange}
+                    step="0.01"
+                    min="0"
+                />
             </td>
 
             {/* Sale Price (editable) */}

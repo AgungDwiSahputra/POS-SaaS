@@ -261,6 +261,16 @@ const DigitalSalesForm = (props) => {
         setCartItems(updated);
     };
 
+    // Update cart item cost
+    const updateCartItemCost = (index, newCost) => {
+        const cost = parseFloat(newCost);
+        if (isNaN(cost) || cost < 0) return;
+
+        const updated = [...cartItems];
+        updated[index].cost = cost;
+        setCartItems(updated);
+    };
+
     // Remove item from cart
     const removeCartItem = (index) => {
         setCartItems(cartItems.filter((_, i) => i !== index));
@@ -404,6 +414,7 @@ const DigitalSalesForm = (props) => {
                             allConfigData={allConfigData}
                             updateCartItemQty={updateCartItemQty}
                             updateCartItemPrice={updateCartItemPrice}
+                            updateCartItemCost={updateCartItemCost}
                             removeCartItem={removeCartItem}
                         />
                     </div>
