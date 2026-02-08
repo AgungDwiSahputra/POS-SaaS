@@ -109,6 +109,7 @@ import Language from "./components/languages/Language";
 import EditLanguageData from "./components/languages/EditLanguageData";
 import BaseUnits from "./components/base-unit/BaseUnits";
 import RegisterReport from "./components/report/registerReport/RegisterReport";
+import DigitalSalesReport from "./components/report/digitalSalesReport/DigitalSalesReport";
 import Variation from "./components/variation/Variation";
 import ReceiptSettings from "./components/settings/ReceiptSettings";
 import AdminDashboard from "./components/admin/dashboard/AdminDashboard"
@@ -725,6 +726,11 @@ export const route = [
     {
         path: "report/register",
         ele: <RegisterReport />,
+        permission: Permissions.MANAGE_REPORTS,
+    },
+    {
+        path: "report/digital-sales",
+        ele: <DigitalSalesReport />,
         permission: Permissions.MANAGE_REPORTS,
     },
     {

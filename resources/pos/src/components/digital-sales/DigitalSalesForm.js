@@ -139,12 +139,18 @@ const DigitalSalesForm = (props) => {
             error = true;
         }
 
-        // Check provider balance
+        // Check provider balance (hanya untuk setor_tunai)
         if (selectedProvider && cartItems.length > 0) {
             const totalCost = calculateCartCost();
             const providerSaldo = parseFloat(selectedProvider.attributes?.saldo ?? 0) || 0;
             const currencySymbol = frontSetting.value?.currency_symbol || 'Rp';
-            if (providerSaldo < totalCost) {
+            
+            // Cek type dari digital products di cart
+            const productTypes = cartItems.map(item => item.product.attributes?.type);
+            const allTarikTunai = productTypes.length > 0 && productTypes.every(type => type === 'tarik_tunai');
+            
+            // Hanya validasi saldo jika bukan tarik_tunai
+            if (!allTarikTunai && providerSaldo < totalCost) {
                 dispatch(addToast({
                     text: intl.formatMessage({ id: 'digital-sale.insufficient-balance' }) +
                           ` (Available: ${currencySymbol} ${providerSaldo.toFixed(2)}, Required: ${currencySymbol} ${totalCost.toFixed(2)})`,

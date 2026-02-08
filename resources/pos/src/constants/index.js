@@ -1008,6 +1008,11 @@ export const productTypesOptions = [
     { id: 2, name: "variation.title" },
 ];
 
+export const digitalProductTypeOptions = [
+    { id: 'tarik_tunai', name: 'digital-product.type.tarik-tunai.label' },
+    { id: 'setor_tunai', name: 'digital-product.type.setor-tunai.label' },
+];
+
 export const discountMethodOptions = [
     { id: 1, name: "discount-type.filter.percentage.label" },
     { id: 2, name: "discount-type.filter.fixed.label" },

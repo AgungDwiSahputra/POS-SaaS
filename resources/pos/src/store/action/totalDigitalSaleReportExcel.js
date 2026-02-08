@@ -1,0 +1,36 @@
+import apiConfig from '../../config/apiConfig';
+import {toastType} from '../../constants';
+import {addToast} from './toastAction';
+import {setLoading} from './loadingAction';
+
+export const totalDigitalSaleReportExcel = (dates, setIsWarehouseValue, filter = {}, isLoading = true) => async (dispatch) => {
+    if (isLoading) {
+        dispatch(setLoading(true))
+    }
+    const params = new URLSearchParams();
+    if (dates?.start_date) {
+        params.append('start_date', dates.start_date);
+    }
+    if (dates?.end_date) {
+        params.append('end_date', dates.end_date);
+    }
+    if (filter?.user_id) {
+        params.append('user_id', filter.user_id);
+    }
+    if (filter?.provider_id) {
+        params.append('provider_id', filter.provider_id);
+    }
+
+    await apiConfig.get(`total-digital-sale-report-excel?${params.toString()}`)
+        .then((response) => {
+            window.open(response.data.data.total_digital_sale_excel_url, '_blank');
+            setIsWarehouseValue(false);
+            if (isLoading) {
+                dispatch(setLoading(false))
+            }
+        })
+        .catch(({response}) => {
+            dispatch(addToast(
+                {text: response?.data?.message, type: toastType.ERROR}));
+        });
+};

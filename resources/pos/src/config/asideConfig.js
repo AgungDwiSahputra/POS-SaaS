@@ -419,6 +419,7 @@ export const userMenu = [
         customerReportDetailsPath: "/user/report/customers/details",
         registerReportPath: "/user/report/register",
         cashAdvanceReportPath: "/user/report/cash-advance",
+        digitalSalesReportPath: "/user/report/digital-sales",
         class: "d-flex",
         isSamePrefix: "true",
         permission: Permissions.MANAGE_REPORTS,
@@ -437,6 +438,7 @@ export const userMenu = [
             { title: "best-customer.report.title" },
             { title: "register.report.title" },
             { title: "cash-advance.report.title" },
+            { title: "digital-sale.reports.title" },
         ],
         items: [
             {
@@ -491,6 +493,10 @@ export const userMenu = [
             {
                 title: getFormattedMessage("cash-advance.report.title"),
                 to: "/user/report/cash-advance",
+            },
+            {
+                title: getFormattedMessage("digital-sale.reports.title"),
+                to: "/user/report/digital-sales",
             },
         ],
     },

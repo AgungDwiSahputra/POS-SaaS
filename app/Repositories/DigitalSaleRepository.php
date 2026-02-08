@@ -75,14 +75,6 @@ class DigitalSaleRepository extends BaseRepository
             // Get provider
             $provider = Provider::findOrFail($input['provider_id']);
 
-            // Validate provider balance
-            if ($provider->saldo < $totalCost) {
-                throw new UnprocessableEntityHttpException(
-                    'Insufficient provider balance. Required: ' . number_format($totalCost, 2) .
-                    ', Available: ' . number_format($provider->saldo, 2)
-                );
-            }
-
             // Calculate margin
             $input['margin'] = $totalPrice - $totalCost;
 
@@ -110,8 +102,30 @@ class DigitalSaleRepository extends BaseRepository
                 ]);
             }
 
-            // Deduct provider balance
-            $provider->saldo -= $totalCost;
+            // Cek type dari digital products
+            $productTypes = [];
+            foreach ($items as $item) {
+                $product = \App\Models\DigitalProduct::findOrFail($item['digital_product_id']);
+                $productTypes[] = $product->type;
+            }
+
+            // Tentukan apakah semua items adalah tarik_tunai
+            $allTarikTunai = !empty($productTypes) && count(array_unique($productTypes)) === 1 && $productTypes[0] === 'tarik_tunai';
+
+            // Update saldo berdasarkan type
+            if ($allTarikTunai) {
+                // Tarik tunai: saldo bertambah
+                $provider->saldo += $totalCost;
+            } else {
+                // Setor tunai: saldo berkurang (validasi saldo tetap diperlukan)
+                if ($provider->saldo < $totalCost) {
+                    throw new UnprocessableEntityHttpException(
+                        'Insufficient provider balance. Required: ' . number_format($totalCost, 2) .
+                        ', Available: ' . number_format($provider->saldo, 2)
+                    );
+                }
+                $provider->saldo -= $totalCost;
+            }
             $provider->save();
 
             DB::commit();
@@ -159,42 +173,94 @@ class DigitalSaleRepository extends BaseRepository
 
             $provider = Provider::findOrFail($input['provider_id']);
 
-            // If provider changed, refund old provider and deduct from new provider
+            // Cek type dari digital products (baru dan lama)
+            $newProductTypes = [];
+            foreach ($items as $item) {
+                $product = \App\Models\DigitalProduct::findOrFail($item['digital_product_id']);
+                $newProductTypes[] = $product->type;
+            }
+
+            $oldProductTypes = [];
+            foreach ($sale->digitalSaleItems as $item) {
+                $oldProductTypes[] = $item->digitalProduct->type;
+            }
+
+            $allNewTarikTunai = !empty($newProductTypes) && count(array_unique($newProductTypes)) === 1 && $newProductTypes[0] === 'tarik_tunai';
+            $allOldTarikTunai = !empty($oldProductTypes) && count(array_unique($oldProductTypes)) === 1 && $oldProductTypes[0] === 'tarik_tunai';
+
+            // Jika provider berubah
             if ($sale->provider_id != $input['provider_id']) {
-                // Refund to old provider
+                // Refund ke old provider berdasarkan type lama
                 $oldProvider = Provider::findOrFail($sale->provider_id);
-                $oldProvider->saldo += $sale->cost;
+                if ($allOldTarikTunai) {
+                    // Tarik tunai: refund dengan mengurangi saldo
+                    $oldProvider->saldo -= $sale->cost;
+                } else {
+                    // Setor tunai: refund dengan menambah saldo
+                    $oldProvider->saldo += $sale->cost;
+                }
                 $oldProvider->save();
 
-                // Check new provider balance
-                if ($provider->saldo < $totalCost) {
-                    throw new UnprocessableEntityHttpException(
-                        'Insufficient provider balance. Required: ' . number_format($totalCost, 2) .
-                        ', Available: ' . number_format($provider->saldo, 2)
-                    );
-                }
-
-                // Deduct from new provider
-                $provider->saldo -= $totalCost;
-                $provider->save();
-            } else {
-                // Same provider, adjust balance if cost changed
-                $costDifference = $totalCost - $sale->cost;
-
-                if ($costDifference > 0) {
-                    // Cost increased, need to check balance
-                    if ($provider->saldo < $costDifference) {
+                // Update new provider berdasarkan type baru
+                if ($allNewTarikTunai) {
+                    // Tarik tunai: saldo bertambah (tidak perlu validasi)
+                    $provider->saldo += $totalCost;
+                } else {
+                    // Setor tunai: saldo berkurang (validasi saldo diperlukan)
+                    if ($provider->saldo < $totalCost) {
                         throw new UnprocessableEntityHttpException(
-                            'Insufficient provider balance for cost increase. Additional required: ' .
-                            number_format($costDifference, 2) . ', Available: ' . number_format($provider->saldo, 2)
+                            'Insufficient provider balance. Required: ' . number_format($totalCost, 2) .
+                            ', Available: ' . number_format($provider->saldo, 2)
                         );
                     }
-                    $provider->saldo -= $costDifference;
-                } elseif ($costDifference < 0) {
-                    // Cost decreased, refund difference
-                    $provider->saldo -= $costDifference; // Subtract negative = add
+                    $provider->saldo -= $totalCost;
                 }
-
+                $provider->save();
+            } else {
+                // Provider sama, adjust saldo berdasarkan perubahan cost dan type
+                $costDifference = $totalCost - $sale->cost;
+                
+                if ($allNewTarikTunai && $allOldTarikTunai) {
+                    // Keduanya tarik_tunai: adjust saldo dengan menambah selisih
+                    $provider->saldo += $costDifference;
+                } elseif (!$allNewTarikTunai && !$allOldTarikTunai) {
+                    // Keduanya setor_tunai: adjust saldo dengan mengurangi selisih
+                    if ($costDifference > 0) {
+                        if ($provider->saldo < $costDifference) {
+                            throw new UnprocessableEntityHttpException(
+                                'Insufficient provider balance for cost increase. Additional required: ' .
+                                number_format($costDifference, 2) . ', Available: ' . number_format($provider->saldo, 2)
+                            );
+                        }
+                        $provider->saldo -= $costDifference;
+                    } elseif ($costDifference < 0) {
+                        $provider->saldo -= $costDifference; // Subtract negative = add
+                    }
+                } else {
+                    // Type berubah: refund old cost, apply new cost
+                    if ($allOldTarikTunai) {
+                        // Refund tarik tunai: kurangi saldo
+                        $provider->saldo -= $sale->cost;
+                    } else {
+                        // Refund setor tunai: tambah saldo
+                        $provider->saldo += $sale->cost;
+                    }
+                    
+                    if ($allNewTarikTunai) {
+                        // Apply tarik tunai: tambah saldo
+                        $provider->saldo += $totalCost;
+                    } else {
+                        // Apply setor tunai: kurangi saldo
+                        if ($provider->saldo < $totalCost) {
+                            throw new UnprocessableEntityHttpException(
+                                'Insufficient provider balance. Required: ' . number_format($totalCost, 2) .
+                                ', Available: ' . number_format($provider->saldo, 2)
+                            );
+                        }
+                        $provider->saldo -= $totalCost;
+                    }
+                }
+                
                 $provider->save();
             }
 
@@ -238,11 +304,26 @@ class DigitalSaleRepository extends BaseRepository
         try {
             DB::beginTransaction();
 
-            $sale = DigitalSale::findOrFail($id);
+            $sale = DigitalSale::with(['digitalSaleItems'])->findOrFail($id);
 
-            // Refund provider balance
+            // Refund provider balance berdasarkan type
             $provider = Provider::findOrFail($sale->provider_id);
-            $provider->saldo += $sale->cost;
+
+            // Cek type dari digital products
+            $productTypes = [];
+            foreach ($sale->digitalSaleItems as $item) {
+                $productTypes[] = $item->digitalProduct->type;
+            }
+
+            $allTarikTunai = !empty($productTypes) && count(array_unique($productTypes)) === 1 && $productTypes[0] === 'tarik_tunai';
+
+            if ($allTarikTunai) {
+                // Tarik tunai: refund dengan mengurangi saldo
+                $provider->saldo -= $sale->cost;
+            } else {
+                // Setor tunai: refund dengan menambah saldo
+                $provider->saldo += $sale->cost;
+            }
             $provider->save();
 
             // Delete sale
