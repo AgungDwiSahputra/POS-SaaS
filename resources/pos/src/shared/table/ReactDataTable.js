@@ -79,6 +79,11 @@ const ReactDataTable = (props) => {
         typeValue,
         onTypeChange,
         typeLabel,
+        isProviderFilter = false,
+        providerOptions = [],
+        providerValue,
+        onProviderChange,
+        providerLabel,
     } = props;
     const [perPage, setPerPages] = useState(defaultLimit);
     const [pageSize, setPageSize] = useState(Filters.OBJ.pageSize);
@@ -245,6 +250,11 @@ const ReactDataTable = (props) => {
                             typeValue={typeValue}
                             setTypeIdData={onTypeChange}
                             typeLabel={typeLabel}
+                            isProviderFilter={isProviderFilter}
+                            providerOptions={providerOptions}
+                            providerValue={providerValue}
+                            setProviderIdData={onProviderChange}
+                            providerLabel={providerLabel}
                         />
                     ) : null}
                     {AddButton}

@@ -154,6 +154,12 @@ export default (
         }
         url = url + "type=" + filters.type;
     }
+    if (filters.provider_id) {
+        if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
+            url += "&";
+        }
+        url = url + "provider_id=" + filters.provider_id;
+    }
     if (admin) {
         if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
             url += "&";

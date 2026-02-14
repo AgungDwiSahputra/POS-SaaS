@@ -38,6 +38,7 @@ const DigitalSales = (props) => {
     const [isDelete, setIsDelete] = useState(null);
     const [tableArray, setTableArray] = useState([]);
     const [typeFilter, setTypeFilter] = useState(null);
+    const [providerFilter, setProviderFilter] = useState(null);
 
     useEffect(() => {
         fetchSetting();
@@ -57,10 +58,21 @@ const DigitalSales = (props) => {
         setTypeFilter(obj);
     };
 
+    const onProviderChange = (obj) => {
+        setProviderFilter(obj);
+    };
+
     const typeOptions = [
         { value: 'tarik_tunai', label: getFormattedMessage('digital-sale.type.tarik-tunai.label') },
         { value: 'setor_tunai', label: getFormattedMessage('digital-sale.type.setor-tunai.label') },
     ];
+
+    const providerOptions = providers && providers.length > 0
+        ? providers.map(provider => ({
+            value: provider.id,
+            label: provider.attributes.nama_provider,
+        }))
+        : [];
 
     const goToEdit = (item) => {
         const id = item.id;
@@ -364,8 +376,14 @@ const DigitalSales = (props) => {
                     typeValue={typeFilter}
                     onTypeChange={onTypeChange}
                     typeLabel={getFormattedMessage("digital-sale.type.filter.label")}
+                    isProviderFilter={true}
+                    providerOptions={providerOptions}
+                    providerValue={providerFilter}
+                    onProviderChange={onProviderChange}
+                    providerLabel={getFormattedMessage("digital-sale.provider.label")}
                     extraFilters={{
                         type: typeFilter ? typeFilter.value : null,
+                        provider_id: providerFilter ? providerFilter.value : null,
                     }}
                 />
             </div>

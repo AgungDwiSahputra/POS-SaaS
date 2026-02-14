@@ -67,6 +67,11 @@ const FilterDropdown = (props) => {
         typeValue,
         setTypeIdData,
         typeLabel,
+        isProviderFilter,
+        providerOptions = [],
+        providerValue,
+        setProviderIdData,
+        providerLabel,
     } = props;
 
     const dispatch = useDispatch();
@@ -87,6 +92,7 @@ const FilterDropdown = (props) => {
     const [cashier, setCashier] = useState();
     const [customer, setCustomer] = useState();
     const [type, setType] = useState();
+    const [provider, setProvider] = useState();
 
     const formattedPaymentMethods = [
         { value: 0, label: getFormattedMessage("unit.filter.all.label") },
@@ -125,6 +131,12 @@ const FilterDropdown = (props) => {
             setCustomer(customerValue);
         }
     }, [customerValue]);
+
+    useEffect(() => {
+        if (providerValue) {
+            setProvider(providerValue);
+        }
+    }, [providerValue]);
 
     const transferStatusFilterOptions = getFormattedOptions(
         transferStatusOptions
@@ -230,6 +242,14 @@ const FilterDropdown = (props) => {
             };
             setType(defaultType);
             setTypeIdData && setTypeIdData(defaultType);
+        }
+        if (isProviderFilter) {
+            const defaultProvider = {
+                label: getFormattedMessage("unit.filter.all.label"),
+                value: "0",
+            };
+            setProvider(defaultProvider);
+            setProviderIdData && setProviderIdData(defaultProvider);
         }
         onResetClick();
     };
@@ -442,6 +462,38 @@ const FilterDropdown = (props) => {
                             dispatch({ type: "RESET_OPTION", payload: false });
                             setType(obj);
                             setTypeIdData && setTypeIdData(obj);
+                            dispatch({ type: "ON_TOGGLE", payload: false });
+                        }}
+                    />
+                ) : null}
+                {isProviderFilter ? (
+                    <ReactSelect
+                        title={
+                            providerLabel ||
+                            getFormattedMessage("digital-sale.provider.label")
+                        }
+                        data={[
+                            {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            },
+                            ...providerOptions,
+                        ]}
+                        defaultValue={
+                            providerValue || {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            }
+                        }
+                        value={provider || providerValue}
+                        onChange={(obj) => {
+                            dispatch({ type: "RESET_OPTION", payload: false });
+                            setProvider(obj);
+                            setProviderIdData && setProviderIdData(obj);
                             dispatch({ type: "ON_TOGGLE", payload: false });
                         }}
                     />
