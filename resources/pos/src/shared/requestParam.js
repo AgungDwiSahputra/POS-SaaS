@@ -148,6 +148,12 @@ export default (
         }
         url = url + "brand_id=" + filters.brand_id;
     }
+    if (filters.type) {
+        if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
+            url += "&";
+        }
+        url = url + "type=" + filters.type;
+    }
     if (admin) {
         if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
             url += "&";

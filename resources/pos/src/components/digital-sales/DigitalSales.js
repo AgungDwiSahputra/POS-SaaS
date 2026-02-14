@@ -37,6 +37,7 @@ const DigitalSales = (props) => {
     const [deleteModel, setDeleteModel] = useState(false);
     const [isDelete, setIsDelete] = useState(null);
     const [tableArray, setTableArray] = useState([]);
+    const [typeFilter, setTypeFilter] = useState(null);
 
     useEffect(() => {
         fetchSetting();
@@ -51,6 +52,15 @@ const DigitalSales = (props) => {
     const onChange = (filter) => {
         fetchDigitalSales(filter, true);
     };
+
+    const onTypeChange = (obj) => {
+        setTypeFilter(obj);
+    };
+
+    const typeOptions = [
+        { value: 'tarik_tunai', label: getFormattedMessage('digital-sale.type.tarik-tunai.label') },
+        { value: 'setor_tunai', label: getFormattedMessage('digital-sale.type.setor-tunai.label') },
+    ];
 
     const goToEdit = (item) => {
         const id = item.id;
@@ -69,23 +79,27 @@ const DigitalSales = (props) => {
     const itemsValue =
         currencySymbol &&
         digitalSales.length >= 0 &&
-        digitalSales.map((sale) => ({
-            date: getFormattedDate(
-                sale.attributes.created_at,
-                allConfigData && allConfigData
-            ),
-            time: moment(sale.attributes.created_at).format("LT"),
-            reference_code: sale.attributes.reference_code,
-            provider_name: sale.attributes.provider_name,
-            cost: sale.attributes.cost,
-            price: sale.attributes.price,
-            margin: sale.attributes.margin,
-            status: sale.attributes.status,
-            status_label: sale.attributes.status_label,
-            user_name: sale.attributes.user_name,
-            id: sale.id,
-            currency: currencySymbol,
-        }));
+        [...digitalSales]
+            .sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at))
+            .map((sale) => ({
+                date: getFormattedDate(
+                    sale.attributes.created_at,
+                    allConfigData && allConfigData
+                ),
+                time: moment(sale.attributes.created_at).format("LT"),
+                reference_code: sale.attributes.reference_code,
+                provider_name: sale.attributes.provider_name,
+                type: sale.attributes.type,
+                type_label: sale.attributes.type_label,
+                cost: sale.attributes.cost,
+                price: sale.attributes.price,
+                margin: sale.attributes.margin,
+                status: sale.attributes.status,
+                status_label: sale.attributes.status_label,
+                user_name: sale.attributes.user_name,
+                id: sale.id,
+                currency: currencySymbol,
+            }));
 
     useEffect(() => {
         const costSum = () => {
@@ -124,6 +138,8 @@ const DigitalSales = (props) => {
                 time: "",
                 reference_code: "Total",
                 provider_name: "",
+                type: "",
+                type_label: "",
                 cost: costSum(),
                 price: priceSum(),
                 margin: marginSum(),
@@ -163,6 +179,23 @@ const DigitalSales = (props) => {
             selector: (row) => row.provider_name,
             sortField: "provider_name",
             sortable: false,
+        },
+        {
+            name: getFormattedMessage("digital-sale.type.filter.label"),
+            selector: (row) => row.type_label,
+            sortField: "type",
+            sortable: false,
+            cell: (row) => {
+                if (row.reference_code === "Total") {
+                    return null;
+                }
+                const typeClass = row.type === 'tarik_tunai' ? 'bg-light-warning' : 'bg-light-info';
+                return (
+                    <span className={`badge ${typeClass}`}>
+                        <span>{row.type_label}</span>
+                    </span>
+                );
+            },
         },
         {
             name: getFormattedMessage("digital-sale.cost.label"),
@@ -326,6 +359,14 @@ const DigitalSales = (props) => {
                     isShowFilterField
                     isStatus
                     isCallFetchDataApi={isCallFetchDataApi}
+                    isTypeFilter={true}
+                    typeOptions={typeOptions}
+                    typeValue={typeFilter}
+                    onTypeChange={onTypeChange}
+                    typeLabel={getFormattedMessage("digital-sale.type.filter.label")}
+                    extraFilters={{
+                        type: typeFilter ? typeFilter.value : null,
+                    }}
                 />
             </div>
             <DeleteDigitalSale

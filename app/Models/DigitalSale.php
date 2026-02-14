@@ -79,6 +79,7 @@ class DigitalSale extends BaseModel implements JsonResourceful
                 'digital_product_id' => $item->digital_product_id,
                 'digital_product_name' => $item->digitalProduct->name ?? 'N/A',
                 'digital_product_code' => $item->digitalProduct->code ?? 'N/A',
+                'digital_product_type' => $item->digitalProduct->type ?? 'N/A',
                 'product_price' => $item->product_price,
                 'quantity' => $item->quantity,
                 'sub_total' => $item->sub_total,
@@ -86,12 +87,25 @@ class DigitalSale extends BaseModel implements JsonResourceful
             ];
         })->toArray();
 
+        // Get type from first item's digital product
+        $type = 'N/A';
+        $typeLabel = 'N/A';
+        if ($this->digitalSaleItems->isNotEmpty()) {
+            $firstItem = $this->digitalSaleItems->first();
+            if ($firstItem->digitalProduct) {
+                $type = $firstItem->digitalProduct->type;
+                $typeLabel = $this->getTypeLabel($type);
+            }
+        }
+
         $fields = [
             'date' => $this->date,
             'provider_id' => $this->provider_id,
             'provider_name' => $this->provider->nama_provider ?? 'N/A',
             'provider_saldo' => $this->provider->saldo ?? 0,
             'items' => $items,
+            'type' => $type,
+            'type_label' => $typeLabel,
             'cost' => $this->cost,
             'price' => $this->price,
             'margin' => $this->margin,
@@ -105,6 +119,15 @@ class DigitalSale extends BaseModel implements JsonResourceful
         ];
 
         return $fields;
+    }
+
+    public function getTypeLabel(string $type): string
+    {
+        return match($type) {
+            'tarik_tunai' => 'Tarik Tunai',
+            'setor_tunai' => 'Setor Tunai',
+            default => 'Unknown',
+        };
     }
 
     public function getStatusLabel(): string

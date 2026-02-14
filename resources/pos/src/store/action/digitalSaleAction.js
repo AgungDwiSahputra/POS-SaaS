@@ -28,7 +28,11 @@ export const fetchDigitalSales =
                     filter.order_By ||
                     filter.created_at ||
                     filter.provider_id ||
-                    filter.user_id)
+                    filter.user_id ||
+                    filter.type ||
+                    filter.start_date ||
+                    filter.end_date ||
+                    filter.status)
             ) {
                 url += requestParam(filter, admin, null, null, url);
             }

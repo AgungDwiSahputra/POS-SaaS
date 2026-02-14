@@ -51,6 +51,13 @@ class DigitalSaleAPIController extends AppBaseController
             $salesQuery->where('status', $request->get('status'));
         }
 
+        // Type filter - filter berdasarkan type di digital_products
+        if ($request->get('type') && $request->get('type') != '0') {
+            $salesQuery->whereHas('digitalSaleItems.digitalProduct', function ($query) use ($request) {
+                $query->where('type', $request->get('type'));
+            });
+        }
+
         // Search by reference_code, provider name
         if (!empty($search)) {
             $salesQuery->where(function ($q) use ($search) {

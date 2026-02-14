@@ -62,6 +62,11 @@ const FilterDropdown = (props) => {
         customerValue,
         setCustomerData,
         customerLabel,
+        isTypeFilter,
+        typeOptions = [],
+        typeValue,
+        setTypeIdData,
+        typeLabel,
     } = props;
 
     const dispatch = useDispatch();
@@ -81,6 +86,7 @@ const FilterDropdown = (props) => {
     const [paymentType, setPaymentType] = useState();
     const [cashier, setCashier] = useState();
     const [customer, setCustomer] = useState();
+    const [type, setType] = useState();
 
     const formattedPaymentMethods = [
         { value: 0, label: getFormattedMessage("unit.filter.all.label") },
@@ -216,6 +222,14 @@ const FilterDropdown = (props) => {
             };
             setCustomer(defaultCustomer);
             setCustomerData && setCustomerData(defaultCustomer);
+        }
+        if (isTypeFilter) {
+            const defaultType = {
+                label: getFormattedMessage("unit.filter.all.label"),
+                value: "0",
+            };
+            setType(defaultType);
+            setTypeIdData && setTypeIdData(defaultType);
         }
         onResetClick();
     };
@@ -397,6 +411,38 @@ const FilterDropdown = (props) => {
                         onChange={(obj) => {
                             setCustomer(obj);
                             setCustomerData && setCustomerData(obj);
+                        }}
+                    />
+                ) : null}
+                {isTypeFilter ? (
+                    <ReactSelect
+                        title={
+                            typeLabel ||
+                            getFormattedMessage("digital-sale.type.filter.label")
+                        }
+                        data={[
+                            {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            },
+                            ...typeOptions,
+                        ]}
+                        defaultValue={
+                            typeValue || {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            }
+                        }
+                        value={type || typeValue}
+                        onChange={(obj) => {
+                            dispatch({ type: "RESET_OPTION", payload: false });
+                            setType(obj);
+                            setTypeIdData && setTypeIdData(obj);
+                            dispatch({ type: "ON_TOGGLE", payload: false });
                         }}
                     />
                 ) : null}

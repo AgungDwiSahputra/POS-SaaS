@@ -74,6 +74,11 @@ const ReactDataTable = (props) => {
         onCustomerChange,
         customerLabel,
         conditionalRowStyles = [],
+        isTypeFilter = false,
+        typeOptions = [],
+        typeValue,
+        onTypeChange,
+        typeLabel,
     } = props;
     const [perPage, setPerPages] = useState(defaultLimit);
     const [pageSize, setPageSize] = useState(Filters.OBJ.pageSize);
@@ -235,6 +240,11 @@ const ReactDataTable = (props) => {
                             customerValue={customerValue}
                             setCustomerData={onCustomerChange}
                             customerLabel={customerLabel}
+                            isTypeFilter={isTypeFilter}
+                            typeOptions={typeOptions}
+                            typeValue={typeValue}
+                            setTypeIdData={onTypeChange}
+                            typeLabel={typeLabel}
                         />
                     ) : null}
                     {AddButton}

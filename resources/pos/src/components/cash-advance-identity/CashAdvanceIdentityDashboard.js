@@ -107,7 +107,8 @@ const CashAdvanceIdentityDashboard = (props) => {
     };
 
     // Tidak perlu filter lokal lagi karena sudah di-filter di backend saat memilih identity
-    const filteredCashAdvances = cashAdvances || [];
+    // Urutkan dari data terbaru berdasarkan created_at
+    const filteredCashAdvances = cashAdvances ? [...cashAdvances].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) : [];
 
     const handleIdentitySelect = (identity) => {
         setSelectedIdentity(identity);
