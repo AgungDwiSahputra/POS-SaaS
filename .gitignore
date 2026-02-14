@@ -15,4 +15,5 @@ node_modules
 public/uploads/*
 public/storage/*
 .kilocode/*
+.kilocode/mcp.json
 .zencoder
