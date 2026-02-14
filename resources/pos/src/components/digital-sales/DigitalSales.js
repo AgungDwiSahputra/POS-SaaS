@@ -17,6 +17,7 @@ import ActionDropDownButton from "../../shared/action-buttons/ActionDropDownButt
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
 import { fetchSetting } from "../../store/action/settingAction";
 import { fetchProviders } from "../../store/action/providerAction";
+import { fetchUsers } from "../../store/action/userAction";
 import ProviderCard from "../provider/ProviderCard";
 import { Permissions } from "../../constants";
 
@@ -31,7 +32,9 @@ const DigitalSales = (props) => {
         isCallFetchDataApi,
         fetchSetting,
         providers,
-        fetchProviders
+        fetchProviders,
+        users,
+        fetchUsers
     } = props;
 
     const [deleteModel, setDeleteModel] = useState(false);
@@ -39,10 +42,12 @@ const DigitalSales = (props) => {
     const [tableArray, setTableArray] = useState([]);
     const [typeFilter, setTypeFilter] = useState(null);
     const [providerFilter, setProviderFilter] = useState(null);
+    const [userFilter, setUserFilter] = useState(null);
 
     useEffect(() => {
         fetchSetting();
         fetchProviders();
+        fetchUsers({}, true, '?all_users=true');
     }, []);
 
     const currencySymbol =
@@ -62,6 +67,10 @@ const DigitalSales = (props) => {
         setProviderFilter(obj);
     };
 
+    const onUserChange = (obj) => {
+        setUserFilter(obj);
+    };
+
     const typeOptions = [
         { value: 'tarik_tunai', label: getFormattedMessage('digital-sale.type.tarik-tunai.label') },
         { value: 'setor_tunai', label: getFormattedMessage('digital-sale.type.setor-tunai.label') },
@@ -71,6 +80,13 @@ const DigitalSales = (props) => {
         ? providers.map(provider => ({
             value: provider.id,
             label: provider.attributes.nama_provider,
+        }))
+        : [];
+
+    const userOptions = users && users.length > 0
+        ? users.map(user => ({
+            value: user.id,
+            label: `${user.attributes.first_name} ${user.attributes.last_name}`,
         }))
         : [];
 
@@ -190,6 +206,12 @@ const DigitalSales = (props) => {
             name: getFormattedMessage("digital-sale.provider.label"),
             selector: (row) => row.provider_name,
             sortField: "provider_name",
+            sortable: false,
+        },
+        {
+            name: getFormattedMessage("digital-sale.user.label"),
+            selector: (row) => row.user_name,
+            sortField: "user_name",
             sortable: false,
         },
         {
@@ -381,9 +403,15 @@ const DigitalSales = (props) => {
                     providerValue={providerFilter}
                     onProviderChange={onProviderChange}
                     providerLabel={getFormattedMessage("digital-sale.provider.label")}
+                    isUserFilter={true}
+                    userOptions={userOptions}
+                    userValue={userFilter}
+                    onUserChange={onUserChange}
+                    userLabel={getFormattedMessage("digital-sale.user.label")}
                     extraFilters={{
                         type: typeFilter ? typeFilter.value : null,
                         provider_id: providerFilter ? providerFilter.value : null,
+                        user_id: userFilter ? userFilter.value : null,
                     }}
                 />
             </div>
@@ -404,7 +432,8 @@ const mapStateToProps = (state) => {
         frontSetting,
         allConfigData,
         isCallFetchDataApi,
-        providers
+        providers,
+        users
     } = state;
     return {
         digitalSales,
@@ -413,7 +442,8 @@ const mapStateToProps = (state) => {
         frontSetting,
         allConfigData,
         isCallFetchDataApi,
-        providers
+        providers,
+        users
     };
 };
 
@@ -421,5 +451,6 @@ export default connect(mapStateToProps, {
     fetchDigitalSales,
     deleteDigitalSale,
     fetchSetting,
-    fetchProviders
+    fetchProviders,
+    fetchUsers
 })(DigitalSales);

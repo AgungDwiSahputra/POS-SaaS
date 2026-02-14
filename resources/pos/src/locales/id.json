@@ -597,6 +597,7 @@
     "digital-sales.success.edit.message": "Penjualan Digital berhasil diperbarui",
     "digital-sales.success.delete.message": "Penjualan Digital berhasil dihapus",
     "digital-sale.provider.label": "Provider",
+    "digital-sale.user.label": "Pengguna",
     "digital-sale.provider.placeholder": "Pilih Provider",
     "digital-sale.provider.required": "Provider wajib diisi",
     "digital-sale.provider.balance": "Saldo",

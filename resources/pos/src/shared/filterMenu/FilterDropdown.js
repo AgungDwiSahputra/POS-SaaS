@@ -72,6 +72,11 @@ const FilterDropdown = (props) => {
         providerValue,
         setProviderIdData,
         providerLabel,
+        isUserFilter,
+        userOptions = [],
+        userValue,
+        setUserIdData,
+        userLabel,
     } = props;
 
     const dispatch = useDispatch();
@@ -93,6 +98,7 @@ const FilterDropdown = (props) => {
     const [customer, setCustomer] = useState();
     const [type, setType] = useState();
     const [provider, setProvider] = useState();
+    const [user, setUser] = useState();
 
     const formattedPaymentMethods = [
         { value: 0, label: getFormattedMessage("unit.filter.all.label") },
@@ -137,6 +143,12 @@ const FilterDropdown = (props) => {
             setProvider(providerValue);
         }
     }, [providerValue]);
+
+    useEffect(() => {
+        if (userValue) {
+            setUser(userValue);
+        }
+    }, [userValue]);
 
     const transferStatusFilterOptions = getFormattedOptions(
         transferStatusOptions
@@ -250,6 +262,14 @@ const FilterDropdown = (props) => {
             };
             setProvider(defaultProvider);
             setProviderIdData && setProviderIdData(defaultProvider);
+        }
+        if (isUserFilter) {
+            const defaultUser = {
+                label: getFormattedMessage("unit.filter.all.label"),
+                value: "0",
+            };
+            setUser(defaultUser);
+            setUserIdData && setUserIdData(defaultUser);
         }
         onResetClick();
     };
@@ -494,6 +514,38 @@ const FilterDropdown = (props) => {
                             dispatch({ type: "RESET_OPTION", payload: false });
                             setProvider(obj);
                             setProviderIdData && setProviderIdData(obj);
+                            dispatch({ type: "ON_TOGGLE", payload: false });
+                        }}
+                    />
+                ) : null}
+                {isUserFilter ? (
+                    <ReactSelect
+                        title={
+                            userLabel ||
+                            getFormattedMessage("digital-sale.user.label")
+                        }
+                        data={[
+                            {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            },
+                            ...userOptions,
+                        ]}
+                        defaultValue={
+                            userValue || {
+                                value: "0",
+                                label: getFormattedMessage(
+                                    "unit.filter.all.label"
+                                ),
+                            }
+                        }
+                        value={user || userValue}
+                        onChange={(obj) => {
+                            dispatch({ type: "RESET_OPTION", payload: false });
+                            setUser(obj);
+                            setUserIdData && setUserIdData(obj);
                             dispatch({ type: "ON_TOGGLE", payload: false });
                         }}
                     />

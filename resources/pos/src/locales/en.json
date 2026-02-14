@@ -603,6 +603,7 @@
     "digital-sales.success.edit.message": "Digital Sale updated successfully",
     "digital-sales.success.delete.message": "Digital Sale deleted successfully",
     "digital-sale.provider.label": "Provider",
+    "digital-sale.user.label": "User",
     "digital-sale.provider.placeholder": "Select Provider",
     "digital-sale.provider.required": "Provider is required",
     "digital-sale.provider.balance": "Balance",

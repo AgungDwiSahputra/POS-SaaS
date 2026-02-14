@@ -37,12 +37,12 @@ class DigitalSaleAPIController extends AppBaseController
         }
 
         // Provider filter
-        if ($request->get('provider_id')) {
+        if ($request->get('provider_id') && $request->get('provider_id') != '0') {
             $salesQuery->where('provider_id', $request->get('provider_id'));
         }
 
         // User filter
-        if ($request->get('user_id')) {
+        if ($request->get('user_id') && $request->get('user_id') != '0') {
             $salesQuery->where('user_id', $request->get('user_id'));
         }
 
