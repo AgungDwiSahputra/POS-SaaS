@@ -110,7 +110,7 @@ const TopSellingProduct = (props) => {
                                                     </td>
                                                     <td className="py-4">
                                                         <span className="badge bg-light-primary me-2">
-                                                            {top?.total_quantity && parseFloat(top?.total_quantity)?.toFixed(2)}{" "}
+                                                            {top?.total_quantity ? parseFloat(top?.total_quantity).toLocaleString('id-ID', { maximumFractionDigits: 2 }).replace(/,00$/, '') : 0}{" "}
                                                             {top.sale_unit}
                                                         </span>
                                                     </td>

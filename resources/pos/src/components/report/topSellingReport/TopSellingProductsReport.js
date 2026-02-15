@@ -31,7 +31,8 @@ const TopSellingProductsReport = (props) => {
 
     const itemsValue =
         currencySymbol &&
-        topSellingReport.length >= 0 &&
+        topSellingReport &&
+        topSellingReport.length > 0 &&
         topSellingReport.map((top) => ({
             code: top.code,
             product: top.name,
