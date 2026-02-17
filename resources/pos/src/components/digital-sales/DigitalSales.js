@@ -17,7 +17,7 @@ import ActionDropDownButton from "../../shared/action-buttons/ActionDropDownButt
 import TopProgressBar from "../../shared/components/loaders/TopProgressBar";
 import { fetchSetting } from "../../store/action/settingAction";
 import { fetchProviders } from "../../store/action/providerAction";
-import { fetchUsers } from "../../store/action/userAction";
+import { fetchUsersList } from "../../store/action/userAction";
 import ProviderCard from "../provider/ProviderCard";
 import { Permissions } from "../../constants";
 
@@ -34,7 +34,7 @@ const DigitalSales = (props) => {
         providers,
         fetchProviders,
         users,
-        fetchUsers
+        fetchUsersList
     } = props;
 
     const [deleteModel, setDeleteModel] = useState(false);
@@ -47,7 +47,7 @@ const DigitalSales = (props) => {
     useEffect(() => {
         fetchSetting();
         fetchProviders();
-        fetchUsers({}, true, '?all_users=true');
+        fetchUsersList();
     }, []);
 
     const currencySymbol =
@@ -452,5 +452,5 @@ export default connect(mapStateToProps, {
     deleteDigitalSale,
     fetchSetting,
     fetchProviders,
-    fetchUsers
+    fetchUsersList
 })(DigitalSales);

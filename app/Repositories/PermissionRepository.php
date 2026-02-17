@@ -75,32 +75,117 @@ class PermissionRepository extends BaseRepository
             }
         }
 
+        // Get manage_* permissions
         $managePermissions = $this->model
             ->where('name', 'like', 'manage_%')
             ->whereNotIn('name', $restrictedPermissions)
             ->get();
 
+        // Get standalone permissions (non-manage permissions that should appear separately)
+        $standalonePermissionNames = ['create_balance_requests', 'delete_balance_requests'];
+        $standalonePermissions = $this->model
+            ->whereIn('name', $standalonePermissionNames)
+            ->whereNotIn('name', $restrictedPermissions)
+            ->get();
+
         $allPermissions = Permission::all(['id', 'name']);
 
+        // Process manage permissions with their child permissions
         $managePermissions->each(function ($permission) use ($allPermissions) {
             $module = Str::after($permission->name, 'manage_');
 
-            $childPermissions = collect(['edit', 'create', 'view', 'delete'])->map(function ($action) use ($module, $allPermissions) {
-                $name = "{$action}_{$module}";
-                $match = $allPermissions->firstWhere('name', $name);
+            // Special modules that only have specific actions
+            $viewOnlyModules = ['dashboard', 'pos_screen'];
+            $editOnlyModules = ['reports', 'sms_templates', 'email_templates', 'sms_apis', 'setting'];
+            $noChildModules = ['print_barcode', 'store']; // Modules without CRUD permissions
 
-                if ($match) {
-                    return [
-                        'id' => $match->id,
-                        'name' => $name,
+            if (in_array($module, $noChildModules)) {
+                // For modules without child permissions, create a self-referencing child
+                $permission->child_permissions = collect([
+                    [
+                        'id' => $permission->id,
+                        'name' => $permission->name,
                         'selected' => false,
-                    ];
-                }
-                return null;
-            })->filter()->values();
+                        'is_self' => true, // Flag to indicate this is the permission itself
+                    ]
+                ]);
+            } elseif (in_array($module, $viewOnlyModules)) {
+                $childPermissions = collect(['view'])->map(function ($action) use ($module, $allPermissions) {
+                    $name = "{$action}_{$module}";
+                    $match = $allPermissions->firstWhere('name', $name);
+                    if ($match) {
+                        return [
+                            'id' => $match->id,
+                            'name' => $name,
+                            'selected' => false,
+                        ];
+                    }
+                    return null;
+                })->filter()->values();
+                $permission->child_permissions = $childPermissions;
+            } elseif (in_array($module, $editOnlyModules)) {
+                $childPermissions = collect(['edit'])->map(function ($action) use ($module, $allPermissions) {
+                    $name = "{$action}_{$module}";
+                    $match = $allPermissions->firstWhere('name', $name);
+                    if ($match) {
+                        return [
+                            'id' => $match->id,
+                            'name' => $name,
+                            'selected' => false,
+                        ];
+                    }
+                    return null;
+                })->filter()->values();
+                $permission->child_permissions = $childPermissions;
+            } else {
+                // Standard modules with full CRUD
+                $childPermissions = collect(['edit', 'create', 'view', 'delete'])->map(function ($action) use ($module, $allPermissions) {
+                    $name = "{$action}_{$module}";
+                    $match = $allPermissions->firstWhere('name', $name);
 
-            $permission->child_permissions = $childPermissions;
+                    if ($match) {
+                        return [
+                            'id' => $match->id,
+                            'name' => $name,
+                            'selected' => false,
+                        ];
+                    }
+                    return null;
+                })->filter()->values();
+
+                $permission->child_permissions = $childPermissions;
+            }
         });
+
+        // Process standalone permissions (create_balance_requests, delete_balance_requests)
+        // Group them under a virtual "balance_requests" parent
+        $balanceRequestPermissions = $standalonePermissions->filter(function ($p) {
+            return Str::contains($p->name, 'balance_requests');
+        });
+
+        if ($balanceRequestPermissions->count() > 0) {
+            // Find or create virtual parent for balance_requests
+            $manageBalanceRequests = $managePermissions->firstWhere('name', 'manage_balance_requests');
+            
+            if ($manageBalanceRequests) {
+                // Add standalone permissions as additional children
+                $existingChildren = $manageBalanceRequests->child_permissions ?? collect([]);
+                
+                foreach ($balanceRequestPermissions as $standalone) {
+                    // Only add if not already exists
+                    $exists = $existingChildren->firstWhere('name', $standalone->name);
+                    if (!$exists) {
+                        $existingChildren->push([
+                            'id' => $standalone->id,
+                            'name' => $standalone->name,
+                            'selected' => false,
+                            'is_standalone' => true,
+                        ]);
+                    }
+                }
+                $manageBalanceRequests->child_permissions = $existingChildren;
+            }
+        }
 
         return $managePermissions;
 

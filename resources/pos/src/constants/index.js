@@ -131,7 +131,8 @@ export const apiBaseURL = {
     DIGITAL_PRODUCTS: "/digital-products",
     DIGITAL_SALES: "/digital-sales",
     PROVIDERS: "/providers",
-    BALANCE_REQUESTS: "/balance-requests"
+    BALANCE_REQUESTS: "/balance-requests",
+    USERS_LIST: "users-list"
 };
 
 export const adminApiBaseURL = {
@@ -726,7 +727,6 @@ export const Permissions = {
     MANAGE_DASHBOARD: "manage_dashboard",
     MANAGE_ROLES: "manage_roles",
     MANAGE_BRANDS: "manage_brands",
-    MANAGE_CURRENCY: "manage_currency",
     MANAGE_WAREHOUSES: "manage_warehouses",
     MANAGE_UNITS: "manage_units",
     MANAGE_PRODUCT_CATEGORIES: "manage_product_categories",
@@ -753,17 +753,16 @@ export const Permissions = {
     MANAGE_POS_SCREEN: "manage_pos_screen",
     MANAGE_SALE: "manage_sale",
     MANAGE_SALE_RETURN: "manage_sale_return",
-    MANAGE_REPORT: "manage_report",
+    MANAGE_REPORTS: "manage_reports",
     MANAGE_PRINT_BARCODE: "manage_print_barcode",
     MANAGE_ADJUSTMENTS: "manage_adjustments",
     MANAGE_TRANSFERS: "manage_transfers",
-    MANAGE_REPORTS: "manage_reports",
     MANAGE_EMAIL_TEMPLATES: "manage_email_templates",
-    MANAGE_QUOTATION: "manage_quotations",
+    MANAGE_QUOTATIONS: "manage_quotations",
     MANAGE_SMS_API: "manage_sms_apis",
     MANAGE_SMS_TEMPLATES: "manage_sms_templates",
-    MANAGE_LANGUAGES: "manage_language",
     MANAGE_STORE: "manage_store",
+    MANAGE_DIGITAL_SALES: "manage_digital_sales",
     CREATE_ADJUSTMENTS: "create_adjustments",
     VIEW_ADJUSTMENTS: "view_adjustments",
     EDIT_ADJUSTMENTS: "edit_adjustments",
@@ -1187,17 +1186,14 @@ export const permissionMappings = {
     manage_quotations: "/user/quotations",
     manage_transfers: "/user/transfers",
     manage_expenses: "/user/expenses",
-    manage_currency: "/user/currencies",
     manage_variations: "/user/variations",
     manage_expense_categories: "/user/expense-categories",
     manage_setting: "/user/settings",
     edit_setting: "/user/settings",
     manage_purchase_return: "/user/purchase-return",
     manage_sale_return: "/user/sale-return",
-    manage_report: "/user/report/report-warehouse",
     edit_reports: "/user/report/report-warehouse",
     manage_reports: "/user/report/report-warehouse",
-    manage_language: "/user/languages",
     manage_sms_apis: "/user/sms-api",
     edit_sms_apis: "/user/sms-api",
     view_sms_apis: "/user/sms-api",
@@ -1212,6 +1208,7 @@ export const permissionMappings = {
     edit_providers: "/user/providers",
     view_providers: "/user/providers",
     delete_providers: "/user/providers",
+    manage_digital_sales: "/user/digital-sales",
 };
 
 export const paymentOptions = {

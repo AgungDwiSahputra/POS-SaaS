@@ -221,6 +221,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         });
         Route::get('providers', [ProviderAPIController::class, 'index']);
 
+        // Public endpoint for users dropdown (no manage_users permission required)
+        Route::get('users-list', [UserAPIController::class, 'getUsersList']);
+
         //balance-requests route
         Route::middleware('permission:manage_balance_requests')->group(function () {
             Route::resource('balance-requests', BalanceRequestAPIController::class);
@@ -242,7 +245,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         });
 
         // Digital Sales
-        Route::middleware('permission:manage_sale|manage_pos_screen|manage_reports')->group(function () {
+        Route::middleware('permission:manage_digital_sales')->group(function () {
             Route::resource('digital-sales', DigitalSaleAPIController::class);
             Route::get('digital-sale-info/{sale}', [DigitalSaleAPIController::class, 'saleInfo'])->name('digital-sale-info');
 

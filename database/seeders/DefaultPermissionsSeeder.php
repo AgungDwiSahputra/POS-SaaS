@@ -31,10 +31,6 @@ class DefaultPermissionsSeeder extends Seeder
                 'display_name' => 'Manage Brands'
             ],
             [
-                'name' => 'manage_currency',
-                'display_name' => 'Manage Currency'
-            ],
-            [
                 'name' => 'manage_warehouses',
                 'display_name' => 'Manage Warehouses'
             ],
@@ -127,10 +123,6 @@ class DefaultPermissionsSeeder extends Seeder
                 'display_name' => 'Manage Sms Apis'
             ],
             [
-                'name' => 'manage_language',
-                'display_name' => 'Manage Language'
-            ],
-            [
                 'name' => 'manage_variations',
                 'display_name' => 'Manage Variations'
             ],
@@ -149,6 +141,14 @@ class DefaultPermissionsSeeder extends Seeder
             [
                 'name' => 'delete_balance_requests',
                 'display_name' => 'Delete Balance Requests'
+            ],
+            [
+                'name' => 'manage_print_barcode',
+                'display_name' => 'Manage Print Barcode'
+            ],
+            [
+                'name' => 'manage_store',
+                'display_name' => 'Manage Store'
             ],
         ];
 

@@ -57,7 +57,7 @@ class GenerateCrudPermissionsSeeder extends Seeder
             }
         }
 
-        $removeManagePermissions = ['manage_currency', 'manage_language'];
+        $removeManagePermissions = [];
 
         foreach ($removeManagePermissions as $permName) {
             $permission = Permission::where('name', $permName)->first();
