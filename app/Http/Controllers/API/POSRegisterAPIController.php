@@ -6,6 +6,8 @@ use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\CreatePOSRegisterRequest;
 use App\Http\Resources\POSRegisterCollection;
 use App\Http\Resources\POSRegisterResource;
+use App\Models\DigitalSale;
+use App\Models\DigitalSaleItem;
 use App\Models\PaymentMethod;
 use App\Models\POSRegister;
 use App\Models\Sale;
@@ -182,11 +184,28 @@ class POSRegisterAPIController extends AppBaseController
         $data['today_sales_return_amount'] = SaleReturn::whereIn('sale_id', $saleIds)
             ->sum('grand_total');
 
-        $data['today_sales_payment_amount'] = SalesPayment::whereIn('sale_id', $saleIds)
-            ->whereBetween('payment_date', [$startDate, $endDate])
-            ->sum('amount');
+        // Calculate Total Digital Sales first (needed for total payment calculation)
+        // Formula: (Total harga jual digital) - (Total harga modal type tarik_tunai × 2)
+        $totalDigitalSalesPrice = DigitalSale::where('user_id', $user_id ?? Auth::id())
+            ->where('status', DigitalSale::COMPLETED)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('price');
 
-        $data['today_sales_payment_amount'] = $data['today_sales_amount'] - $data['today_sales_return_amount'];
+        // Get total cost for tarik_tunai type transactions
+        // Join digital_sales -> digital_sale_items -> digital_products (where type = 'tarik_tunai')
+        $totalTarikTunaiCost = DigitalSale::where('user_id', $user_id ?? Auth::id())
+            ->where('status', DigitalSale::COMPLETED)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('digitalSaleItems.digitalProduct', function (Builder $query) {
+                $query->where('type', 'tarik_tunai');
+            })
+            ->sum('cost');
+
+        $data['total_digital_sales'] = $totalDigitalSalesPrice - ($totalTarikTunaiCost * 2);
+
+        // Total Pembayaran = (Total Penjualan + Total Penjualan Digital) - Total Pengembalian (Retur)
+        $data['today_sales_payment_amount'] = ($data['today_sales_amount'] + $data['total_digital_sales']) - $data['today_sales_return_amount'];
+        
         $data['refunded_cash'] = SaleReturn::whereIn('sale_id', $saleIds)
             ->whereHas('sale', function (Builder $query) {
                 $query->where('payment_type', Sale::CASH);

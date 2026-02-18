@@ -848,6 +848,7 @@
     "currency.icon.right.side.lable": "Ikon mata uang di sisi kanan",
     "pos.register-details.sell.title": "Jual",
     "total.sales.title": "Total Penjualan",
+    "total.digital.sales.title": "Total Penjualan Digital",
     "email.status.edit.success.message": "Status Email berhasil diperbarui.",
     "sms.status.edit.success.message": "Status SMS berhasil diperbarui.",
     "sms-api.title": "API SMS",

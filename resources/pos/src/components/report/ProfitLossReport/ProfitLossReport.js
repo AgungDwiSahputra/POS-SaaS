@@ -20,6 +20,7 @@ import {
     faSquareMinus,
     faMoneyBillTrendUp,
     faMoneyBillTransfer,
+    faMobileScreen,
 } from "@fortawesome/free-solid-svg-icons";
 import DateRangePicker from "../../../shared/datepicker/DateRangePicker";
 import { Filters } from "../../../constants";
@@ -49,15 +50,17 @@ const ProfitLossReport = (props) => {
         const salesAmount = parseAmount(profitAndLossReport?.sales);
         const saleReturnAmount = parseAmount(profitAndLossReport?.sale_returns);
         const hppAmount = parseAmount(profitAndLossReport?.hpp);
+        const digitalSalesAmount = parseAmount(profitAndLossReport?.total_digital_sales);
 
-        return salesAmount - saleReturnAmount - hppAmount;
+        return salesAmount - saleReturnAmount + digitalSalesAmount - hppAmount;
     }, [profitAndLossReport]);
 
     const revenueAmount = useMemo(() => {
         const salesAmount = parseAmount(profitAndLossReport?.sales);
         const saleReturnAmount = parseAmount(profitAndLossReport?.sale_returns);
+        const digitalSalesAmount = parseAmount(profitAndLossReport?.total_digital_sales);
 
-        return salesAmount - saleReturnAmount;
+        return salesAmount - saleReturnAmount + digitalSalesAmount;
     }, [profitAndLossReport]);
 
     const netProfitAmount = useMemo(() => {
@@ -121,6 +124,30 @@ const ProfitLossReport = (props) => {
                                 profitAndLossReport.sales
                                     ? parseFloat(
                                           profitAndLossReport.sales
+                                      ).toFixed(2)
+                                    : "0.00"
+                            }
+                        />
+
+                        <ProfitLossWidget
+                            className={"bg-secondary"}
+                            iconClass="bg-gray-300"
+                            currency={
+                                frontSetting.value &&
+                                frontSetting.value.currency_symbol
+                            }
+                            icon={
+                                <FontAwesomeIcon
+                                    icon={faMobileScreen}
+                                    className="fs-1-xl text-white"
+                                />
+                            }
+                            title={getFormattedMessage("total.digital.sales.title")}
+                            allConfigData={allConfigData}
+                            value={
+                                profitAndLossReport.total_digital_sales
+                                    ? parseFloat(
+                                          profitAndLossReport.total_digital_sales
                                       ).toFixed(2)
                                     : "0.00"
                             }
@@ -248,7 +275,17 @@ const ProfitLossReport = (props) => {
                                                 profitAndLossReport.sales
                                             )
                                         )}
-                                        ${placeholderText("sales.title")}) - (
+                                        ${placeholderText("sales.title")}) + (
+                                        ${currencySymbolHandling(
+                                            allConfigData,
+                                            frontSetting.value &&
+                                                frontSetting.value
+                                                    .currency_symbol,
+                                            parseAmount(
+                                                profitAndLossReport.total_digital_sales
+                                            )
+                                        )}
+                                        ${placeholderText("total.digital.sales.title")}) - (
                                         ${currencySymbolHandling(
                                             allConfigData,
                                             frontSetting.value &&
@@ -292,7 +329,19 @@ const ProfitLossReport = (props) => {
                                             )}
                                             ${placeholderText(
                                                 "sales.title"
-                                            )})  - (
+                                            )}) + (
+                                                ${currencySymbolHandling(
+                                                    allConfigData,
+                                                    frontSetting.value &&
+                                                        frontSetting.value
+                                                            .currency_symbol,
+                                                    parseAmount(
+                                                        profitAndLossReport.total_digital_sales
+                                                    )
+                                                )}
+                                                ${placeholderText(
+                                                    "total.digital.sales.title"
+                                                )}) - (
                                                 ${currencySymbolHandling(
                                                     allConfigData,
                                                     frontSetting.value &&
