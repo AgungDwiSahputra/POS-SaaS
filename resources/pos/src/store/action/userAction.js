@@ -21,7 +21,7 @@ export const fetchUsersList = () => async (dispatch) => {
         const response = await apiConfig.get(apiBaseURL.USERS_LIST);
         dispatch({
             type: userActionType.FETCH_USERS,
-            payload: response.data.data,
+            payload: response.data.data.data,
         });
     } catch (error) {
         // Silently fail for dropdown data
