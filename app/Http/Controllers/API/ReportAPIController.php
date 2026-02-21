@@ -630,24 +630,14 @@ class ReportAPIController extends AppBaseController
         $data['hpp'] = $totalHpp - $returnedHpp;
         $data['product_cost'] = $data['hpp'];
 
-        // Calculate Total Digital Sales
-        // Formula: (Total harga jual digital) - (Total harga modal type tarik_tunai × 2)
-        $totalDigitalSalesPrice = DigitalSale::where('status', DigitalSale::COMPLETED)
+        // Calculate Total Digital Margin
+        // Using margin column from digital_sales table
+        $data['total_digital_margin'] = DigitalSale::where('status', DigitalSale::COMPLETED)
             ->whereBetween('created_at', [$request->get('start_date'), $request->get('end_date')])
-            ->sum('price');
+            ->sum('margin');
 
-        // Get total cost for tarik_tunai type transactions
-        $totalTarikTunaiCost = DigitalSale::where('status', DigitalSale::COMPLETED)
-            ->whereBetween('created_at', [$request->get('start_date'), $request->get('end_date')])
-            ->whereHas('digitalSaleItems.digitalProduct', function (Builder $query) {
-                $query->where('type', 'tarik_tunai');
-            })
-            ->sum('cost');
-
-        $data['total_digital_sales'] = $totalDigitalSalesPrice - ($totalTarikTunaiCost * 2);
-
-        // Gross Profit = (Sales - Sale Returns + Digital Sales) - HPP
-        $data['gross_profit'] = ($data['sales'] - $data['sale_returns'] + $data['total_digital_sales']) - $data['hpp'];
+        // Gross Profit = (Sales - Sale Returns + Digital Margin) - HPP
+        $data['gross_profit'] = ($data['sales'] - $data['sale_returns'] + $data['total_digital_margin']) - $data['hpp'];
 
         // Net Profit = Gross Profit - Expenses
         $data['net_profit'] = $data['gross_profit'] - $data['expenses'];

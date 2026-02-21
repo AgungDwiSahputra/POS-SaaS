@@ -851,6 +851,7 @@
     "pos.register-details.sell.title": "Sell",
     "total.sales.title": "Total Sales",
     "total.digital.sales.title": "Total Digital Sales",
+    "total.digital.margin.title": "Total Digital Margin",
     "email.status.edit.success.message": "Email status updated successfully.",
     "sms.status.edit.success.message": "SMS status updated successfully.",
     "sms-api.title": "SMS API",

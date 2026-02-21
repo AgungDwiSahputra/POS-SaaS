@@ -50,17 +50,16 @@ const ProfitLossReport = (props) => {
         const salesAmount = parseAmount(profitAndLossReport?.sales);
         const saleReturnAmount = parseAmount(profitAndLossReport?.sale_returns);
         const hppAmount = parseAmount(profitAndLossReport?.hpp);
-        const digitalSalesAmount = parseAmount(profitAndLossReport?.total_digital_sales);
+        const digitalMarginAmount = parseAmount(profitAndLossReport?.total_digital_margin);
 
-        return salesAmount - saleReturnAmount + digitalSalesAmount - hppAmount;
+        return salesAmount - saleReturnAmount + digitalMarginAmount - hppAmount;
     }, [profitAndLossReport]);
 
     const revenueAmount = useMemo(() => {
         const salesAmount = parseAmount(profitAndLossReport?.sales);
         const saleReturnAmount = parseAmount(profitAndLossReport?.sale_returns);
-        const digitalSalesAmount = parseAmount(profitAndLossReport?.total_digital_sales);
 
-        return salesAmount - saleReturnAmount + digitalSalesAmount;
+        return salesAmount - saleReturnAmount;
     }, [profitAndLossReport]);
 
     const netProfitAmount = useMemo(() => {
@@ -142,12 +141,12 @@ const ProfitLossReport = (props) => {
                                     className="fs-1-xl text-white"
                                 />
                             }
-                            title={getFormattedMessage("total.digital.sales.title")}
+                            title={getFormattedMessage("total.digital.margin.title")}
                             allConfigData={allConfigData}
                             value={
-                                profitAndLossReport.total_digital_sales
+                                profitAndLossReport.total_digital_margin
                                     ? parseFloat(
-                                          profitAndLossReport.total_digital_sales
+                                          profitAndLossReport.total_digital_margin
                                       ).toFixed(2)
                                     : "0.00"
                             }
@@ -275,17 +274,7 @@ const ProfitLossReport = (props) => {
                                                 profitAndLossReport.sales
                                             )
                                         )}
-                                        ${placeholderText("sales.title")}) + (
-                                        ${currencySymbolHandling(
-                                            allConfigData,
-                                            frontSetting.value &&
-                                                frontSetting.value
-                                                    .currency_symbol,
-                                            parseAmount(
-                                                profitAndLossReport.total_digital_sales
-                                            )
-                                        )}
-                                        ${placeholderText("total.digital.sales.title")}) - (
+                                        ${placeholderText("sales.title")}) - (
                                         ${currencySymbolHandling(
                                             allConfigData,
                                             frontSetting.value &&
@@ -336,11 +325,11 @@ const ProfitLossReport = (props) => {
                                                         frontSetting.value
                                                             .currency_symbol,
                                                     parseAmount(
-                                                        profitAndLossReport.total_digital_sales
+                                                        profitAndLossReport.total_digital_margin
                                                     )
                                                 )}
                                                 ${placeholderText(
-                                                    "total.digital.sales.title"
+                                                    "total.digital.margin.title"
                                                 )}) - (
                                                 ${currencySymbolHandling(
                                                     allConfigData,
