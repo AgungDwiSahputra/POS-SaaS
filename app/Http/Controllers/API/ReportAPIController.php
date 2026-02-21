@@ -572,29 +572,39 @@ class ReportAPIController extends AppBaseController
     public function getProfitLossReport(Request $request)
     {
         $data = [];
+        
+        // Convert date strings to Carbon instances with proper time boundaries
+        // This ensures datetime columns are filtered correctly for the entire day
+        $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
+        $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
+        
+        // For date-only columns, use the original date strings
+        $dateOnlyStart = $request->get('start_date');
+        $dateOnlyEnd = $request->get('end_date');
+        
         $data['sales'] = Sale::whereBetween(
             'date',
-            [$request->get('start_date'), $request->get('end_date')]
+            [$dateOnlyStart, $dateOnlyEnd]
         )->sum('grand_total');
         $data['purchase_returns'] = PurchaseReturn::whereHas('warehouse')->whereBetween(
             'date',
-            [$request->get('start_date'), $request->get('end_date')]
+            [$dateOnlyStart, $dateOnlyEnd]
         )->sum('grand_total');
         $data['purchases'] = Purchase::whereHas('warehouse')->whereBetween(
             'date',
-            [$request->get('start_date'), $request->get('end_date')]
+            [$dateOnlyStart, $dateOnlyEnd]
         )->sum('grand_total') - $data['purchase_returns'];
         $data['sale_returns'] = SaleReturn::whereHas('warehouse')->whereBetween(
             'date',
-            [$request->get('start_date'), $request->get('end_date')]
+            [$dateOnlyStart, $dateOnlyEnd]
         )->sum('grand_total');
         $data['expenses'] = Expense::whereHas('warehouse')->whereBetween(
             'date',
-            [$request->get('start_date'), $request->get('end_date')]
+            [$dateOnlyStart, $dateOnlyEnd]
         )->sum('amount');
         $data['sales_payment_amount'] = SalesPayment::whereHas('sale')->whereBetween(
             'payment_date',
-            [$request->get('start_date'), $request->get('end_date')]
+            [$dateOnlyStart, $dateOnlyEnd]
         )->sum('amount');
         $data['Revenue'] = $data['sales'] - $data['sale_returns'];
         $data['payments_received'] = $data['sales_payment_amount'] + $data['purchase_returns'];
@@ -604,12 +614,12 @@ class ReportAPIController extends AppBaseController
 
         $sales = Sale::whereBetween(
             'date',
-            [$request->get('start_date'), $request->get('end_date')]
+            [$dateOnlyStart, $dateOnlyEnd]
         )->with('saleItems')->get();
 
         $allSaleReturnsItems = SaleReturnItem::join('sales_return', 'sales_return.id', '=', 'sale_return_items.sale_return_id')
             ->join('sales', 'sales.id', '=', 'sales_return.sale_id')
-            ->whereBetween('sales.date', [$request->get('start_date'), $request->get('end_date')])
+            ->whereBetween('sales.date', [$dateOnlyStart, $dateOnlyEnd])
             ->select('sale_return_items.quantity', 'sale_return_items.product_id')
             ->withWhereHas('product')
             ->get();
@@ -632,8 +642,9 @@ class ReportAPIController extends AppBaseController
 
         // Calculate Total Digital Margin
         // Using margin column from digital_sales table
+        // Note: created_at is a datetime column, so we use Carbon with time boundaries
         $data['total_digital_margin'] = DigitalSale::where('status', DigitalSale::COMPLETED)
-            ->whereBetween('created_at', [$request->get('start_date'), $request->get('end_date')])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('margin');
 
         // Gross Profit = (Sales - Sale Returns + Digital Margin) - HPP
