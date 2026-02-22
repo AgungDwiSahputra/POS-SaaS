@@ -656,6 +656,7 @@
     "print-barcode.custom.width.label": "Lebar Label",
     "print-barcode.custom.height.label": "Tinggi Label",
     "print-barcode.custom.page-width.label": "Lebar Halaman",
+    "print-barcode.custom.page-height.label": "Tinggi Halaman",
     "print-barcode.custom.horizontal-gap.label": "Jarak Horizontal",
     "print-barcode.custom.vertical-gap.label": "Jarak Vertikal",
     "print-barcode.custom.padding.label": "Padding",

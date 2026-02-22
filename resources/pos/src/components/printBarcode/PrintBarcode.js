@@ -74,6 +74,7 @@ const PrintBarcode = () => {
         widthMm: 38,
         heightMm: 25,
         pageWidthMm: 210,
+        pageHeightMm: 297,
         columnGapMm: 3,
         rowGapMm: 3,
         paddingMm: 2,
@@ -148,7 +149,7 @@ const PrintBarcode = () => {
             return null;
         }
 
-        if (option.isCustom) {
+        if (option?.value === "custom") {
             return buildLayoutFromCustom(customPaper);
         }
 
@@ -176,7 +177,7 @@ const PrintBarcode = () => {
     }, [updateProducts, printBarcodeValue, printBarcodeQuantity, paperLayout]);
 
     useEffect(() => {
-        if (printBarcodeValue.paperSizeValue?.isCustom) {
+        if (printBarcodeValue.paperSizeValue?.value === "custom") {
             const customLayout = buildLayoutFromCustom(customPaper);
             setPaperLayout(customLayout);
         }
@@ -208,7 +209,7 @@ const PrintBarcode = () => {
         const nextLayout = resolveLayoutForOption(option);
         setPaperLayout(nextLayout);
 
-        if (option?.isCustom) {
+        if (option?.value === "custom") {
             setIsPrintShow(false);
             setUpdated(false);
         } else {
@@ -249,7 +250,7 @@ const PrintBarcode = () => {
             errorss["paperSizeValue"] = getFormattedMessage(
                 "globally.paper.size.validate.label"
             );
-        } else if (printBarcodeValue.paperSizeValue.isCustom) {
+        } else if (printBarcodeValue.paperSizeValue?.value === "custom") {
             if (customPaper.widthMm <= 0) {
                 errorss.customWidth = getFormattedMessage(
                     "print-barcode.custom-size.width.validate"
@@ -322,6 +323,7 @@ const PrintBarcode = () => {
             widthMm: 38,
             heightMm: 25,
             pageWidthMm: 210,
+            pageHeightMm: 297,
             columnGapMm: 3,
             rowGapMm: 3,
             paddingMm: 2,
@@ -384,6 +386,7 @@ const PrintBarcode = () => {
                     barcodeOptions={barcodeOptions}
                     updateProducts={print}
                     paperSizeValue={printBarcodeValue.paperSizeValue}
+                    customPaper={customPaper}
                 />
             </div>
         );
@@ -767,7 +770,7 @@ const PrintBarcode = () => {
                         </div>
                     </Col>
                 </Row>
-                {printBarcodeValue.paperSizeValue?.isCustom && (
+                {printBarcodeValue.paperSizeValue?.value === "custom" && (
                     <Row className="g-3 mb-4">
                         <Col xs={12} md={4}>
                             <label className="form-label">
@@ -829,6 +832,24 @@ const PrintBarcode = () => {
                                     className="form-control"
                                     value={customPaper.pageWidthMm}
                                     onChange={handleCustomPaperChange("pageWidthMm")}
+                                />
+                                <InputGroup.Text>mm</InputGroup.Text>
+                            </InputGroup>
+                        </Col>
+                        <Col xs={12} md={4}>
+                            <label className="form-label">
+                                {getFormattedMessage(
+                                    "print-barcode.custom.page-height.label"
+                                )}
+                            </label>
+                            <InputGroup>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step="0.1"
+                                    className="form-control"
+                                    value={customPaper.pageHeightMm}
+                                    onChange={handleCustomPaperChange("pageHeightMm")}
                                 />
                                 <InputGroup.Text>mm</InputGroup.Text>
                             </InputGroup>
@@ -935,6 +956,7 @@ const PrintBarcode = () => {
                     updated={updated}
                     allConfigData={allConfigData}
                     paperSizeValue={printBarcodeValue.paperSizeValue}
+                    customPaper={customPaper}
                 />
                 }
             </div>

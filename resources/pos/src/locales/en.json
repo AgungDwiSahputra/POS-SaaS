@@ -658,6 +658,7 @@
     "print-barcode.custom.width.label": "Label Width",
     "print-barcode.custom.height.label": "Label Height",
     "print-barcode.custom.page-width.label": "Page Width",
+    "print-barcode.custom.page-height.label": "Page Height",
     "print-barcode.custom.horizontal-gap.label": "Horizontal Gap",
     "print-barcode.custom.vertical-gap.label": "Vertical Gap",
     "print-barcode.custom.padding.label": "Padding",

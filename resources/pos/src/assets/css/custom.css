@@ -3758,6 +3758,42 @@ div .rdt_Pagination div:first-of-type svg {
   }
 }
 
+/* Custom Paper Size Barcode Styles - Screen Preview */
+.barcode-main.barcode-custom-paper {
+  background: #fff;
+  border: 1px dashed #666 !important;
+  margin: 10px auto !important;
+}
+
+.barcode-main.barcode-custom-paper .barcode-main__barcode-item {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  text-align: center !important;
+  overflow: hidden !important;
+}
+
+.barcode-main.barcode-custom-paper .barcode-main__barcode-style {
+  font-size: 10px !important;
+  line-height: 12px !important;
+}
+
+.barcode-main.barcode-custom-paper .barcode-main__barcode-style img {
+  height: 20px !important;
+  max-width: 100% !important;
+  width: auto !important;
+  object-fit: contain;
+}
+
+.barcode-main.barcode-custom-paper .fw-bolder,
+.barcode-main.barcode-custom-paper .text-capitalize {
+  font-size: 9px !important;
+  line-height: 11px !important;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
 .print-main {
   height: 110px;
   padding: 0.12in;

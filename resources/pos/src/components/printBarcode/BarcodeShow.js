@@ -20,7 +20,8 @@ const BarcodeShow = (props) => {
         frontSetting,
         allConfigData,
         barcodeOptions,
-        paperSizeValue, // Add this prop
+        paperSizeValue,
+        customPaper,
     } = props;
 
     const companyName = frontSetting?.value?.store_name;
@@ -44,29 +45,55 @@ const BarcodeShow = (props) => {
         return DEFAULT_LAYOUT;
     })();
 
-    // Check for 105x120mm paper based on the selected option value
-    const paperSizeClass = (paperSizeValue?.value === 9) ? "barcode-paper-105x120" : "";
+    // Determine paper size class
+    let paperSizeClass = "";
+    if (paperSizeValue?.value === 9) {
+        paperSizeClass = "barcode-paper-105x120";
+    } else if (paperSizeValue?.value === "custom") {
+        paperSizeClass = "barcode-custom-paper";
+    }
 
-    const containerStyle = {
-        width: `${effectiveLayout.pageWidthIn}in`,
-        maxWidth: `${effectiveLayout.pageWidthIn}in`,
-        display: "flex",
-        flexWrap: "wrap",
-        gap: `${effectiveLayout.rowGapIn}in ${effectiveLayout.columnGapIn}in`,
-        justifyContent: "flex-start",
-        '--barcode-label-width': `${effectiveLayout.labelWidthIn}in`,
-        '--barcode-label-height': `${effectiveLayout.labelHeightIn}in`,
-        '--barcode-padding': `${effectiveLayout.paddingIn}in`,
-    };
-
-    // Override inline styles for 105x120 paper to force 3 columns
-    const itemStyle = paperSizeClass
-        ? {} // Let CSS handle the sizing for this paper size
+    // For custom paper, use customPaper values directly for preview
+    const containerStyle = paperSizeValue?.value === "custom" && customPaper
+        ? {
+            width: `${customPaper.pageWidthMm}mm`,
+            maxWidth: `${customPaper.pageWidthMm}mm`,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: `${customPaper.rowGapMm}mm ${customPaper.columnGapMm}mm`,
+            justifyContent: "flex-start",
+            '--barcode-label-width': `${customPaper.widthMm}mm`,
+            '--barcode-label-height': `${customPaper.heightMm}mm`,
+            '--barcode-padding': `${customPaper.paddingMm}mm`,
+        }
         : {
-            width: `${effectiveLayout.labelWidthIn}in`,
-            minHeight: `${effectiveLayout.labelHeightIn}in`,
-            padding: `${effectiveLayout.paddingIn}in`,
+            width: `${effectiveLayout.pageWidthIn}in`,
+            maxWidth: `${effectiveLayout.pageWidthIn}in`,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: `${effectiveLayout.rowGapIn}in ${effectiveLayout.columnGapIn}in`,
+            justifyContent: "flex-start",
+            '--barcode-label-width': `${effectiveLayout.labelWidthIn}in`,
+            '--barcode-label-height': `${effectiveLayout.labelHeightIn}in`,
+            '--barcode-padding': `${effectiveLayout.paddingIn}in`,
         };
+
+    // Override inline styles for special paper sizes
+    // For custom paper, use customPaper values directly
+    const itemStyle = paperSizeValue?.value === "custom" && customPaper
+        ? {
+            width: `${customPaper.widthMm}mm`,
+            minHeight: `${customPaper.heightMm}mm`,
+            padding: `${customPaper.paddingMm}mm`,
+            boxSizing: 'border-box',
+        }
+        : paperSizeClass
+            ? {} // Let CSS handle the sizing for other special paper sizes (e.g., 105x120)
+            : {
+                width: `${effectiveLayout.labelWidthIn}in`,
+                minHeight: `${effectiveLayout.labelHeightIn}in`,
+                padding: `${effectiveLayout.paddingIn}in`,
+            };
 
     const loopBarcode = (product) => {
         let indents = [];
