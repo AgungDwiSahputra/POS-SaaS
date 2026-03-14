@@ -877,6 +877,7 @@
     "print-barcode.show-company.label": "Show Company Name",
     "print-barcode.show-product-name.label": "Show Product Name",
     "print-barcode.show-price.label": "Show Price",
+    "print-barcode.show-border.label": "Show Border",
     "product.input.quantity-limitation.label": "Quantity Limitation",
     "product.input.quantity-limitation.placeholder": "Enter Quantity Limitation",
     "pos.hold-list-btn.title": "Hold",

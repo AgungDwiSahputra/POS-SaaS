@@ -875,6 +875,7 @@
     "print-barcode.show-company.label": "Tampilkan Nama Perusahaan",
     "print-barcode.show-product-name.label": "Tampilkan Nama Produk",
     "print-barcode.show-price.label": "Tampilkan Harga",
+    "print-barcode.show-border.label": "Tampilkan Border",
     "product.input.quantity-limitation.label": "Batasan Jumlah",
     "product.input.quantity-limitation.placeholder": "Masukkan Batasan Jumlah",
     "pos.hold-list-btn.title": "Tahan",

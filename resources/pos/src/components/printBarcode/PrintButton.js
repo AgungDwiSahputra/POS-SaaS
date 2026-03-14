@@ -25,11 +25,13 @@ class PrintButton extends React.PureComponent {
     }
 
     componentDidUpdate(prevProps) {
-        // Re-inject style if customPaper props change
+        // Re-inject style if customPaper props change or barcodeOptions.showBorder changes
         const prevCustomPaper = prevProps.customPaper;
         const currentCustomPaper = this.props.customPaper;
         const prevPaperSize = prevProps.paperSizeValue;
         const currentPaperSize = this.props.paperSizeValue;
+        const prevShowBorder = prevProps.barcodeOptions?.showBorder;
+        const currentShowBorder = this.props.barcodeOptions?.showBorder;
 
         if (
             prevCustomPaper?.widthMm !== currentCustomPaper?.widthMm ||
@@ -39,7 +41,8 @@ class PrintButton extends React.PureComponent {
             prevCustomPaper?.columnGapMm !== currentCustomPaper?.columnGapMm ||
             prevCustomPaper?.rowGapMm !== currentCustomPaper?.rowGapMm ||
             prevCustomPaper?.paddingMm !== currentCustomPaper?.paddingMm ||
-            prevPaperSize?.value !== currentPaperSize?.value
+            prevPaperSize?.value !== currentPaperSize?.value ||
+            prevShowBorder !== currentShowBorder
         ) {
             this.injectCustomPageStyle();
         }
@@ -50,12 +53,25 @@ class PrintButton extends React.PureComponent {
     }
 
     injectCustomPageStyle = () => {
-        const { paperSizeValue, customPaper } = this.props;
+        const { paperSizeValue, customPaper, barcodeOptions } = this.props;
+        const showBorder = barcodeOptions?.showBorder ?? true;
 
         // Remove any existing custom style first
         this.removeCustomPageStyle();
 
-        // Only inject for custom paper size
+        // Always inject base print styles to remove borders during print
+        const basePrintStyles = `
+            @media print {
+                .barcode-main {
+                    border: none !important;
+                }
+                .barcode-main__barcode-item {
+                    border: none !important;
+                }
+            }
+        `;
+
+        // Only inject custom paper size styles when using custom
         if (paperSizeValue?.value === "custom" && customPaper) {
             const labelWidthMm = parseFloat(customPaper.widthMm) || 38;
             const labelHeightMm = parseFloat(customPaper.heightMm) || 25;
@@ -65,36 +81,41 @@ class PrintButton extends React.PureComponent {
             const rowGapMm = parseFloat(customPaper.rowGapMm) || 3;
             const paddingMm = parseFloat(customPaper.paddingMm) || 2;
 
-            const style = document.createElement("style");
-            style.id = this.customPageStyleId;
-            style.innerHTML = `
-                @media print {
-                    @page {
-                        size: ${pageWidthMm}mm ${pageHeightMm}mm;
-                        margin: 0;
-                    }
-                    .barcode-main.barcode-custom-paper {
-                        width: ${pageWidthMm}mm !important;
-                        max-width: ${pageWidthMm}mm !important;
-                        min-height: auto !important;
-                        border: none !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                        box-sizing: border-box;
-                        display: flex !important;
-                        flex-wrap: wrap !important;
-                        gap: ${rowGapMm}mm ${columnGapMm}mm !important;
-                    }
-                    .barcode-main.barcode-custom-paper .barcode-main__barcode-item {
-                        width: ${labelWidthMm}mm !important;
-                        max-width: ${labelWidthMm}mm !important;
-                        min-width: ${labelWidthMm}mm !important;
-                        min-height: ${labelHeightMm}mm !important;
-                        padding: ${paddingMm}mm !important;
-                        box-sizing: border-box !important;
-                    }
+            const customPrintStyles = `
+                @page {
+                    size: ${pageWidthMm}mm ${pageHeightMm}mm;
+                    margin: 0;
+                }
+                .barcode-main.barcode-custom-paper {
+                    width: ${pageWidthMm}mm !important;
+                    max-width: ${pageWidthMm}mm !important;
+                    min-height: auto !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    box-sizing: border-box;
+                    display: flex !important;
+                    flex-wrap: wrap !important;
+                    gap: ${rowGapMm}mm ${columnGapMm}mm !important;
+                }
+                .barcode-main.barcode-custom-paper .barcode-main__barcode-item {
+                    width: ${labelWidthMm}mm !important;
+                    max-width: ${labelWidthMm}mm !important;
+                    min-width: ${labelWidthMm}mm !important;
+                    min-height: ${labelHeightMm}mm !important;
+                    padding: ${paddingMm}mm !important;
+                    box-sizing: border-box !important;
                 }
             `;
+
+            const style = document.createElement("style");
+            style.id = this.customPageStyleId;
+            style.innerHTML = basePrintStyles + customPrintStyles;
+            document.head.appendChild(style);
+        } else {
+            // For presets, still inject base print styles to remove borders
+            const style = document.createElement("style");
+            style.id = this.customPageStyleId;
+            style.innerHTML = basePrintStyles;
             document.head.appendChild(style);
         }
     };
@@ -116,7 +137,7 @@ class PrintButton extends React.PureComponent {
         const paperSizeValue = this.props.paperSizeValue;
         const customPaper = this.props.customPaper;
 
-        const companyName = frontSetting?.value?.company_name;
+        const companyName = frontSetting?.value?.company_name || frontSetting?.value?.store_name;
         const currencySymbol =
             frontSetting &&
             frontSetting.value &&
@@ -163,6 +184,8 @@ class PrintButton extends React.PureComponent {
 
         // Override inline styles for special paper sizes
         // For custom paper, use customPaper values directly (same as BarcodeShow for consistency)
+        // Also apply border based on showBorder option
+        const showBorder = barcodeOptions?.showBorder ?? true;
         const itemStyle = paperSizeValue?.value === "custom" && customPaper
             ? {
                 width: `${customPaper.widthMm}mm`,
@@ -171,21 +194,30 @@ class PrintButton extends React.PureComponent {
                 boxSizing: 'border-box',
             }
             : paperSizeClass
-                ? {} // Let CSS handle the sizing for other special paper sizes (e.g., 105x120)
+                ? {
+                    // Let CSS handle the sizing for other special paper sizes (e.g., 105x120)
+                }
                 : {
                     width: `${effectiveLayout.labelWidthIn}in`,
                     minHeight: `${effectiveLayout.labelHeightIn}in`,
                     padding: `${effectiveLayout.paddingIn}in`,
                 };
 
+        // Add border style for preview (not printed)
+        const borderStyle = showBorder ? { border: '1px dashed #ccc' } : {};
+        const combinedItemStyle = { ...itemStyle, ...borderStyle };
+
         function printFunction(product) {
+            // Check if barcode is available
+            const hasBarcode = product && product.barcode_url && product.barcode_url.length > 0;
+            
             let indents = [];
             for (let i = 0; i < product.quantity; i++) {
                 indents.push(
                     <div
                         key={i}
                         className="barcode-main__barcode-item barcode-main__barcode-style"
-                        style={itemStyle}
+                        style={combinedItemStyle}
                     >
                         <div className="fw-bolder lh-1">
                             {barcodeOptions.companyName && companyName}
@@ -208,11 +240,18 @@ class PrintButton extends React.PureComponent {
                                 )}
                             </div>
                         )}
-                        <Image
-                            src={product && product.barcode_url}
-                            alt={product && product.name}
-                            className="w-100"
-                        />
+                        {/* Barcode Image - with error handling */}
+                        {hasBarcode ? (
+                            <Image
+                                src={product.barcode_url}
+                                alt={product.name}
+                                className="w-100"
+                            />
+                        ) : (
+                            <div className="text-danger small py-2">
+                                {getFormattedMessage("print-barcode.no-barcode.label") || "Barcode not available"}
+                            </div>
+                        )}
                         <div className="fw-bolder">
                             {product && product.code}
                         </div>

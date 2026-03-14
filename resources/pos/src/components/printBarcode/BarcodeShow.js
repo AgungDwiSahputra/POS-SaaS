@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Image } from "react-bootstrap-v5";
 import { currencySymbolHandling } from "../../shared/sharedMethod";
 import { getFormattedMessage } from "../../shared/sharedMethod";
@@ -24,7 +24,59 @@ const BarcodeShow = (props) => {
         customPaper,
     } = props;
 
-    const companyName = frontSetting?.value?.store_name;
+    // Destructure barcodeOptions with default values
+    const {
+        companyName: showCompanyName = true,
+        productName: showProductName = true,
+        price: showPrice = true,
+        showBorder = true,
+    } = barcodeOptions || {};
+
+    // Inject @page CSS for custom paper sizes (same as PrintButton)
+    useEffect(() => {
+        const styleId = "barcodeshow-custom-page-style";
+        const existingStyle = document.getElementById(styleId);
+        
+        if (paperSizeValue?.value === "custom" && customPaper) {
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            
+            const pageWidthMm = parseFloat(customPaper.pageWidthMm) || 210;
+            const pageHeightMm = parseFloat(customPaper.pageHeightMm) || 297;
+            
+            const style = document.createElement("style");
+            style.id = styleId;
+            style.innerHTML = `
+                @media print {
+                    @page {
+                        size: ${pageWidthMm}mm ${pageHeightMm}mm;
+                        margin: 0;
+                    }
+                    .barcode-main.barcode-custom-paper {
+                        width: ${pageWidthMm}mm !important;
+                        max-width: ${pageWidthMm}mm !important;
+                        min-height: auto !important;
+                        border: none !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        box-sizing: border-box;
+                        display: flex !important;
+                        flex-wrap: wrap !important;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        return () => {
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+        };
+    }, [paperSizeValue, customPaper]);
+
+    const companyName = frontSetting?.value?.company_name || frontSetting?.value?.store_name;
     const currencySymbol =
         frontSetting &&
         frontSetting.value &&
@@ -80,22 +132,31 @@ const BarcodeShow = (props) => {
 
     // Override inline styles for special paper sizes
     // For custom paper, use customPaper values directly
+    // Also apply border based on showBorder option
     const itemStyle = paperSizeValue?.value === "custom" && customPaper
         ? {
             width: `${customPaper.widthMm}mm`,
             minHeight: `${customPaper.heightMm}mm`,
             padding: `${customPaper.paddingMm}mm`,
             boxSizing: 'border-box',
+            border: showBorder ? '1px dashed #ccc' : 'none',
         }
         : paperSizeClass
-            ? {} // Let CSS handle the sizing for other special paper sizes (e.g., 105x120)
+            ? {
+                border: showBorder ? '1px dashed #ccc' : 'none',
+            } // Let CSS handle the sizing for other special paper sizes (e.g., 105x120)
             : {
                 width: `${effectiveLayout.labelWidthIn}in`,
                 minHeight: `${effectiveLayout.labelHeightIn}in`,
                 padding: `${effectiveLayout.paddingIn}in`,
+                border: showBorder ? '1px dashed #ccc' : 'none',
             };
 
+    // Check if barcode is available - defined inside loopBarcode function
     const loopBarcode = (product) => {
+        // Check if barcode is available for this product
+        const hasBarcode = product && product.barcode_url && product.barcode_url.length > 0;
+        
         let indents = [];
         for (let i = 0; i < product.quantity; i++) {
             indents.push(
@@ -125,11 +186,18 @@ const BarcodeShow = (props) => {
                             )}
                         </div>
                     )}{" "}
-                    <Image
-                        src={product && product.barcode_url}
-                        alt={product && product.name}
-                        className="w-100"
-                    />
+                    {/* Barcode Image - with error handling */}
+                    {hasBarcode ? (
+                        <Image
+                            src={product.barcode_url}
+                            alt={product.name}
+                            className="w-100"
+                        />
+                    ) : (
+                        <div className="text-danger small py-2">
+                            {getFormattedMessage("print-barcode.no-barcode.label") || "Barcode not available"}
+                        </div>
+                    )}
                     <div className="fw-bolder">{product && product.code}</div>
                 </div>
             );

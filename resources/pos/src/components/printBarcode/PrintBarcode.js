@@ -63,6 +63,7 @@ const PrintBarcode = () => {
     const [companyName, setCompanyName] = useState(true);
     const [productName, setProductName] = useState(true);
     const [price, setPrice] = useState(true);
+    const [showBorder, setShowBorder] = useState(true);
     const [errors, setErrors] = useState({
         warehouse_id: "",
         paperSizeValue: "",
@@ -101,6 +102,14 @@ const PrintBarcode = () => {
 
     const buildLayoutFromPreset = (option) => {
         if (!option || !option.config) {
+            // If option doesn't have config, try to find it from paperSize array
+            const foundOption = paperSize.find(p => p.value === option?.value);
+            if (foundOption && foundOption.config) {
+                return {
+                    ...DEFAULT_LAYOUT,
+                    ...foundOption.config,
+                };
+            }
             return null;
         }
 
@@ -118,6 +127,7 @@ const PrintBarcode = () => {
         const widthMm = Number.parseFloat(config.widthMm);
         const heightMm = Number.parseFloat(config.heightMm);
         const pageWidthMm = Number.parseFloat(config.pageWidthMm);
+        const pageHeightMm = Number.parseFloat(config.pageHeightMm);
         const columnGapMm = Number.parseFloat(config.columnGapMm);
         const rowGapMm = Number.parseFloat(config.rowGapMm);
         const paddingMm = Number.parseFloat(config.paddingMm);
@@ -133,11 +143,13 @@ const PrintBarcode = () => {
         const labelWidthIn = mmToInches(widthMm);
         const labelHeightIn = mmToInches(heightMm);
         const pageWidthIn = Math.max(mmToInches(pageWidthMm || 210), labelWidthIn + 0.25);
+        const pageHeightIn = Math.max(mmToInches(pageHeightMm || 297), labelHeightIn + 0.25);
 
         return {
             labelWidthIn,
             labelHeightIn,
             pageWidthIn,
+            pageHeightIn,
             columnGapIn: Math.max(mmToInches(columnGapMm || 0), 0),
             rowGapIn: Math.max(mmToInches(rowGapMm || 0), 0),
             paddingIn: Math.max(mmToInches(paddingMm || 0), 0.01),
@@ -154,7 +166,6 @@ const PrintBarcode = () => {
         }
 
         const presetLayout = buildLayoutFromPreset(option);
-
         return presetLayout || DEFAULT_LAYOUT;
     };
 
@@ -183,14 +194,25 @@ const PrintBarcode = () => {
         }
     }, [customPaper, printBarcodeValue.paperSizeValue]);
 
+    // Check if price should be disabled for custom barcode
+    // Consider both updateProducts (for generated barcode) and customBarcodeInput (for user input)
+    const isPriceDisabled = isCustomBarcode && (
+        !updateProducts.length || 
+        !updateProducts[0]?.product_price || 
+        updateProducts[0]?.product_price <= 0
+    ) && (
+        !customBarcodeInput.product_price || 
+        customBarcodeInput.product_price <= 0
+    );
+
     useEffect(() => {
-        if(isCustomBarcode && (!updateProducts.length || !updateProducts[0].product_price || updateProducts[0].product_price <= 0)) {
+        if (isPriceDisabled) {
             setDisabled(true);
-            setPrice(false)
+            setPrice(false);
         } else {
             setDisabled(false);
         }
-    }, [isCustomBarcode, updateProducts])
+    }, [isCustomBarcode, updateProducts, customBarcodeInput]);
 
     const onWarehouseChange = (obj) => {
         setPrintBarcodeValue((inputs) => ({ ...inputs, warehouse_id: obj }));
@@ -214,6 +236,7 @@ const PrintBarcode = () => {
             setUpdated(false);
         } else {
             setIsPrintShow(true);
+            setUpdated(true); // Add this to trigger preview update when changing presets
         }
     };
 
@@ -318,6 +341,7 @@ const PrintBarcode = () => {
         });
         setProductName(false);
         setPrice(false);
+        setShowBorder(true);
         setPaperLayout(null);
         setCustomPaper({
             widthMm: 38,
@@ -409,14 +433,20 @@ const PrintBarcode = () => {
         companyName: companyName,
         productName: productName,
         price: price,
+        showBorder: showBorder,
     };
 
     const handleCustomInputChange = (event) => {
         const { name, value } = event.target;
-        if(name === 'quantity' && Number(value) < 1) return
+        
+        // Allow input to update, but ensure quantity has minimum value of 1 when used
+        const processedValue = (name === 'quantity' && value !== "") 
+            ? Math.max(1, Number(value)) 
+            : value;
+            
         setCustomBarcodeInput((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: processedValue,
         }));
 
         setUpdateProducts((prevProducts) => {
@@ -426,16 +456,16 @@ const PrintBarcode = () => {
                 const lastProduct = updatedProducts[updatedProducts.length - 1];
                 updatedProducts[updatedProducts.length - 1] = {
                     ...lastProduct,
-                    [name]: value,
+                    [name]: processedValue,
                     quantity:
                         name === "quantity"
-                            ? value
+                            ? processedValue
                             : lastProduct.quantity || 10,
                 };
             } else {
                 updatedProducts.push({
-                    [name]: value,
-                    quantity: name === "quantity" ? value : 10,
+                    [name]: processedValue,
+                    quantity: name === "quantity" ? processedValue : 10,
                 });
             }
 
@@ -473,6 +503,12 @@ const PrintBarcode = () => {
             }
         } catch (error) {
             console.error("Error generating barcode:", error);
+            dispatch(
+                addToast({
+                    text: getFormattedMessage("print-barcode.generate.error"),
+                    type: toastType.ERROR,
+                })
+            );
         }
     };
 
@@ -492,8 +528,15 @@ const PrintBarcode = () => {
                             type="checkbox"
                             checked={isCustomBarcode}
                             onChange={(event) => {
-                                setPrice(false);
-                                setProductName(false);
+                                if (event.target.checked) {
+                                    // Switching to custom barcode mode - set checkboxes to false
+                                    setPrice(false);
+                                    setProductName(false);
+                                } else {
+                                    // Switching back to normal mode - reset checkboxes to true
+                                    setPrice(true);
+                                    setProductName(true);
+                                }
                                 setIsCustomBarcode(event.target.checked);
                                 setUpdateProducts([]);
                                 setIsPrintShow(false);
@@ -766,6 +809,32 @@ const PrintBarcode = () => {
                                         ? errors["Currency_icon_Right_side"]
                                         : null}
                                 </span>
+                            </div>
+                        </div>
+                        <div className="mt-4 px-2">
+                            <div>
+                                {getFormattedMessage(
+                                    "print-barcode.show-border.label"
+                                )}
+                            </div>
+                            <div className="d-flex align-items-center mt-2">
+                                <label className="form-check form-switch form-switch-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={showBorder}
+                                        name="show_border"
+                                        onChange={(event) =>
+                                            setShowBorder(event.target.checked)
+                                        }
+                                        className="me-3 form-check-input cursor-pointer"
+                                    />
+                                    <div className="control__indicator" />
+                                </label>
+                                <span
+                                    className="switch-slider"
+                                    data-checked="✓"
+                                    data-unchecked="✕"
+                                />
                             </div>
                         </div>
                     </Col>
