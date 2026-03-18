@@ -33,6 +33,8 @@ const BarcodeShow = (props) => {
     } = barcodeOptions || {};
 
     // Inject @page CSS for custom paper sizes (same as PrintButton)
+    // Note: We don't use @page { size: ...mm } because thermal printers like TSC TTP-244 Pro
+    // don't handle this well. Instead, we rely on inline styles.
     useEffect(() => {
         const styleId = "barcodeshow-custom-page-style";
         const existingStyle = document.getElementById(styleId);
@@ -42,20 +44,22 @@ const BarcodeShow = (props) => {
                 existingStyle.remove();
             }
             
-            const pageWidthMm = parseFloat(customPaper.pageWidthMm) || 210;
-            const pageHeightMm = parseFloat(customPaper.pageHeightMm) || 297;
+            const labelWidthMm = parseFloat(customPaper.widthMm) || 38;
+            const labelHeightMm = parseFloat(customPaper.heightMm) || 25;
+            const columnGapMm = parseFloat(customPaper.columnGapMm) || 3;
+            const rowGapMm = parseFloat(customPaper.rowGapMm) || 3;
+            const paddingMm = parseFloat(customPaper.paddingMm) || 2;
             
             const style = document.createElement("style");
             style.id = styleId;
             style.innerHTML = `
                 @media print {
                     @page {
-                        size: ${pageWidthMm}mm ${pageHeightMm}mm;
                         margin: 0;
                     }
                     .barcode-main.barcode-custom-paper {
-                        width: ${pageWidthMm}mm !important;
-                        max-width: ${pageWidthMm}mm !important;
+                        width: auto !important;
+                        max-width: none !important;
                         min-height: auto !important;
                         border: none !important;
                         padding: 0 !important;
@@ -63,6 +67,16 @@ const BarcodeShow = (props) => {
                         box-sizing: border-box;
                         display: flex !important;
                         flex-wrap: wrap !important;
+                        gap: ${rowGapMm}mm ${columnGapMm}mm !important;
+                    }
+                    .barcode-main.barcode-custom-paper .barcode-main__barcode-item {
+                        width: ${labelWidthMm}mm !important;
+                        max-width: ${labelWidthMm}mm !important;
+                        min-width: ${labelWidthMm}mm !important;
+                        min-height: ${labelHeightMm}mm !important;
+                        padding: ${paddingMm}mm !important;
+                        box-sizing: border-box !important;
+                        border: none !important;
                     }
                 }
             `;

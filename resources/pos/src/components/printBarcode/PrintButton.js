@@ -60,6 +60,7 @@ class PrintButton extends React.PureComponent {
         this.removeCustomPageStyle();
 
         // Always inject base print styles to remove borders during print
+        // and ensure proper printing for thermal printers
         const basePrintStyles = `
             @media print {
                 .barcode-main {
@@ -68,42 +69,49 @@ class PrintButton extends React.PureComponent {
                 .barcode-main__barcode-item {
                     border: none !important;
                 }
+                body {
+                    margin: 0;
+                    padding: 0;
+                }
             }
         `;
 
-        // Only inject custom paper size styles when using custom
+        // For custom paper, we DON'T use @page { size: ...mm } because
+        // thermal printers like TSC TTP-244 Pro don't handle this well.
+        // Instead, we rely on inline styles which work correctly.
+        // The @page rule was causing the paper width to be very small when printing.
         if (paperSizeValue?.value === "custom" && customPaper) {
             const labelWidthMm = parseFloat(customPaper.widthMm) || 38;
             const labelHeightMm = parseFloat(customPaper.heightMm) || 25;
-            const pageWidthMm = parseFloat(customPaper.pageWidthMm) || 210;
-            const pageHeightMm = parseFloat(customPaper.pageHeightMm) || 297;
             const columnGapMm = parseFloat(customPaper.columnGapMm) || 3;
             const rowGapMm = parseFloat(customPaper.rowGapMm) || 3;
             const paddingMm = parseFloat(customPaper.paddingMm) || 2;
 
+            // Custom print styles WITHOUT @page size rule
+            // Using inline styles in the component handles the sizing correctly
             const customPrintStyles = `
-                @page {
-                    size: ${pageWidthMm}mm ${pageHeightMm}mm;
-                    margin: 0;
-                }
-                .barcode-main.barcode-custom-paper {
-                    width: ${pageWidthMm}mm !important;
-                    max-width: ${pageWidthMm}mm !important;
-                    min-height: auto !important;
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    box-sizing: border-box;
-                    display: flex !important;
-                    flex-wrap: wrap !important;
-                    gap: ${rowGapMm}mm ${columnGapMm}mm !important;
-                }
-                .barcode-main.barcode-custom-paper .barcode-main__barcode-item {
-                    width: ${labelWidthMm}mm !important;
-                    max-width: ${labelWidthMm}mm !important;
-                    min-width: ${labelWidthMm}mm !important;
-                    min-height: ${labelHeightMm}mm !important;
-                    padding: ${paddingMm}mm !important;
-                    box-sizing: border-box !important;
+                @media print {
+                    .barcode-main.barcode-custom-paper {
+                        border: none !important;
+                        width: auto !important;
+                        max-width: none !important;
+                        min-height: auto !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        box-sizing: border-box;
+                        display: flex !important;
+                        flex-wrap: wrap !important;
+                        gap: ${rowGapMm}mm ${columnGapMm}mm !important;
+                    }
+                    .barcode-main.barcode-custom-paper .barcode-main__barcode-item {
+                        border: none !important;
+                        width: ${labelWidthMm}mm !important;
+                        max-width: ${labelWidthMm}mm !important;
+                        min-width: ${labelWidthMm}mm !important;
+                        min-height: ${labelHeightMm}mm !important;
+                        padding: ${paddingMm}mm !important;
+                        box-sizing: border-box !important;
+                    }
                 }
             `;
 
@@ -112,7 +120,7 @@ class PrintButton extends React.PureComponent {
             style.innerHTML = basePrintStyles + customPrintStyles;
             document.head.appendChild(style);
         } else {
-            // For presets, still inject base print styles to remove borders
+            // For presets, inject base print styles
             const style = document.createElement("style");
             style.id = this.customPageStyleId;
             style.innerHTML = basePrintStyles;
