@@ -77,6 +77,7 @@ const BarcodeShow = (props) => {
                         padding: ${paddingMm}mm !important;
                         box-sizing: border-box !important;
                         border: none !important;
+                        font-size: ${parseFloat(customPaper.fontSize) || 12}px !important;
                     }
                 }
             `;
@@ -154,6 +155,7 @@ const BarcodeShow = (props) => {
             padding: `${customPaper.paddingMm}mm`,
             boxSizing: 'border-box',
             border: showBorder ? '1px dashed #ccc' : 'none',
+            fontSize: `${customPaper.fontSize || 12}px`,
         }
         : paperSizeClass
             ? {

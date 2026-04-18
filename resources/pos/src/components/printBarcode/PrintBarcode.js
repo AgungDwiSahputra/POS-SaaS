@@ -72,13 +72,14 @@ const PrintBarcode = () => {
         customHeight: "",
     });
     const [customPaper, setCustomPaper] = useState({
-        widthMm: 38,
-        heightMm: 25,
+        widthMm: 50,
+        heightMm: 24,
         pageWidthMm: 210,
         pageHeightMm: 297,
-        columnGapMm: 3,
-        rowGapMm: 3,
-        paddingMm: 2,
+        columnGapMm: 22,
+        rowGapMm: 0,
+        paddingMm: 0,
+        fontSize: 12,
     });
     const [updated, setUpdated] = useState(false);
     const [disabled, setDisabled] = useState(false);
@@ -344,13 +345,14 @@ const PrintBarcode = () => {
         setShowBorder(true);
         setPaperLayout(null);
         setCustomPaper({
-            widthMm: 38,
-            heightMm: 25,
+            widthMm: 50,
+            heightMm: 24,
             pageWidthMm: 210,
             pageHeightMm: 297,
-            columnGapMm: 3,
-            rowGapMm: 3,
-            paddingMm: 2,
+            columnGapMm: 22,
+            rowGapMm: 0,
+            paddingMm: 0,
+            fontSize: 12,
         });
         setIsPrintShow(false);
     };

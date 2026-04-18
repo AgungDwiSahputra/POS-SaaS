@@ -111,6 +111,7 @@ class PrintButton extends React.PureComponent {
                         min-height: ${labelHeightMm}mm !important;
                         padding: ${paddingMm}mm !important;
                         box-sizing: border-box !important;
+                        font-size: ${parseFloat(customPaper.fontSize) || 12}px !important;
                     }
                 }
             `;
@@ -200,6 +201,7 @@ class PrintButton extends React.PureComponent {
                 minHeight: `${customPaper.heightMm}mm`,
                 padding: `${customPaper.paddingMm}mm`,
                 boxSizing: 'border-box',
+                fontSize: `${customPaper.fontSize || 12}px`,
             }
             : paperSizeClass
                 ? {
