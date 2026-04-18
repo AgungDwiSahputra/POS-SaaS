@@ -10,64 +10,48 @@ class ReportStockService
 {
     public function getReport(array $filters): array
     {
-            // Log tenant scoping decision
-            $useTenantScoping = $this->shouldUseTenantScoping();
-            // Build base query based on warehouse filter
-            if (!empty($filters['warehouse_id'])) {
-                // If warehouse filter is applied, use warehouse-specific stock aggregation
-                $base = $this->buildWarehouseFilteredQuery($filters['warehouse_id']);
-            } else {
-                // No warehouse filter, use all stock aggregation
-                $base = $this->buildBaseQuery();
-            }
+        $useTenantScoping = $this->shouldUseTenantScoping();
 
-        // Apply other filters
+        if (!empty($filters['warehouse_id'])) {
+            $base = $this->buildWarehouseFilteredQuery($filters['warehouse_id']);
+        } else {
+            $base = $this->buildBaseQuery();
+        }
+
         $this->applyFilters($base, $filters);
 
-
-        // Clone for filtered query (without pagination)
         $filtered = clone $base;
 
-        // Get paginated items (remove the problematic selectRaw from main query)
         $paginatedQuery = (clone $filtered)->orderBy('products.name');
         $items = $paginatedQuery->paginate($filters['per_page'] ?? 15);
 
+        // ✅ filtered_total_asset: pakai asset_value (hpp) dengan filter aktif
+        $filteredTotalQuery = clone $filtered;
+        $filteredTotal = DB::table(DB::raw("({$filteredTotalQuery->toSql()}) as sub"))
+            ->mergeBindings($filteredTotalQuery->getQuery())
+            ->sum('asset_value');
 
-        // Calculate filtered total (not affected by pagination)
-        // Create a fresh query for total calculation
-        $totalQuery = $useTenantScoping
-            ? Product::query()
-            : Product::withoutGlobalScope('tenant');
+        // ✅ grand_total_asset: pakai asset_value (hpp) TANPA filter, hanya warehouse
+        if (!empty($filters['warehouse_id'])) {
+            $grandBase = $this->buildWarehouseFilteredQuery($filters['warehouse_id']);
+        } else {
+            $grandBase = $this->buildBaseQuery();
+        }
 
-        $totalQuery->join('manage_stocks', 'products.id', '=', 'manage_stocks.product_id')
-            ->selectRaw('SUM(manage_stocks.quantity * COALESCE(products.product_cost, 0)) as total_asset');
-
-        // Apply same filters as main query
-        $this->applyFilters($totalQuery, $filters);
-
-        $filteredTotal = $totalQuery->value('total_asset');
-
-        // Calculate grand total (all products, no filters applied)
-        // Note: Grand total should always be the total of ALL products across ALL warehouses
-        $grandTotalQuery = $useTenantScoping
-            ? Product::query()
-            : Product::withoutGlobalScope('tenant');
-
-        $grandTotal = $grandTotalQuery
-            ->join('manage_stocks', 'products.id', '=', 'manage_stocks.product_id')
-            ->selectRaw('SUM(manage_stocks.quantity * COALESCE(products.product_cost, 0)) as total_asset')
-            ->value('total_asset');
+        $grandTotal = DB::table(DB::raw("({$grandBase->toSql()}) as sub"))
+            ->mergeBindings($grandBase->getQuery())
+            ->sum('asset_value');
 
         return [
             'data' => $items,
             'meta' => [
                 'pagination' => [
-                    'total' => $items->total(),
-                    'per_page' => $items->perPage(),
+                    'total'        => $items->total(),
+                    'per_page'     => $items->perPage(),
                     'current_page' => $items->currentPage(),
                 ],
                 'totals' => [
-                    'grand_total_asset' => (float) ($grandTotal ?? 0),
+                    'grand_total_asset'    => (float) ($grandTotal ?? 0),
                     'filtered_total_asset' => (float) ($filteredTotal ?? 0),
                 ],
             ],
