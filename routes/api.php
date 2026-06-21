@@ -146,7 +146,17 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
         Route::resource('products', ProductAPIController::class);
         Route::resource('main-products', MainProductAPIController::class);
-        Route::resource('digital-products', DigitalProductAPIController::class);
+        Route::middleware('permission:manage_product_digitals')->group(function () {
+            Route::resource('digital-products', DigitalProductAPIController::class);
+            Route::post(
+                'digital-products/{digital_product}',
+                [DigitalProductAPIController::class, 'update']
+            );
+            Route::delete(
+                'digital-products-image-delete/{mediaId}',
+                [DigitalProductAPIController::class, 'digitalProductImageDelete']
+            )->name('digital-products-image-delete');
+        });
         Route::post(
             'products/{product}',
             [ProductAPIController::class, 'update']
@@ -155,18 +165,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
             'main-products/{product}',
             [MainProductAPIController::class, 'update']
         );
-        Route::post(
-            'digital-products/{digital_product}',
-            [DigitalProductAPIController::class, 'update']
-        );
         Route::delete(
             'products-image-delete/{mediaId}',
             [ProductAPIController::class, 'productImageDelete']
         )->name('products-image-delete');
-        Route::delete(
-            'digital-products-image-delete/{mediaId}',
-            [DigitalProductAPIController::class, 'digitalProductImageDelete']
-        )->name('digital-products-image-delete');
 
         Route::get('products', [ProductAPIController::class, 'index']);
         Route::get('get-all-products', [ProductAPIController::class, 'getAllProducts']);

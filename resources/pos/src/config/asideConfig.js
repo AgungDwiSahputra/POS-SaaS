@@ -143,7 +143,7 @@ export const userMenu = [
         to: "/user/digital-services",
         class: "d-flex",
         is_submenu: true,
-        permission: Permissions.MANAGE_PRODUCTS || Permissions.MANAGE_PROVIDERS,
+        permission: Permissions.MANAGE_PRODUCT_DIGITALS || Permissions.MANAGE_PROVIDERS,
         subPath: {
             digitalProductsSubPath: "/user/digital-products",
             providersSubPath: "/user/providers",
@@ -156,7 +156,7 @@ export const userMenu = [
                 name: "digital-products",
                 class: "d-flex",
                 fontIcon: <FontAwesomeIcon icon={faBoxes} />,
-                permission: Permissions.MANAGE_PRODUCTS,
+                permission: Permissions.MANAGE_PRODUCT_DIGITALS,
             },
             {
                 title: "providers.title",

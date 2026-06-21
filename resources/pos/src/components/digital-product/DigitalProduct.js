@@ -269,13 +269,13 @@ const DigitalProduct = (props) => {
             width: "120px",
             cell: (row) => (
                 <ActionButton
-                    isViewIcon={getPermission(allConfigData?.permissions, Permissions.VIEW_PRODUCTS)}
+                    isViewIcon={getPermission(allConfigData?.permissions, Permissions.VIEW_PRODUCT_DIGITALS)}
                     goToDetailScreen={goToProductDetailPage}
                     item={row}
                     goToEditProduct={goToEditProduct}
-                    isEditMode={getPermission(allConfigData?.permissions, Permissions.EDIT_PRODUCTS)}
+                    isEditMode={getPermission(allConfigData?.permissions, Permissions.EDIT_PRODUCT_DIGITALS)}
                     onClickDeleteModel={onClickDeleteModel}
-                    isDeleteMode={getPermission(allConfigData?.permissions, Permissions.DELETE_PRODUCTS)}
+                    isDeleteMode={getPermission(allConfigData?.permissions, Permissions.DELETE_PRODUCT_DIGITALS)}
                 />
             ),
         },
@@ -328,13 +328,13 @@ const DigitalProduct = (props) => {
                 onChange={onChange}
                 isLoading={isLoading}
                 totalRows={totalRecord}
-                {...(getPermission(allConfigData?.permissions, Permissions.CREATE_PRODUCTS) &&
+                {...(getPermission(allConfigData?.permissions, Permissions.CREATE_PRODUCT_DIGITALS) &&
                 {
                     to: "#/user/product-digital/create",
                     buttonValue: getFormattedMessage("product.create.title")
                 }
                 )}
-                isShowFilterField={getPermission(allConfigData?.permissions, Permissions.CREATE_PRODUCTS)}
+                isShowFilterField={getPermission(allConfigData?.permissions, Permissions.CREATE_PRODUCT_DIGITALS)}
                 isUnitFilter
                 title={getFormattedMessage("product.input.product-unit.label")}
                 goToImport={handleClose}

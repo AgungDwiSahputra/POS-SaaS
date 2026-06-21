@@ -199,9 +199,9 @@ const DigitalProductList = (props) => {
                     goToDetailScreen={goToProductDetailPage}
                     item={row}
                     goToEditProduct={goToEditProduct}
-                    isEditMode={getPermission(allConfigData?.permissions, Permissions.EDIT_PRODUCTS)}
+                    isEditMode={getPermission(allConfigData?.permissions, Permissions.EDIT_PRODUCT_DIGITALS)}
                     onClickDeleteModel={onClickDeleteModel}
-                    isDeleteMode={getPermission(allConfigData?.permissions, Permissions.DELETE_PRODUCTS)}
+                    isDeleteMode={getPermission(allConfigData?.permissions, Permissions.DELETE_PRODUCT_DIGITALS)}
                 />
             ),
         },
@@ -217,7 +217,7 @@ const DigitalProductList = (props) => {
                 onChange={onChange}
                 isLoading={isLoading}
                 totalRows={totalRecord}
-                {...(getPermission(allConfigData?.permissions, Permissions.CREATE_PRODUCTS) &&
+                {...(getPermission(allConfigData?.permissions, Permissions.CREATE_PRODUCT_DIGITALS) &&
                 {
                     to: "#/user/digital-products/create",
                     buttonValue: getFormattedMessage("digital-product.create.title")

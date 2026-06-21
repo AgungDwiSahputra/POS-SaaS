@@ -99,6 +99,10 @@ class DefaultPermissionsSeeder extends Seeder
                 'display_name' => 'Manage Sale Return'
             ],
             [
+                'name' => 'manage_product_digitals',
+                'display_name' => 'Manage Product Digitals'
+            ],
+            [
                 'name' => 'manage_digital_sales',
                 'display_name' => 'Manage Digital Sales'
             ],

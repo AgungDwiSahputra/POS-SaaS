@@ -24,7 +24,7 @@ class GenerateCrudPermissionsSeeder extends Seeder
             'expenses', 'cash_advances', 'setting', 'dashboard', 'pos_screen', 'purchase',
             'sale', 'purchase_return', 'sale_return', 'email_templates',
             'reports', 'quotations', 'sms_templates', 'sms_apis',
-            'variations', 'providers', 'balance_requests', 'digital_sales',
+            'variations', 'providers', 'balance_requests', 'digital_sales', 'product_digitals',
         ];
 
         $viewOnlyModules = ['dashboard', 'pos_screen'];

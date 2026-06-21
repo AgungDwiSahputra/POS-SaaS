@@ -286,22 +286,22 @@ export const route = [
     {
         path: "digital-products",
         ele: <DigitalProduct />,
-        permission: Permissions.MANAGE_PRODUCTS,
+        permission: Permissions.MANAGE_PRODUCT_DIGITALS,
     },
     {
         path: "digital-products/create",
         ele: <CreateDigitalProduct />,
-        permission: Permissions.CREATE_PRODUCTS,
+        permission: Permissions.CREATE_PRODUCT_DIGITALS,
     },
     {
         path: "digital-products/edit/:id",
         ele: <EditDigitalProduct />,
-        permission: Permissions.EDIT_PRODUCTS,
+        permission: Permissions.EDIT_PRODUCT_DIGITALS,
     },
     {
         path: "digital-products/detail/:id",
         ele: <DigitalProductDetail />,
-        permission: Permissions.VIEW_PRODUCTS,
+        permission: Permissions.VIEW_PRODUCT_DIGITALS,
     },
     {
         path: "providers",
