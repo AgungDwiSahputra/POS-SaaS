@@ -25,6 +25,13 @@ import DigitalProduct from "./components/digital-product/DigitalProductList";
 import CreateDigitalProduct from "./components/digital-product/CreateDigitalProduct";
 import EditDigitalProduct from "./components/digital-product/EditDigitalProduct";
 import DigitalProductDetail from "./components/digital-product/DigitalProductDetail";
+import ProviderList from "./components/provider/ProviderList";
+import CreateProvider from "./components/provider/CreateProvider";
+import EditProvider from "./components/provider/EditProvider";
+import ProviderDetail from "./components/provider/ProviderDetail";
+import BalanceRequestList from "./components/balance-request/BalanceRequestList";
+import CreateBalanceRequest from "./components/balance-request/CreateBalanceRequest";
+import ProcessBalanceRequest from "./components/balance-request/ProcessBalanceRequest";
 import Settings from "./components/settings/Settings";
 import ExpenseCategory from "./components/expense-category/ExpenseCategory";
 import Expenses from "./components/expense/Expenses";
@@ -51,6 +58,10 @@ import CreateSaleReturn from "./components/saleReturn/CreateSaleReturn";
 import EditSaleReturn from "./components/saleReturn/EditSaleReturn";
 import SaleReturnDetails from "./components/saleReturn/SaleReturnDetails";
 import SaleDetails from "./components/sales/SaleDetails";
+import DigitalSales from "./components/digital-sales/DigitalSales";
+import CreateDigitalSale from "./components/digital-sales/CreateDigitalSale";
+import EditDigitalSale from "./components/digital-sales/EditDigitalSale";
+import DigitalSaleDetails from "./components/digital-sales/DigitalSaleDetails";
 import PurchaseReturn from "./components/purchaseReturn/PurchaseReturn";
 import CreatePurchaseReturn from "./components/purchaseReturn/CreatePurchaseReturn";
 import EditPurchaseReturn from "./components/purchaseReturn/EditPurchaseReturn";
@@ -98,6 +109,7 @@ import Language from "./components/languages/Language";
 import EditLanguageData from "./components/languages/EditLanguageData";
 import BaseUnits from "./components/base-unit/BaseUnits";
 import RegisterReport from "./components/report/registerReport/RegisterReport";
+import DigitalSalesReport from "./components/report/digitalSalesReport/DigitalSalesReport";
 import Variation from "./components/variation/Variation";
 import ReceiptSettings from "./components/settings/ReceiptSettings";
 import AdminDashboard from "./components/admin/dashboard/AdminDashboard"
@@ -292,6 +304,41 @@ export const route = [
         permission: Permissions.VIEW_PRODUCTS,
     },
     {
+        path: "providers",
+        ele: <ProviderList />,
+        permission: Permissions.MANAGE_PROVIDERS,
+    },
+    {
+        path: "providers/create",
+        ele: <CreateProvider />,
+        permission: Permissions.CREATE_PROVIDERS,
+    },
+    {
+        path: "providers/edit/:id",
+        ele: <EditProvider />,
+        permission: Permissions.EDIT_PROVIDERS,
+    },
+    {
+        path: "providers/detail/:id",
+        ele: <ProviderDetail />,
+        permission: Permissions.VIEW_PROVIDERS,
+    },
+    {
+        path: "balance-requests",
+        ele: <BalanceRequestList />,
+        permission: Permissions.MANAGE_BALANCE_REQUESTS,
+    },
+    {
+        path: "balance-requests/create",
+        ele: <CreateBalanceRequest />,
+        permission: Permissions.CREATE_BALANCE_REQUESTS,
+    },
+    {
+        path: "balance-requests/process/:id",
+        ele: <ProcessBalanceRequest />,
+        permission: Permissions.MANAGE_BALANCE_REQUESTS,
+    },
+    {
         path: "adjustments",
         ele: <Adjustments />,
         permission: Permissions.MANAGE_ADJUSTMENTS,
@@ -383,7 +430,7 @@ export const route = [
     },
     {
         path: "cash-advances",
-        ele: <CashAdvanceIdentityDashboard />,
+        ele: <CashAdvances />,
         permission: Permissions.MANAGE_CASH_ADVANCES,
     },
     {
@@ -510,6 +557,26 @@ export const route = [
         path: "sales/detail/:id",
         ele: <SaleDetails />,
         permission: Permissions.VIEW_SALES,
+    },
+    {
+        path: "digital-sales",
+        ele: <DigitalSales />,
+        permission: Permissions.MANAGE_DIGITAL_SALES,
+    },
+    {
+        path: "digital-sales/create",
+        ele: <CreateDigitalSale />,
+        permission: Permissions.CREATE_DIGITAL_SALES,
+    },
+    {
+        path: "digital-sales/edit/:id",
+        ele: <EditDigitalSale />,
+        permission: Permissions.EDIT_DIGITAL_SALES,
+    },
+    {
+        path: "digital-sales/detail/:id",
+        ele: <DigitalSaleDetails />,
+        permission: Permissions.VIEW_DIGITAL_SALES,
     },
     {
         path: "purchase-return",
@@ -659,6 +726,11 @@ export const route = [
     {
         path: "report/register",
         ele: <RegisterReport />,
+        permission: Permissions.MANAGE_REPORTS,
+    },
+    {
+        path: "report/digital-sales",
+        ele: <DigitalSalesReport />,
         permission: Permissions.MANAGE_REPORTS,
     },
     {

@@ -34,7 +34,7 @@ export const stockReportAction =
             url += requestParam(filter, false, stockReport, null, url);
         }
         
-        await apiConfig
+await apiConfig
             .get(url)
             .then((response) => {
                 dispatch({

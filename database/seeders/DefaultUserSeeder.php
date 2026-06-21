@@ -23,10 +23,15 @@ class DefaultUserSeeder extends Seeder
     public function run(): void
     {
         // Super Admin
-        Role::create([
+        $superAdminRole = Role::create([
             'name' => ModelsRole::SUPER_ADMIN,
             'display_name' => 'Super Admin',
         ]);
+
+        // Berikan semua permissions ke Super Admin
+        $allPermissions = Permission::pluck('name', 'id');
+        $superAdminRole->givePermissionTo($allPermissions);
+
         // $superAdminTenant = MultiTenant::create(['email' => 'superadmin@infy-pos.com']);
         $input = [
             'first_name' => 'Super',

@@ -53,22 +53,24 @@ const Expenses = (props) => {
     const itemsValue =
         currencySymbol &&
         expenses.length >= 0 &&
-        expenses.map((expense) => ({
-            date: getFormattedDate(
-                expense.attributes.date,
-                allConfigData && allConfigData
-            ),
-            time: moment(expense.attributes.created_at).format("LT"),
-            reference_code: expense.attributes.reference_code,
-            title: expense.attributes.title,
-            warehouse_name: expense.attributes.warehouse_name,
-            username: expense.attributes.user_name ? expense.attributes.user_name : "-",
-            expense_category_name: expense.attributes.expense_category_name,
-            amount: expense.attributes.amount,
-            details: expense.attributes.details,
-            id: expense.id,
-            currency: currencySymbol,
-        }));
+        [...expenses]
+            .sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at))
+            .map((expense) => ({
+                date: getFormattedDate(
+                    expense.attributes.date,
+                    allConfigData && allConfigData
+                ),
+                time: moment(expense.attributes.created_at).format("LT"),
+                reference_code: expense.attributes.reference_code,
+                title: expense.attributes.title,
+                warehouse_name: expense.attributes.warehouse_name,
+                username: expense.attributes.user_name ? expense.attributes.user_name : "-",
+                expense_category_name: expense.attributes.expense_category_name,
+                amount: expense.attributes.amount,
+                details: expense.attributes.details,
+                id: expense.id,
+                currency: currencySymbol,
+            }));
 
     const columns = [
         {

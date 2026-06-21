@@ -134,13 +134,19 @@ const RoleForm = (props) => {
     const onSubmit = (e) => {
         e.preventDefault();
         if (handleValidation()) {
+            // Format: flat array of selected permission IDs (both parent and child permissions)
             const formattedPermissions = rolesValue.permissions.flatMap(p => {
-                const selected = p.attributes.child_permissions.filter(cp => cp.selected).map(cp => cp.id);
-                return selected.length ? { id: p.id, child_permission: selected } : [];
+                // Include parent permission (manage_*) if any child is selected
+                const selectedChildren = p.attributes.child_permissions.filter(cp => cp.selected).map(cp => cp.id);
+                if (selectedChildren.length > 0) {
+                    // Include parent permission ID and all selected child permission IDs
+                    return [p.id, ...selectedChildren];
+                }
+                return [];
             });
 
             const payload = {
-                ...rolesValue,
+                name: rolesValue.name,
                 permissions: formattedPermissions
             };
 
@@ -151,19 +157,22 @@ const RoleForm = (props) => {
     const onEdit = (e) => {
         e.preventDefault();
         if (handleValidation()) {
-            const formattedPermissions = rolesValue.permissions.map(permission => {
-                const selectedChildren = permission.attributes.child_permissions
+            // Format: flat array of selected permission IDs (both parent and child permissions)
+            const formattedPermissions = rolesValue.permissions.flatMap(p => {
+                // Include parent permission (manage_*) if any child is selected
+                const selectedChildren = p.attributes.child_permissions
                     .filter(cp => cp.selected)
                     .map(cp => cp.id);
 
-                return {
-                    id: permission.id,
-                    child_permission: selectedChildren
-                };
-            }).filter(p => p.child_permission.length > 0);
+                if (selectedChildren.length > 0) {
+                    // Include parent permission ID and all selected child permission IDs
+                    return [p.id, ...selectedChildren];
+                }
+                return [];
+            });
 
             const payload = {
-                ...rolesValue,
+                name: rolesValue.name,
                 permissions: formattedPermissions
             };
             editRole(id, payload, navigate);
@@ -231,12 +240,42 @@ const RoleForm = (props) => {
                                         .sort((a, b) => a.attributes.display_name.localeCompare(b.attributes.display_name))
                                         .map((permission) => {
                                         const childPermissionsMap = {};
+                                        
+                                        // Map child permissions by their action type
                                         permission.attributes.child_permissions.forEach((child) => {
-                                            if (child.name.startsWith("view_")) childPermissionsMap.view = child;
-                                            if (child.name.startsWith("create_")) childPermissionsMap.create = child;
-                                            if (child.name.startsWith("edit_")) childPermissionsMap.update = child;
-                                            if (child.name.startsWith("delete_")) childPermissionsMap.delete = child;
+                                            // Handle standalone permissions (like create_balance_requests, delete_balance_requests)
+                                            if (child.is_standalone) {
+                                                // Map standalone permissions to appropriate columns
+                                                if (child.name.startsWith("create_")) childPermissionsMap.create = child;
+                                                else if (child.name.startsWith("delete_")) childPermissionsMap.delete = child;
+                                                else if (child.name.startsWith("edit_")) childPermissionsMap.update = child;
+                                                else if (child.name.startsWith("view_")) childPermissionsMap.view = child;
+                                                else {
+                                                    // For other standalone permissions, put in a special column
+                                                    childPermissionsMap.special = child;
+                                                }
+                                            } 
+                                            // Handle self-referencing permissions (like manage_print_barcode, manage_store)
+                                            else if (child.is_self) {
+                                                childPermissionsMap.self = child;
+                                            }
+                                            // Handle standard CRUD permissions
+                                            else {
+                                                if (child.name.startsWith("view_")) childPermissionsMap.view = child;
+                                                if (child.name.startsWith("create_")) childPermissionsMap.create = child;
+                                                if (child.name.startsWith("edit_")) childPermissionsMap.update = child;
+                                                if (child.name.startsWith("delete_")) childPermissionsMap.delete = child;
+                                            }
                                         });
+
+                                        // Determine if this permission has any child permissions
+                                        const hasChildren = permission.attributes.child_permissions.length > 0;
+                                        
+                                        // Check if this is a self-referencing permission (no CRUD children)
+                                        const isSelfPermission = childPermissionsMap.self !== undefined;
+                                        
+                                        // Check if this has special standalone permissions
+                                        const hasSpecialPermission = childPermissionsMap.special !== undefined;
 
                                         const hasCreateOrEditSelected =
                                             (childPermissionsMap.create && childPermissionsMap.create.selected) ||
@@ -244,21 +283,30 @@ const RoleForm = (props) => {
                                             (childPermissionsMap.delete && childPermissionsMap.delete.selected);
 
                                         // Check if all permissions for this row are selected
-                                        const allPermissionsSelected = Object.values(childPermissionsMap)
-                                            .every(permission => permission && permission.selected);
+                                        const allPermissionsSelected = permission.attributes.child_permissions
+                                            .every(child => child.selected);
+
+                                        // Determine available columns for this permission
+                                        const hasViewColumn = childPermissionsMap.view !== undefined;
+                                        const hasCreateColumn = childPermissionsMap.create !== undefined;
+                                        const hasUpdateColumn = childPermissionsMap.update !== undefined;
+                                        const hasDeleteColumn = childPermissionsMap.delete !== undefined;
+                                        const hasSpecialColumn = hasSpecialPermission || isSelfPermission;
 
                                         return (
                                             <tr key={permission.id}>
                                                 <td>{permission.attributes.display_name}</td>
 
                                                 <td className='text-center'>
-                                                    <input
-                                                        type="checkbox"
-                                                        name={`select_all_${permission.id}`}
-                                                        checked={allPermissionsSelected}
-                                                        onChange={(e) => handleChanged(e, permission)}
-                                                        className="form-check-input cursor-pointer"
-                                                    />
+                                                    {hasChildren && (
+                                                        <input
+                                                            type="checkbox"
+                                                            name={`select_all_${permission.id}`}
+                                                            checked={allPermissionsSelected}
+                                                            onChange={(e) => handleChanged(e, permission)}
+                                                            className="form-check-input cursor-pointer"
+                                                        />
+                                                    )}
                                                 </td>
 
                                                 <td className='text-center'>
@@ -269,6 +317,16 @@ const RoleForm = (props) => {
                                                             disabled={hasCreateOrEditSelected}
                                                             onChange={(e) =>
                                                                 handleChanged(e, permission, childPermissionsMap.view)
+                                                            }
+                                                            className="form-check-input cursor-pointer"
+                                                        />
+                                                    ) : hasSpecialColumn ? (
+                                                        // Show special/self permission in view column as fallback
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={(childPermissionsMap.self?.selected || childPermissionsMap.special?.selected) || false}
+                                                            onChange={(e) =>
+                                                                handleChanged(e, permission, childPermissionsMap.self || childPermissionsMap.special)
                                                             }
                                                             className="form-check-input cursor-pointer"
                                                         />

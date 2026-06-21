@@ -221,6 +221,17 @@ class TransferRepository extends BaseRepository
         // Skip validation untuk transfer yang sudah ada (mode edit)
         $isEditMode = isset($transfer->id);
 
+        // Debug logging untuk troubleshooting
+        Log::info("Transfer Debug Info", [
+            'from_store_id' => $input['from_store_id'],
+            'to_store_id' => $input['to_store_id'],
+            'from_tenant_id' => $fromStore->tenant_id,
+            'to_tenant_id' => $toStore->tenant_id,
+            'is_cross_tenant' => $isCrossTenant,
+            'is_edit_mode' => $isEditMode,
+            'transfer_id' => $transfer->id ?? null
+        ]);
+
         // Track untuk rollback jika terjadi error
         $syncedProductIds = [];
         $stockMovements = [];
@@ -337,82 +348,108 @@ class TransferRepository extends BaseRepository
                     }
                 }
 
-                // 2. CROSS-TENANT PRODUCT SYNC (skip untuk mode edit)
-                if ($isCrossTenant && !$isEditMode) {
+                // 2. CROSS-TENANT PRODUCT SYNC - Selalu lakukan untuk cross-tenant
+                if ($isCrossTenant) {
                     $sourceProduct = Product::find($sourceProductId);
 
-                    // Lock product for sync operation
-                    try {
-                        $syncLockToken = $lockService->lockProductForSync(
-                            $sourceProduct->product_code,
-                            $toStore->tenant_id
-                        );
-                        $acquiredLocks[] = [
-                            'type' => 'sync',
-                            'key' => "sync:product:{$sourceProduct->product_code}:tenant:{$toStore->tenant_id}",
-                            'token' => $syncLockToken
-                        ];
-                    } catch (Exception $e) {
-                        $this->releaseAllLocks($lockService, $acquiredLocks);
-                        throw new UnprocessableEntityHttpException(
-                            "Cannot process transfer - product is currently being synced: " . $e->getMessage()
-                        );
-                    }
+                    // Cek apakah produk sudah ada di tenant tujuan
+                    $existingProduct = Product::withoutGlobalScope('tenant')
+                        ->where('tenant_id', $toStore->tenant_id)
+                        ->where('product_code', $sourceProduct->product_code)
+                        ->first();
 
-                    try {
-                        Log::info("Starting product sync for cross-tenant transfer", [
+                    if (!$existingProduct) {
+                        // Produk belum ada, lakukan sync
+                        Log::info("Product not found in destination tenant, starting sync", [
                             'source_product_id' => $sourceProductId,
-                            'source_product_code' => $sourceProduct->product_code,
+                            'product_code' => $sourceProduct->product_code,
                             'target_tenant_id' => $toStore->tenant_id
                         ]);
 
-                        $syncResult = $productSyncService->syncProduct(
-                            $sourceProduct,
-                            $toStore->tenant_id
-                        );
-
-                        $destinationProductId = $syncResult['product_id'];
-                        $isSynced = true;
-
-                        // Validate sync result
-                        if (!$destinationProductId || $destinationProductId <= 0) {
-                            throw new Exception("Invalid destination product ID returned from sync: {$destinationProductId}");
+                        // Lock product for sync operation
+                        try {
+                            $syncLockToken = $lockService->lockProductForSync(
+                                $sourceProduct->product_code,
+                                $toStore->tenant_id
+                            );
+                            $acquiredLocks[] = [
+                                'type' => 'sync',
+                                'key' => "sync:product:{$sourceProduct->product_code}:tenant:{$toStore->tenant_id}",
+                                'token' => $syncLockToken
+                            ];
+                        } catch (Exception $e) {
+                            $this->releaseAllLocks($lockService, $acquiredLocks);
+                            throw new UnprocessableEntityHttpException(
+                                "Cannot process transfer - product is currently being synced: " . $e->getMessage()
+                            );
                         }
 
-                        // Track untuk rollback
-                        if ($syncResult['was_created']) {
-                            $syncedProductIds[] = $destinationProductId;
-                        }
+                        try {
+                            Log::info("Starting product sync for cross-tenant transfer", [
+                                'source_product_id' => $sourceProductId,
+                                'source_product_code' => $sourceProduct->product_code,
+                                'target_tenant_id' => $toStore->tenant_id
+                            ]);
 
-                        Log::info("Product synced successfully for transfer", [
+                            $syncResult = $productSyncService->syncProduct(
+                                $sourceProduct,
+                                $toStore->tenant_id
+                            );
+
+                            $destinationProductId = $syncResult['product_id'];
+                            $isSynced = true;
+
+                            // Validate sync result
+                            if (!$destinationProductId || $destinationProductId <= 0) {
+                                throw new Exception("Invalid destination product ID returned from sync: {$destinationProductId}");
+                            }
+
+                            // Track untuk rollback
+                            if ($syncResult['was_created']) {
+                                $syncedProductIds[] = $destinationProductId;
+                            }
+
+                            Log::info("Product synced successfully for transfer", [
+                                'source_product_id' => $sourceProductId,
+                                'destination_product_id' => $destinationProductId,
+                                'was_created' => $syncResult['was_created'],
+                                'was_updated' => $syncResult['was_updated'] ?? false,
+                                'target_tenant_id' => $toStore->tenant_id
+                            ]);
+
+                            // Release sync lock immediately after successful sync
+                            $lockService->releaseLock(
+                                "sync:product:{$sourceProduct->product_code}:tenant:{$toStore->tenant_id}",
+                                $syncLockToken
+                            );
+
+                        } catch (Exception $e) {
+                            Log::error("Product sync failed with details", [
+                                'source_product_id' => $sourceProductId,
+                                'source_product_code' => $sourceProduct->product_code ?? 'N/A',
+                                'target_tenant_id' => $toStore->tenant_id,
+                                'error_message' => $e->getMessage(),
+                                'error_file' => $e->getFile(),
+                                'error_line' => $e->getLine(),
+                                'trace' => $e->getTraceAsString()
+                            ]);
+
+                            $this->releaseAllLocks($lockService, $acquiredLocks);
+                            throw new UnprocessableEntityHttpException(
+                                __('messages.transfer.product_sync_failed') . ': ' . $e->getMessage()
+                            );
+                        }
+                    } else {
+                        // Produk sudah ada, gunakan yang existing
+                        $destinationProductId = $existingProduct->id;
+                        $isSynced = false;
+
+                        Log::info("Product already exists in destination tenant, using existing", [
                             'source_product_id' => $sourceProductId,
-                            'destination_product_id' => $destinationProductId,
-                            'was_created' => $syncResult['was_created'],
-                            'was_updated' => $syncResult['was_updated'] ?? false,
+                            'existing_product_id' => $destinationProductId,
+                            'product_code' => $sourceProduct->product_code,
                             'target_tenant_id' => $toStore->tenant_id
                         ]);
-
-                        // Release sync lock immediately after successful sync
-                        $lockService->releaseLock(
-                            "sync:product:{$sourceProduct->product_code}:tenant:{$toStore->tenant_id}",
-                            $syncLockToken
-                        );
-
-                    } catch (Exception $e) {
-                        Log::error("Product sync failed with details", [
-                            'source_product_id' => $sourceProductId,
-                            'source_product_code' => $sourceProduct->product_code ?? 'N/A',
-                            'target_tenant_id' => $toStore->tenant_id,
-                            'error_message' => $e->getMessage(),
-                            'error_file' => $e->getFile(),
-                            'error_line' => $e->getLine(),
-                            'trace' => $e->getTraceAsString()
-                        ]);
-
-                        $this->releaseAllLocks($lockService, $acquiredLocks);
-                        throw new UnprocessableEntityHttpException(
-                            __('messages.transfer.product_sync_failed') . ': ' . $e->getMessage()
-                        );
                     }
                 }
 
@@ -480,8 +517,22 @@ class TransferRepository extends BaseRepository
                             'new_hpp' => null,
                             'notes' => "Transfer IN from {$transfer->reference_code}"
                         ]);
+
+                        Log::info("Stock movements created for transfer", [
+                            'transfer_id' => $transfer->id,
+                            'reference_code' => $transfer->reference_code,
+                            'source_product' => $sourceProductId,
+                            'destination_product' => $destinationProductId,
+                            'quantity' => $transferItem['quantity'],
+                            'from_warehouse' => $input['from_warehouse_id'],
+                            'to_warehouse' => $input['to_warehouse_id']
+                        ]);
                     } catch (\Exception $e) {
-                        Log::error("Failed to create stock movement records for transfer: " . $e->getMessage());
+                        Log::error("Failed to create stock movement records for transfer: " . $e->getMessage(), [
+                            'transfer_id' => $transfer->id,
+                            'source_product' => $sourceProductId,
+                            'destination_product' => $destinationProductId
+                        ]);
                     }
                 }
 
@@ -528,6 +579,20 @@ class TransferRepository extends BaseRepository
 
         $input['reference_code'] = 'TR_111'.$transfer->id;
         $transfer->update($input);
+
+        // Final logging untuk transfer completion
+        Log::info("Transfer completed successfully", [
+            'transfer_id' => $transfer->id,
+            'reference_code' => $transfer->reference_code,
+            'from_store' => $input['from_store_id'],
+            'to_store' => $input['to_store_id'],
+            'from_warehouse' => $input['from_warehouse_id'],
+            'to_warehouse' => $input['to_warehouse_id'],
+            'is_cross_tenant' => $isCrossTenant,
+            'status' => $transfer->status,
+            'total_items' => $transfer->transferItems->count(),
+            'grand_total' => $transfer->grand_total
+        ]);
 
         return $transfer;
     }

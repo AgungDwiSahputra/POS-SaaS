@@ -66,6 +66,12 @@ export const placeholderText = (label) => {
     return placeholderLabel;
 };
 
+export const getFormattedText = (id, defaultText = null) => {
+    if (!id) return "";
+    const intl = useIntl();
+    return intl.formatMessage({ id, defaultMessage: defaultText ?? id });
+};
+
 export const decimalValidate = (event) => {
     if (!/^\d*\.?\d*$/.test(event.key)) {
         event.preventDefault();

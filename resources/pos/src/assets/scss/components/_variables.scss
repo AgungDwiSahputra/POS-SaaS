@@ -41,41 +41,41 @@ $theme-colors: (
 
 $min-contrast-ratio: 3;
 
-$cyan-100:  if(isDarkMode(), #262832, #E0E3FF) !default;
-$cyan-200:  if(isDarkMode(), #282D66, #C1C6FF) !default;
-$cyan-300:  if(isDarkMode(), #3D4499, #A3AAFF) !default;
-$cyan-400:  if(isDarkMode(), #515ACC, #848DFF) !default;
-$cyan-600:  if(isDarkMode(), #848DFF, #515ACC) !default;
-$cyan-700:  if(isDarkMode(), #A3AAFF, #3D4499) !default;
-$cyan-800:  if(isDarkMode(), #C1C6FF, #282D66) !default;
-$cyan-900:  if(isDarkMode(), #E0E3FF, #141733) !default;
+$cyan-100: if(isDarkMode(), #262832, #E0E3FF) !default;
+$cyan-200: if(isDarkMode(), #282D66, #C1C6FF) !default;
+$cyan-300: if(isDarkMode(), #3D4499, #A3AAFF) !default;
+$cyan-400: if(isDarkMode(), #515ACC, #848DFF) !default;
+$cyan-600: if(isDarkMode(), #848DFF, #515ACC) !default;
+$cyan-700: if(isDarkMode(), #A3AAFF, #3D4499) !default;
+$cyan-800: if(isDarkMode(), #C1C6FF, #282D66) !default;
+$cyan-900: if(isDarkMode(), #E0E3FF, #141733) !default;
 
-$gray-100:  if(isDarkMode(), #1D1F28, #F8F9FA) !default;
-$gray-200:  if(isDarkMode(), #262832, #E9ECEF) !default;
-$gray-300:  if(isDarkMode(), #495057, #DEE2E6) !default;
-$gray-400:  if(isDarkMode(), #6C757D, #CED4DA) !default;
-$gray-600:  if(isDarkMode(), #6C757E, #6C757D) !default;
-$gray-700:  if(isDarkMode(), #DEE2E6, #495057) !default;
-$gray-800:  if(isDarkMode(), #E9ECEF, #343A40) !default;
-$gray-900:  if(isDarkMode(), #FFFFFF, #212529) !default;
+$gray-100: if(isDarkMode(), #1D1F28, #F8F9FA) !default;
+$gray-200: if(isDarkMode(), #262832, #E9ECEF) !default;
+$gray-300: if(isDarkMode(), #495057, #DEE2E6) !default;
+$gray-400: if(isDarkMode(), #6C757D, #CED4DA) !default;
+$gray-600: if(isDarkMode(), #6C757E, #6C757D) !default;
+$gray-700: if(isDarkMode(), #DEE2E6, #495057) !default;
+$gray-800: if(isDarkMode(), #E9ECEF, #343A40) !default;
+$gray-900: if(isDarkMode(), #FFFFFF, #212529) !default;
 
-$blue-100:  if(isDarkMode(), #001F32, #CCEBFE) !default;
-$blue-200:  if(isDarkMode(), #003D64, #99D6FD) !default;
-$blue-300:  if(isDarkMode(), #005C97, #66C2FD) !default;
-$blue-400:  if(isDarkMode(), #007AC9, #33ADFC) !default;
-$blue-600:  if(isDarkMode(), #33ADFC, #007AC9) !default;
-$blue-700:  if(isDarkMode(), #66C2FD, #005C97) !default;
-$blue-800:  if(isDarkMode(), #99D6FD, #003D64) !default;
-$blue-900:  if(isDarkMode(), #CCEBFE, #001F32) !default;
+$blue-100: if(isDarkMode(), #001F32, #CCEBFE) !default;
+$blue-200: if(isDarkMode(), #003D64, #99D6FD) !default;
+$blue-300: if(isDarkMode(), #005C97, #66C2FD) !default;
+$blue-400: if(isDarkMode(), #007AC9, #33ADFC) !default;
+$blue-600: if(isDarkMode(), #33ADFC, #007AC9) !default;
+$blue-700: if(isDarkMode(), #66C2FD, #005C97) !default;
+$blue-800: if(isDarkMode(), #99D6FD, #003D64) !default;
+$blue-900: if(isDarkMode(), #CCEBFE, #001F32) !default;
 
-$green-100:  if(isDarkMode(), #022617, #CEF2E3) !default;
-$green-200:  if(isDarkMode(), #044D2E, #9DE6C7) !default;
-$green-300:  if(isDarkMode(), #067346, #6CD9AC) !default;
-$green-400:  if(isDarkMode(), #089A5D, #3BCD90) !default;
-$green-600:  if(isDarkMode(), #3BCD90, #089A5D) !default;
-$green-700:  if(isDarkMode(), #6CD9AC, #067346) !default;
-$green-800:  if(isDarkMode(), #9DE6C7, #044D2E) !default;
-$green-900:  if(isDarkMode(), #CEF2E3, #022617) !default;
+$green-100: if(isDarkMode(), #022617, #CEF2E3) !default;
+$green-200: if(isDarkMode(), #044D2E, #9DE6C7) !default;
+$green-300: if(isDarkMode(), #067346, #6CD9AC) !default;
+$green-400: if(isDarkMode(), #089A5D, #3BCD90) !default;
+$green-600: if(isDarkMode(), #3BCD90, #089A5D) !default;
+$green-700: if(isDarkMode(), #6CD9AC, #067346) !default;
+$green-800: if(isDarkMode(), #9DE6C7, #044D2E) !default;
+$green-900: if(isDarkMode(), #CEF2E3, #022617) !default;
 
 $yellow-100: if(isDarkMode(), #332507, #FFF1D3) !default;
 $yellow-200: if(isDarkMode(), #664A0D, #FFE3A6) !default;
@@ -86,14 +86,14 @@ $yellow-700: if(isDarkMode(), #FFD47A, #996E14) !default;
 $yellow-800: if(isDarkMode(), #FFE3A6, #664A0D) !default;
 $yellow-900: if(isDarkMode(), #FFF1D3, #332507) !default;
 
-$red-100:    if(isDarkMode(), #31080E, #FDD4DA) !default;
-$red-200:    if(isDarkMode(), #62101C, #FBA9B5) !default;
-$red-300:    if(isDarkMode(), #94192B, #FA7F91) !default;
-$red-400:    if(isDarkMode(), #C52139, #F8546C) !default;
-$red-600:    if(isDarkMode(), #F8546C, #C52139) !default;
-$red-700:    if(isDarkMode(), #FA7F91, #94192B) !default;
-$red-800:    if(isDarkMode(), #FBA9B5, #62101C) !default;
-$red-900:    if(isDarkMode(), #FDD4DA, #31080E) !default;
+$red-100: if(isDarkMode(), #31080E, #FDD4DA) !default;
+$red-200: if(isDarkMode(), #62101C, #FBA9B5) !default;
+$red-300: if(isDarkMode(), #94192B, #FA7F91) !default;
+$red-400: if(isDarkMode(), #C52139, #F8546C) !default;
+$red-600: if(isDarkMode(), #F8546C, #C52139) !default;
+$red-700: if(isDarkMode(), #FA7F91, #94192B) !default;
+$red-800: if(isDarkMode(), #FBA9B5, #62101C) !default;
+$red-900: if(isDarkMode(), #FDD4DA, #31080E) !default;
 
 // Light colors
 $primary-light:                     $cyan-100 !default;
@@ -102,8 +102,8 @@ $info-light:                        $blue-100 !default;
 $warning-light:                     $yellow-100 !default;
 $danger-light:                      $red-100 !default;
 
-$body-bg:                           if(isDarkMode(), #13151F, $white) !default;
-$page-body-bg:                      if(isDarkMode(), $black, #EFF3F7) !default;
+$body-bg: if(isDarkMode(), #13151F, $white) !default;
+$page-body-bg: if(isDarkMode(), $black, #EFF3F7) !default;
 
 $theme-light-colors: (
     "primary":    $primary-light,
@@ -172,7 +172,7 @@ $theme-colors-palette: (
 ) !default;  // Custom variable
 
 //custom variable
-$theme-box-shadow:                  if(isDarkMode(), 0 5px 20px rgba(0, 0, 0, 0.2), 0 5px 20px rgba(173, 181, 189, 0.2)) !default;
+$theme-box-shadow: if(isDarkMode(), 0 5px 20px rgba(0, 0, 0, 0.2), 0 5px 20px rgba(173, 181, 189, 0.2)) !default;
 
 // Content Spacing
 $content-spacing: (
@@ -265,7 +265,7 @@ $card-border-width:                 0 !default;
 $card-spacer-y:                     2.5rem !default;
 $card-spacer-x:                     2.5rem !default;
 $card-border-radius:                0.625rem !default;
-$card-box-shadow:                   if(isDarkMode(), null, 0 0 20px rgba($gray, 0.1)) !default;
+$card-box-shadow: if(isDarkMode(), null, 0 0 20px rgba($gray, 0.1)) !default;
 
 //modal variables
 $modal-content-bg:                  $body-bg !default;
@@ -307,7 +307,7 @@ $list-group-border-color:           $gray-200 !default;
 $breadcrumb-item-padding-x:         1.25rem !default;
 $breadcrumb-active-color:           $primary !default;
 $breadcrumb-font-size:              1rem !default;
-$breadcrumb-divider:                if(isDarkMode(), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAA6klEQVQ4jdXTvUqDMRQG4LYKYh10EN28BW9A70DwBqqb+LeKFHc354KIY1FnN393cRNx8k5sHwdPIYRvMJn0LIGX5CGHnLRa/66wjnae1WIbGGEwQXGEMfZrwDk8+6kLdLCCz0APatGnQC8b0L0atIvHQIeYytDdWvQ+0CtMJ+gI2zXoLO4Cvc7QL2zVoDO4DfSmAe2l+zuF/jhbi2/XTVoexu2W8RGPs1OKPWQzuYT34vHJxuY8sEW8BXZYgqWDPUAbC3iN7LgUm3y9s8jm8RJZ/9dYHN6Mlk6TrBfZSRGWAGsN2WoV9ifrG4VPmQ6+Ej5TAAAAAElFTkSuQmCC'), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAAjUlEQVQ4je3UoQ0CQRAF0BcuwZCQAxqgFygGxUkawmCoAAEKRwsIBB0gOcyKDcHMsefuq8mIl5/sZCmcKptrHPHEPdvvscAtitd44IV1tj/jjSYKwjK1y9EJLmixG9CiaC8P1T866qKnVBinuf233RTX1G47YGEsdCZFsZnf31fnA57jhNXX/oBNFCuWD9KOSg85zoijAAAAAElFTkSuQmCC')) !default;
+$breadcrumb-divider: if(isDarkMode(), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAA6klEQVQ4jdXTvUqDMRQG4LYKYh10EN28BW9A70DwBqqb+LeKFHc354KIY1FnN393cRNx8k5sHwdPIYRvMJn0LIGX5CGHnLRa/66wjnae1WIbGGEwQXGEMfZrwDk8+6kLdLCCz0APatGnQC8b0L0atIvHQIeYytDdWvQ+0CtMJ+gI2zXoLO4Cvc7QL2zVoDO4DfSmAe2l+zuF/jhbi2/XTVoexu2W8RGPs1OKPWQzuYT34vHJxuY8sEW8BXZYgqWDPUAbC3iN7LgUm3y9s8jm8RJZ/9dYHN6Mlk6TrBfZSRGWAGsN2WoV9ifrG4VPmQ6+Ej5TAAAAAElFTkSuQmCC'), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAAjUlEQVQ4je3UoQ0CQRAF0BcuwZCQAxqgFygGxUkawmCoAAEKRwsIBB0gOcyKDcHMsefuq8mIl5/sZCmcKptrHPHEPdvvscAtitd44IV1tj/jjSYKwjK1y9EJLmixG9CiaC8P1T866qKnVBinuf233RTX1G47YGEsdCZFsZnf31fnA57jhNXX/oBNFCuWD9KOSg85zoijAAAAAElFTkSuQmCC')) !default;
 //$breadcrumb-divider:                url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAA6klEQVQ4jdXTvUqDMRQG4LYKYh10EN28BW9A70DwBqqb+LeKFHc354KIY1FnN393cRNx8k5sHwdPIYRvMJn0LIGX5CGHnLRa/66wjnae1WIbGGEwQXGEMfZrwDk8+6kLdLCCz0APatGnQC8b0L0atIvHQIeYytDdWvQ+0CtMJ+gI2zXoLO4Cvc7QL2zVoDO4DfSmAe2l+zuF/jhbi2/XTVoexu2W8RGPs1OKPWQzuYT34vHJxuY8sEW8BXZYgqWDPUAbC3iN7LgUm3y9s8jm8RJZ/9dYHN6Mlk6TrBfZSRGWAGsN2WoV9ifrG4VPmQ6+Ej5TAAAAAElFTkSuQmCC');
 
 // carousel-variables

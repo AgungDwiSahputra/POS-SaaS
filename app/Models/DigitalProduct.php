@@ -72,6 +72,7 @@ class DigitalProduct extends Model implements HasMedia, JsonResourceful
         'cost',
         'expiry_date',
         'file_path',
+        'type',
     ];
 
     protected $casts = [
@@ -90,6 +91,7 @@ class DigitalProduct extends Model implements HasMedia, JsonResourceful
             'cost' => 'required|numeric|min:0',
             'expiry_date' => 'nullable|date|after:today',
             'file_path' => 'nullable|string|max:500',
+            'type' => 'required|in:tarik_tunai,setor_tunai',
             'images.*' => 'image|mimes:jpg,jpeg,png,svg,pdf,zip|max:10240',
         ];
     }
@@ -132,6 +134,7 @@ class DigitalProduct extends Model implements HasMedia, JsonResourceful
             'cost' => $this->cost,
             'expiry_date' => $this->expiry_date,
             'file_path' => $this->file_path,
+            'type' => $this->type,
             'image_url' => $this->image_url,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

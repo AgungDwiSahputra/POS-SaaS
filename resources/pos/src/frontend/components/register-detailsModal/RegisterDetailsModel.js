@@ -186,6 +186,21 @@ function RegisterDetailsModel(props) {
                             <tr>
                                 <td>
                                     {getFormattedMessage(
+                                        "total.digital.sales.title"
+                                    )}
+                                    :
+                                </td>
+                                <td>
+                                    {currencySymbolHandling(
+                                        allConfigData,
+                                        currencySymbol,
+                                        closeRegisterDetails?.total_digital_sales || 0
+                                    )}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {getFormattedMessage(
                                         "register.total-refund.title"
                                     )}
                                     :

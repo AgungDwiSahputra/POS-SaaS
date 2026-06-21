@@ -7,11 +7,17 @@ import { getFormattedMessage } from "../../shared/sharedMethod";
 const DeleteCashAdvance = (props) => {
     const { deleteCashAdvance, onDelete, deleteModel, onClickDeleteModel, onDeleteSuccess } = props;
 
-    const deleteClick = () => {
-        deleteCashAdvance(onDelete.id);
-        onClickDeleteModel(false);
-        if (onDeleteSuccess) {
-            onDeleteSuccess();
+    const deleteClick = async () => {
+        try {
+            // Wait for delete to complete
+            await deleteCashAdvance(onDelete.id);
+            onClickDeleteModel(false);
+            if (onDeleteSuccess) {
+                onDeleteSuccess();
+            }
+        } catch (error) {
+            // Error is already handled in the action with toast
+            console.error('Delete failed:', error);
         }
     };
 

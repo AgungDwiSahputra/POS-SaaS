@@ -128,7 +128,11 @@ export const apiBaseURL = {
     DUAL_SCREEN_SETTINGS: "dual-screen-settings",
     DUAL_SCREEN_SETTINGS_UPDATE: "dual-screen-settings/update",
     PAYMENT_METHOD: "payment-methods",
-    DIGITAL_PRODUCTS: "/digital-products"
+    DIGITAL_PRODUCTS: "/digital-products",
+    DIGITAL_SALES: "/digital-sales",
+    PROVIDERS: "/providers",
+    BALANCE_REQUESTS: "/balance-requests",
+    USERS_LIST: "users-list"
 };
 
 export const adminApiBaseURL = {
@@ -475,6 +479,19 @@ export const saleActionType = {
     DELETE_SALE_PAYMENT: "DELETE_SALE_PAYMENT",
 };
 
+export const digitalSaleActionType = {
+    FETCH_DIGITAL_SALES: "FETCH_DIGITAL_SALES",
+    FETCH_DIGITAL_SALE: "FETCH_DIGITAL_SALE",
+    ADD_DIGITAL_SALE: "ADD_DIGITAL_SALE",
+    EDIT_DIGITAL_SALE: "EDIT_DIGITAL_SALE",
+    DELETE_DIGITAL_SALE: "DELETE_DIGITAL_SALE",
+    FETCH_DIGITAL_SALE_DETAILS: "FETCH_DIGITAL_SALE_DETAILS",
+    CREATE_DIGITAL_SALE_PAYMENT: "CREATE_DIGITAL_SALE_PAYMENT",
+    FETCH_DIGITAL_SALE_PAYMENT: "FETCH_DIGITAL_SALE_PAYMENT",
+    EDIT_DIGITAL_SALE_PAYMENT: "EDIT_DIGITAL_SALE_PAYMENT",
+    DELETE_DIGITAL_SALE_PAYMENT: "DELETE_DIGITAL_SALE_PAYMENT",
+};
+
 export const holdListActionType = {
     FETCH_HOLDS: "FETCH_HOLDS",
     ADD_HOLD: "ADD_HOLD",
@@ -710,12 +727,20 @@ export const Permissions = {
     MANAGE_DASHBOARD: "manage_dashboard",
     MANAGE_ROLES: "manage_roles",
     MANAGE_BRANDS: "manage_brands",
-    MANAGE_CURRENCY: "manage_currency",
     MANAGE_WAREHOUSES: "manage_warehouses",
     MANAGE_UNITS: "manage_units",
     MANAGE_PRODUCT_CATEGORIES: "manage_product_categories",
     MANAGE_VARIATIONS: "manage_variations",
     MANAGE_PRODUCTS: "manage_products",
+    MANAGE_PROVIDERS: "manage_providers",
+    CREATE_PROVIDERS: "create_providers",
+    EDIT_PROVIDERS: "edit_providers",
+    VIEW_PROVIDERS: "view_providers",
+    DELETE_PROVIDERS: "delete_providers",
+    MANAGE_BALANCE_REQUESTS: "manage_balance_requests",
+    VIEW_BALANCE_REQUESTS: "view_balance_requests",
+    CREATE_BALANCE_REQUESTS: "create_balance_requests",
+    DELETE_BALANCE_REQUESTS: "delete_balance_requests",
     MANAGE_SUPPLIERS: "manage_suppliers",
     MANAGE_CUSTOMERS: "manage_customers",
     MANAGE_USER: "manage_users",
@@ -728,17 +753,16 @@ export const Permissions = {
     MANAGE_POS_SCREEN: "manage_pos_screen",
     MANAGE_SALE: "manage_sale",
     MANAGE_SALE_RETURN: "manage_sale_return",
-    MANAGE_REPORT: "manage_report",
+    MANAGE_REPORTS: "manage_reports",
     MANAGE_PRINT_BARCODE: "manage_print_barcode",
     MANAGE_ADJUSTMENTS: "manage_adjustments",
     MANAGE_TRANSFERS: "manage_transfers",
-    MANAGE_REPORTS: "manage_reports",
     MANAGE_EMAIL_TEMPLATES: "manage_email_templates",
-    MANAGE_QUOTATION: "manage_quotations",
+    MANAGE_QUOTATIONS: "manage_quotations",
     MANAGE_SMS_API: "manage_sms_apis",
     MANAGE_SMS_TEMPLATES: "manage_sms_templates",
-    MANAGE_LANGUAGES: "manage_language",
     MANAGE_STORE: "manage_store",
+    MANAGE_DIGITAL_SALES: "manage_digital_sales",
     CREATE_ADJUSTMENTS: "create_adjustments",
     VIEW_ADJUSTMENTS: "view_adjustments",
     EDIT_ADJUSTMENTS: "edit_adjustments",
@@ -803,6 +827,11 @@ export const Permissions = {
     VIEW_SALES: "view_sale",
     EDIT_SALES: "edit_sale",
     DELETE_SALES: "delete_sale",
+    MANAGE_DIGITAL_SALES: "manage_digital_sales",
+    CREATE_DIGITAL_SALES: "create_digital_sales",
+    VIEW_DIGITAL_SALES: "view_digital_sales",
+    EDIT_DIGITAL_SALES: "edit_digital_sales",
+    DELETE_DIGITAL_SALES: "delete_digital_sales",
     CREATE_PURCHASE_RETURN: "create_purchase_return",
     VIEW_PURCHASE_RETURN: "view_purchase_return",
     EDIT_PURCHASE_RETURN: "edit_purchase_return",
@@ -847,6 +876,23 @@ export const digitalProductActionType = {
     ADD_DIGITAL_PRODUCT: "ADD_DIGITAL_PRODUCT",
     EDIT_DIGITAL_PRODUCT: "EDIT_DIGITAL_PRODUCT",
     DELETE_DIGITAL_PRODUCT: "DELETE_DIGITAL_PRODUCT",
+};
+
+export const providerActionType = {
+    FETCH_PROVIDERS: "FETCH_PROVIDERS",
+    FETCH_PROVIDER: "FETCH_PROVIDER",
+    ADD_PROVIDER: "ADD_PROVIDER",
+    EDIT_PROVIDER: "EDIT_PROVIDER",
+    DELETE_PROVIDER: "DELETE_PROVIDER",
+};
+
+export const balanceRequestActionType = {
+    FETCH_BALANCE_REQUESTS: "FETCH_BALANCE_REQUESTS",
+    FETCH_BALANCE_REQUEST: "FETCH_BALANCE_REQUEST",
+    ADD_BALANCE_REQUEST: "ADD_BALANCE_REQUEST",
+    UPDATE_BALANCE_REQUEST_STATUS: "UPDATE_BALANCE_REQUEST_STATUS",
+    DELETE_BALANCE_REQUEST: "DELETE_BALANCE_REQUEST",
+    FETCH_BALANCE_REQUEST_PENDING_COUNT: "FETCH_BALANCE_REQUEST_PENDING_COUNT",
 };
 
 export const posProductActionType = {
@@ -959,6 +1005,11 @@ export const taxMethodOptions = [
 export const productTypesOptions = [
     { id: 1, name: "products.type.single-type.label" },
     { id: 2, name: "variation.title" },
+];
+
+export const digitalProductTypeOptions = [
+    { id: 'tarik_tunai', name: 'digital-product.type.tarik-tunai.label' },
+    { id: 'setor_tunai', name: 'digital-product.type.setor-tunai.label' },
 ];
 
 export const discountMethodOptions = [
@@ -1135,23 +1186,29 @@ export const permissionMappings = {
     manage_quotations: "/user/quotations",
     manage_transfers: "/user/transfers",
     manage_expenses: "/user/expenses",
-    manage_currency: "/user/currencies",
     manage_variations: "/user/variations",
     manage_expense_categories: "/user/expense-categories",
     manage_setting: "/user/settings",
     edit_setting: "/user/settings",
     manage_purchase_return: "/user/purchase-return",
     manage_sale_return: "/user/sale-return",
-    manage_report: "/user/report/report-warehouse",
     edit_reports: "/user/report/report-warehouse",
     manage_reports: "/user/report/report-warehouse",
-    manage_language: "/user/languages",
     manage_sms_apis: "/user/sms-api",
     edit_sms_apis: "/user/sms-api",
     view_sms_apis: "/user/sms-api",
     manage_sms_templates: "/user/sms-templates",
     manage_email_templates: "/user/email-templates",
     manage_store: "/user/store",
+    manage_balance_requests: "/user/balance-requests",
+    create_balance_requests: "/user/balance-requests/create",
+    delete_balance_requests: "/user/balance-requests",
+    manage_providers: "/user/providers",
+    create_providers: "/user/providers",
+    edit_providers: "/user/providers",
+    view_providers: "/user/providers",
+    delete_providers: "/user/providers",
+    manage_digital_sales: "/user/digital-sales",
 };
 
 export const paymentOptions = {

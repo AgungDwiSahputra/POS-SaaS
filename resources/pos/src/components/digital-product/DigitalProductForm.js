@@ -6,12 +6,13 @@ import { InputGroup } from "react-bootstrap-v5";
 import { addDigitalProduct, editDigitalProduct } from "../../store/action/digitalProductAction";
 import { fetchAllProductCategories } from "../../store/action/productCategoryAction";
 import { fetchAllBrands } from "../../store/action/brandsAction";
-import { getFormattedMessage, placeholderText, getCurrentUser } from "../../shared/sharedMethod";
+import { getFormattedMessage, placeholderText, getCurrentUser, getFormattedOptions } from "../../shared/sharedMethod";
 import MultipleImage from "../product/MultipleImage";
 import ModelFooter from "../../shared/components/modelFooter";
 import ReactSelect from "../../shared/select/reactSelect";
 import moment from "moment";
 import ReactDatePicker from "../../shared/datepicker/ReactDatePicker";
+import { digitalProductTypeOptions } from "../../constants";
 
 const DigitalProductForm = (props) => {
      const {
@@ -33,10 +34,13 @@ const DigitalProductForm = (props) => {
         cost: "",
         expiry_date: null,
         file_path: "",
+        type: "",
     });
 
     const [multipleFiles, setMultipleFiles] = useState([]);
     const [errors, setErrors] = useState({});
+
+    const digitalProductTypeOptionsObj = getFormattedOptions(digitalProductTypeOptions);
 
     // Digital products don't need brands and product categories
 
@@ -63,12 +67,14 @@ const DigitalProductForm = (props) => {
                     cost: attributes.cost || "",
                     expiry_date: attributes.expiry_date ? moment(attributes.expiry_date) : null,
                     file_path: attributes.file_path || "",
+                    type: attributes.type || "",
                 });
 
                 console.log('DigitalProductForm: Form values set for ID', id, ':', {
                     name: attributes.name || "",
                     code: attributes.code || "",
                     price: attributes.price || "",
+                    type: attributes.type || "",
                 });
             } else {
                 console.warn('DigitalProductForm: Product with ID', id, 'not found in Redux state');
@@ -99,13 +105,7 @@ const DigitalProductForm = (props) => {
     const prepareFormData = () => {
         const formData = new FormData();
 
-        // Get current user tenant_id using the safe utility function
-        const currentUser = getCurrentUser();
-        const tenantId = currentUser?.tenant_id;
-
-        if (tenantId) {
-            formData.append("tenant_id", tenantId);
-        }
+        // Remove manual tenant_id sending - let backend handle it via Multitenantable trait
 
         formData.append("name", digitalProductValue.name);
         formData.append("code", digitalProductValue.code);
@@ -116,6 +116,7 @@ const DigitalProductForm = (props) => {
             formData.append("expiry_date", moment(digitalProductValue.expiry_date).format("YYYY-MM-DD"));
         }
         formData.append("file_path", digitalProductValue.file_path || "");
+        formData.append("type", digitalProductValue.type || "");
 
         if (multipleFiles && multipleFiles.length > 0) {
             multipleFiles.forEach((image, index) => {
@@ -140,6 +141,8 @@ const DigitalProductForm = (props) => {
             errors["price"] = getFormattedMessage("product.input.product-price.validate.label");
         } else if (!digitalProductValue["cost"] || isNaN(parseFloat(digitalProductValue["cost"]))) {
             errors["cost"] = getFormattedMessage("digital-product.input.cost.validate.label");
+        } else if (!digitalProductValue["type"] || digitalProductValue["type"].trim() === "") {
+            errors["type"] = getFormattedMessage("digital-product.input.type.validate.label");
         } else {
             isValid = true;
         }
@@ -164,6 +167,7 @@ const DigitalProductForm = (props) => {
                  cost: digitalProductValue.cost,
                  expiry_date: digitalProductValue.expiry_date,
                  file_path: digitalProductValue.file_path,
+                 type: digitalProductValue.type,
                  multipleFiles: multipleFiles
              });
 
@@ -191,7 +195,7 @@ const DigitalProductForm = (props) => {
                         <div className="row">
                             <div className="col-xl-8">
                                 <div className="card">
-                                    <div className="card-body">
+                                    <div className="card-body p-0">
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
                                                 <label className="form-label">
@@ -281,6 +285,33 @@ const DigitalProductForm = (props) => {
                                                 </span>
                                             </div>
                                             <div className="col-md-6 mb-3">
+                                                {/* <label className="form-label">
+                                                    {getFormattedMessage("digital-product.input.type.label")}
+                                                    :{" "}
+                                                </label> */}
+                                                {/* <span className="required" /> */}
+                                                <ReactSelect
+                                                    title={getFormattedMessage("digital-product.input.type.label")}
+                                                    multiLanguageOption={digitalProductTypeOptionsObj}
+                                                    onChange={(obj) => {
+                                                        setDigitalProductValue({
+                                                            ...digitalProductValue,
+                                                            type: obj ? obj.value : ""
+                                                        });
+                                                        setErrors({});
+                                                    }}
+                                                    value={digitalProductValue.type ? {
+                                                        value: digitalProductValue.type,
+                                                        label: digitalProductTypeOptionsObj.find(opt => opt.id === digitalProductValue.type)?.name || ""
+                                                    } : null}
+                                                    errors={errors["type"]}
+                                                    placeholder={placeholderText("digital-product.input.type.placeholder.label")}
+                                                />
+                                                <span className="text-danger d-block fw-400 fs-small mt-2">
+                                                    {errors["type"] ? errors["type"] : null}
+                                                </span>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
                                                 <label className="form-label">
                                                     {getFormattedMessage("expiry.date.title")}
                                                     :{" "}
@@ -314,7 +345,7 @@ const DigitalProductForm = (props) => {
                             </div>
                             <div className="col-xl-4">
                                 <div className="card">
-                                    <div className="card-body">
+                                    <div className="card-body p-0">
                                         <label className="form-label">
                                             {getFormattedMessage("product.input.multiple-image.label")}
                                             :{" "}

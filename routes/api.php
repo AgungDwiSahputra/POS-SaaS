@@ -23,6 +23,8 @@ use App\Http\Controllers\API\SettingAPIController;
 use App\Http\Controllers\API\BaseUnitAPIController;
 use App\Http\Controllers\API\CustomerAPIController;
 use App\Http\Controllers\API\PurchaseAPIController;
+use App\Http\Controllers\API\ProviderAPIController;
+use App\Http\Controllers\API\BalanceRequestAPIController;
 use App\Http\Controllers\API\SupplierAPIController;
 use App\Http\Controllers\API\TransferAPIController;
 use App\Http\Controllers\MailTemplateAPIController;
@@ -48,6 +50,9 @@ use App\Http\Controllers\API\PurchaseReturnAPIController;
 use App\Http\Controllers\API\ExpenseCategoryAPIController;
 use App\Http\Controllers\API\ProductCategoryAPIController;
 use App\Http\Controllers\API\DigitalProductAPIController;
+use App\Http\Controllers\API\DigitalSaleAPIController;
+use App\Http\Controllers\API\DigitalSalesPaymentAPIController;
+use App\Http\Controllers\API\DigitalPurchaseTransactionAPIController;
 
 /*
 |--------------------------------------------------------------------------
@@ -110,7 +115,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::middleware('permission:manage_roles')->group(function () {
             Route::resource('roles', RoleAPIController::class);
         });
-        Route::get('roles', [RoleAPIController::class, 'index']);
 
         // product category route
         Route::middleware('permission:manage_product_categories')->group(function () {
@@ -211,6 +215,23 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('suppliers', [SupplierAPIController::class, 'index']);
         Route::post('import-suppliers', [SupplierAPIController::class, 'importSuppliers']);
 
+        //providers route
+        Route::middleware('permission:manage_providers')->group(function () {
+            Route::resource('providers', ProviderAPIController::class);
+        });
+        Route::get('providers', [ProviderAPIController::class, 'index']);
+
+        // Public endpoint for users dropdown (no manage_users permission required)
+        Route::get('users-list', [UserAPIController::class, 'getUsersList']);
+
+        //balance-requests route
+        Route::middleware('permission:manage_balance_requests')->group(function () {
+            Route::resource('balance-requests', BalanceRequestAPIController::class);
+            Route::post('balance-requests/{id}/status', [BalanceRequestAPIController::class, 'updateStatus'])->name('balance-requests.update-status');
+            Route::get('balance-requests-pending-count', [BalanceRequestAPIController::class, 'pendingCount'])->name('balance-requests.pending-count');
+        });
+        Route::get('balance-requests', [BalanceRequestAPIController::class, 'index']);
+
         //sale
         Route::middleware('permission:manage_sale|manage_pos_screen|manage_reports')->group(function () {
             Route::resource('sales', SaleAPIController::class);
@@ -221,6 +242,17 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
             Route::get('sales/{sale}/payments', [SalesPaymentAPIController::class, 'getAllPayments']);
             Route::post('sales/{salesPayment}/payment', [SalesPaymentAPIController::class, 'updateSalePayment']);
             Route::delete('sales/{id}/payment', [SalesPaymentAPIController::class, 'deletePayment']);
+        });
+
+        // Digital Sales
+        Route::middleware('permission:manage_digital_sales')->group(function () {
+            Route::resource('digital-sales', DigitalSaleAPIController::class);
+            Route::get('digital-sale-info/{sale}', [DigitalSaleAPIController::class, 'saleInfo'])->name('digital-sale-info');
+
+            Route::post('digital-sales/{sale}/capture-payment', [DigitalSalesPaymentAPIController::class, 'createDigitalSalePayment']);
+            Route::get('digital-sales/{sale}/payments', [DigitalSalesPaymentAPIController::class, 'getAllPayments']);
+            Route::post('digital-sales/{salesPayment}/payment', [DigitalSalesPaymentAPIController::class, 'updateDigitalSalePayment']);
+            Route::delete('digital-sales/{id}/payment', [DigitalSalesPaymentAPIController::class, 'deletePayment']);
         });
 
         Route::resource('holds', HoldAPIController::class);

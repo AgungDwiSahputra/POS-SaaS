@@ -59,13 +59,13 @@ export const fetchRoles =
     };
 
 export const fetchRole =
-    (rolesId, singleRole, isLoading = true) =>
+    (rolesId, isLoading = true) =>
     async (dispatch) => {
         if (isLoading) {
             dispatch(setLoading(true));
         }
         apiConfig
-            .get(apiBaseURL.ROLES + "/" + rolesId, singleRole)
+            .get(apiBaseURL.ROLES + "/" + rolesId)
             .then((response) => {
                 dispatch({
                     type: rolesActionType.FETCH_ROLE,
@@ -76,6 +76,9 @@ export const fetchRole =
                 }
             })
             .catch(({ response }) => {
+                if (isLoading) {
+                    dispatch(setLoading(false));
+                }
                 dispatch(
                     addToast({
                         text: response?.data?.message,
@@ -133,7 +136,7 @@ export const editRole = (rolesId, role, navigate) => async (dispatch) => {
 export const deleteRole = (rolesId) => async (dispatch) => {
     apiConfig
         .delete(apiBaseURL.ROLES + "/" + rolesId)
-        .then((response) => {
+        .then(() => {
             dispatch(removeFromTotalRecord(1));
             dispatch({ type: rolesActionType.DELETE_ROLES, payload: rolesId });
             dispatch(callFetchDataApi(true));

@@ -118,6 +118,12 @@ export default (
         }
         url = url + "recorded_by=" + filters.recorded_by;
     }
+    if (filters.identity_id) {
+        if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
+            url += "&";
+        }
+        url = url + "identity_id=" + filters.identity_id;
+    }
     if (filters.cash_status !== undefined && filters.cash_status !== null && filters.cash_status !== "all") {
         if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
             url += "&";
@@ -141,6 +147,18 @@ export default (
             url += "&";
         }
         url = url + "brand_id=" + filters.brand_id;
+    }
+    if (filters.type) {
+        if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
+            url += "&";
+        }
+        url = url + "type=" + filters.type;
+    }
+    if (filters.provider_id) {
+        if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {
+            url += "&";
+        }
+        url = url + "provider_id=" + filters.provider_id;
     }
     if (admin) {
         if (baseUrl.indexOf("?") > 0 || (url.includes("?") && url.length > 1)) {

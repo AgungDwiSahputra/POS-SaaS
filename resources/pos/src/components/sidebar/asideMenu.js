@@ -19,7 +19,8 @@ import { useIntl } from "react-intl";
 import { ROLES, Tokens } from "../../constants";
 import { useDispatch, useSelector } from "react-redux";
 import { changeStore, fetchStore } from "../../store/action/storeAction";
-import { Dropdown, DropdownButton } from "react-bootstrap";
+import { fetchBalanceRequestPendingCount } from "../../store/action/balanceRequestAction";
+import { Dropdown, DropdownButton, Badge } from "react-bootstrap";
 
 const AsideMenu = (props) => {
     const {
@@ -38,7 +39,7 @@ const AsideMenu = (props) => {
     const { id } = useParams();
     const [searchTerm, setSearchTerm] = useState("");
     const updatedLanguage = localStorage.getItem(Tokens.UPDATED_LANGUAGE);
-    const { loginUser, stores } = useSelector(state => state)
+    const { loginUser, stores, balanceRequests } = useSelector(state => state)
     const [selectedStore, setSelectedStore] = useState(null);
 
     useEffect(() => {
@@ -59,6 +60,8 @@ const AsideMenu = (props) => {
         if(loginUser?.roles != ROLES.SUPER_ADMIN ) {
             dispatch(fetchStore());
         }
+        // Fetch pending balance request count for badge
+        dispatch(fetchBalanceRequestPendingCount());
     },[])
 
     useEffect(() => {
@@ -469,6 +472,15 @@ const AsideMenu = (props) => {
                                                                     id: `${subMainItems.title}`,
                                                                 }
                                                             )}
+                                                            {subMainItems.name === "balance-requests" &&
+                                                            balanceRequests?.pendingCount > 0 ? (
+                                                                <Badge
+                                                                    bg="danger"
+                                                                    className="ms-2"
+                                                                >
+                                                                    {balanceRequests.pendingCount}
+                                                                </Badge>
+                                                            ) : null}
                                                         </Link>
                                                     </MenuItem>
                                                 );

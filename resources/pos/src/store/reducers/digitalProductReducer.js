@@ -3,7 +3,6 @@ import { digitalProductActionType } from '../../constants';
 export default (state = [], action) => {
     switch (action.type) {
         case digitalProductActionType.FETCH_DIGITAL_PRODUCTS:
-            console.log('Reducer: FETCH_DIGITAL_PRODUCTS:', action.payload);
             return [...action.payload];
         case digitalProductActionType.FETCH_DIGITAL_PRODUCT:
             console.log('Reducer: FETCH_DIGITAL_PRODUCT:', action.payload);

@@ -13,8 +13,10 @@ import {
     placeholderText,
     currencySymbolHandling,
     getFormattedDate,
+    getFormattedOptions,
 } from "../../shared/sharedMethod";
 import moment from "moment";
+import { digitalProductTypeOptions } from "../../constants";
 
 const DigitalProductDetail = (props) => {
      const { fetchDigitalProduct, digitalProducts, frontSetting, allConfigData } = props;
@@ -94,6 +96,20 @@ const DigitalProductDetail = (props) => {
                                     </th>
                                     <td className="py-4">
                                         {productData?.cost ? formatCurrency(productData.cost) : ""}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th className="py-4" scope="row">
+                                        {getFormattedMessage("digital-product.input.type.label")}
+                                    </th>
+                                    <td className="py-4">
+                                        <span className="badge bg-light-primary">
+                                            {(() => {
+                                                const digitalProductTypeOptionsObj = getFormattedOptions(digitalProductTypeOptions);
+                                                const typeOption = digitalProductTypeOptionsObj.find(opt => opt.id === productData?.type);
+                                                return typeOption ? typeOption.name : productData?.type || "";
+                                            })()}
+                                        </span>
                                     </td>
                                 </tr>
                                 {productData?.expiry_date && (

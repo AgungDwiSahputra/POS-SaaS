@@ -290,4 +290,39 @@ class UserAPIController extends AppBaseController
 
         return $this->sendSuccess(__('messages.success.status_updated'));
     }
+
+    /**
+     * Get users list for dropdown/select components (public endpoint)
+     * This endpoint is used for filtering in various modules like digital sales
+     * Does not require manage_users permission
+     */
+    public function getUsersList(Request $request): JsonResponse
+    {
+        $loginUserId = Auth::id();
+        $userStore = UserStore::where('user_id', $loginUserId)->first();
+        $storeUserId = $userStore ? $userStore->store->user_id : $loginUserId;
+        $allStoreTenants = Store::where('user_id', $storeUserId)->pluck('tenant_id')->toArray();
+
+        $query = User::select('id', 'first_name', 'last_name')
+            ->where('status', 1);
+
+        if (!empty($allStoreTenants)) {
+            $query = $query->withoutGlobalScope('tenant')
+                ->whereIn('tenant_id', $allStoreTenants);
+        }
+
+        $users = $query->get();
+
+        return $this->sendResponse([
+            'data' => $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'attributes' => [
+                        'first_name' => $user->first_name,
+                        'last_name' => $user->last_name,
+                    ]
+                ];
+            })
+        ], 'Users list retrieved successfully.');
+    }
 }

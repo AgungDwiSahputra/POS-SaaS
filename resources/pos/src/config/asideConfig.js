@@ -38,6 +38,8 @@ import {
     faStore,
     faMoneyCheck,
     faDisplay,
+    faHandHoldingDollar,
+    faLaptopCode,
 } from "@fortawesome/free-solid-svg-icons";
 import { getFormattedMessage } from "../shared/sharedMethod";
 
@@ -78,14 +80,6 @@ export const userMenu = [
                 title: "products.title",
                 to: "/user/products",
                 name: "products",
-                class: "d-flex",
-                fontIcon: <FontAwesomeIcon icon={faBoxes} />,
-                permission: Permissions.MANAGE_PRODUCTS,
-            },
-            {
-                title: "digital-product.title",
-                to: "/user/digital-products",
-                name: "digital-products",
                 class: "d-flex",
                 fontIcon: <FontAwesomeIcon icon={faBoxes} />,
                 permission: Permissions.MANAGE_PRODUCTS,
@@ -139,6 +133,46 @@ export const userMenu = [
                 to: "/user/print/barcode",
                 class: "d-flex",
                 permission: Permissions.MANAGE_PRODUCTS,
+            },
+        ],
+    },
+    {
+        title: "digital-services.title",
+        name: "digital-services",
+        fontIcon: <FontAwesomeIcon icon={faCube} />,
+        to: "/user/digital-services",
+        class: "d-flex",
+        is_submenu: true,
+        permission: Permissions.MANAGE_PRODUCTS || Permissions.MANAGE_PROVIDERS,
+        subPath: {
+            digitalProductsSubPath: "/user/digital-products",
+            providersSubPath: "/user/providers",
+            balanceRequestsSubPath: "/user/balance-requests",
+        },
+        subMenu: [
+            {
+                title: "digital-product.title",
+                to: "/user/digital-products",
+                name: "digital-products",
+                class: "d-flex",
+                fontIcon: <FontAwesomeIcon icon={faBoxes} />,
+                permission: Permissions.MANAGE_PRODUCTS,
+            },
+            {
+                title: "providers.title",
+                to: "/user/providers",
+                name: "providers",
+                class: "d-flex",
+                fontIcon: <FontAwesomeIcon icon={faMoneyBill} />,
+                permission: Permissions.MANAGE_PROVIDERS || Permissions.MANAGE_BALANCE_REQUESTS,
+            },
+            {
+                title: "balance-request.title",
+                to: "/user/balance-requests",
+                name: "balance-requests",
+                class: "d-flex",
+                fontIcon: <FontAwesomeIcon icon={faHandHoldingDollar} />,
+                permission: Permissions.MANAGE_BALANCE_REQUESTS,
             },
         ],
     },
@@ -212,6 +246,7 @@ export const userMenu = [
         subPath: {
             salesSubPath: "/user/sales",
             salesReturnSubPath: "/user/sale-return",
+            digitalSalesSubPath: "/user/digital-sales",
         },
         subMenu: [
             {
@@ -221,6 +256,14 @@ export const userMenu = [
                 to: "/user/sales",
                 class: "d-flex",
                 permission: Permissions.MANAGE_SALE,
+            },
+            {
+                title: "digital-sales.title",
+                name: "digital-sales",
+                fontIcon: <FontAwesomeIcon icon={faLaptopCode} />,
+                to: "/user/digital-sales",
+                class: "d-flex",
+                permission: Permissions.MANAGE_DIGITAL_SALES,
             },
             {
                 title: "sales-return.title",
@@ -376,6 +419,7 @@ export const userMenu = [
         customerReportDetailsPath: "/user/report/customers/details",
         registerReportPath: "/user/report/register",
         cashAdvanceReportPath: "/user/report/cash-advance",
+        digitalSalesReportPath: "/user/report/digital-sales",
         class: "d-flex",
         isSamePrefix: "true",
         permission: Permissions.MANAGE_REPORTS,
@@ -394,6 +438,7 @@ export const userMenu = [
             { title: "best-customer.report.title" },
             { title: "register.report.title" },
             { title: "cash-advance.report.title" },
+            { title: "digital-sale.reports.title" },
         ],
         items: [
             {
@@ -448,6 +493,10 @@ export const userMenu = [
             {
                 title: getFormattedMessage("cash-advance.report.title"),
                 to: "/user/report/cash-advance",
+            },
+            {
+                title: getFormattedMessage("digital-sale.reports.title"),
+                to: "/user/report/digital-sales",
             },
         ],
     },

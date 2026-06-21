@@ -73,29 +73,29 @@ const DigitalProductList = (props) => {
     };
 
     const itemsValue =
-         currencySymbol &&
-         digitalProducts.length >= 0 &&
-         digitalProducts.map((product) => {
-             // Handle JSON:API format (check if attributes exist)
-             const attributes = product.attributes || product;
+          currencySymbol &&
+          digitalProducts.length >= 0 &&
+          digitalProducts.map((product) => {
+              // Handle JSON:API format (check if attributes exist)
+              const attributes = product.attributes || product;
 
-             return {
-                 name: attributes.name || "",
-                 code: attributes.code || "",
-                 description: attributes.description || "",
-                 date: getFormattedDate(
-                     attributes.created_at || product.created_at,
-                     allConfigData && allConfigData
-                 ),
-                 time: moment(attributes.created_at || product.created_at).format("LT"),
-                 product_price: formattedPrice(attributes.price || product.price),
-                 product_cost: formattedPrice(attributes.cost || product.cost),
-                 expiry_date: attributes.expiry_date || "",
-                 images: attributes.image_url || product.image_url || { imageUrls: [] },
-                 id: attributes.id || product.id,
-                 currency: currencySymbol,
-             };
-         });
+              return {
+                  name: attributes.name || "",
+                  code: attributes.code || "",
+                  description: attributes.description || "",
+                  date: getFormattedDate(
+                      attributes.created_at || product.created_at,
+                      allConfigData && allConfigData
+                  ),
+                  time: moment(attributes.created_at || product.created_at).format("LT"),
+                  product_price: formattedPrice(attributes.price || product.price),
+                  product_cost: formattedPrice(attributes.cost || product.cost),
+                  expiry_date: attributes.expiry_date || "",
+                  images: attributes.image_url || product.image_url || { imageUrls: [] },
+                  id: attributes.id || product.id,
+                  currency: currencySymbol,
+              };
+          });
 
     const columns = [
         {

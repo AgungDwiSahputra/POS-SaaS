@@ -228,7 +228,7 @@ const DateRangePicker = ( props ) => {
             </div>
             <div className={`${popoverOpen === true ? 'custom-overlay' : ''}`}>
                 <Popover trigger='click' placement='bottom' isOpen={popoverOpen}
-                    target='Popover1' toggle={toggle} transition={{ timeout: 150 }} >
+                    target='Popover1' toggle={toggle} fade={false} >
                     <PopoverBody className='date-picker-popover'>
                         <ListGroup>
                             <ListGroupItem className={`${dateColor === 'today' ? 'bg-primary text-white' : null} border-0 rounded`}

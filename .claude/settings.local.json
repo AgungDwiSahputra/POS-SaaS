@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(npm run)",
+      "Bash(node:*)",
+      "Bash(php artisan cache:clear:*)",
+      "Bash(php artisan config:clear:*)",
+      "Bash(php artisan view:clear:*)",
+      "Bash(cat:*)",
+      "Bash(php artisan make:test:*)",
+      "Bash(php artisan test:*)",
+      "Bash(php artisan tinker:*)",
+      "Bash(php:*)",
+      "Bash(curl:*)",
+      "Bash(npm run prod:*)",
+      "Bash(npm run build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

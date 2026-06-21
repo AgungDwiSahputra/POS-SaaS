@@ -29,7 +29,7 @@ export const fetchWarehouses =
             ) {
                 url += requestParam(filter, null, null, null, url);
             }
-            apiConfig
+            return apiConfig
                 .get(url)
                 .then((response) => {
                     dispatch({
@@ -44,17 +44,21 @@ export const fetchWarehouses =
                                 : response.data.data.total
                         )
                     );
-                    if (isLoading) {
-                        dispatch(setLoading(false));
-                    }
                 })
-                .catch(({ response }) => {
+                .catch((error) => {
                     dispatch(
                         addToast({
-                            text: response?.data?.message,
+                            text: error.response?.data?.message,
                             type: toastType.ERROR,
                         })
                     );
+                    // Re-throw the error so it can be caught by the component
+                    throw error;
+                })
+                .finally(() => {
+                    if (isLoading) {
+                        dispatch(setLoading(false));
+                    }
                 });
         };
 

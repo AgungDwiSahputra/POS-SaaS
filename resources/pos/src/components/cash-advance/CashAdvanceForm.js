@@ -29,8 +29,9 @@ const CashAdvanceForm = (props) => {
         date: singleCashAdvance
             ? moment(singleCashAdvance[0].date).toDate()
             : new Date(),
-        warehouse_id: singleCashAdvance ? singleCashAdvance[0].warehouse_id : 1, // Default warehouse ID
+        warehouse_id: singleCashAdvance ? (singleCashAdvance[0].warehouse_id ?? 1) : 1, // Default warehouse ID
         identity_id: singleCashAdvance ? singleCashAdvance[0].identity_id : "",
+        identity_name: singleCashAdvance ? singleCashAdvance[0].identity_name : "",
         amount: singleCashAdvance ? String(singleCashAdvance[0].amount || "") : "",
         notes: singleCashAdvance ? String(singleCashAdvance[0].notes || "") : "",
     });
@@ -45,103 +46,67 @@ const CashAdvanceForm = (props) => {
     const [searchParams] = useSearchParams();
     const identityIdFromUrl = searchParams.get('identity_id');
 
-    // Set selected identity based on singleCashAdvance, URL parameter, or stored selection
-    const selectedIdentity = singleCashAdvance && singleCashAdvance[0]?.identity_id
-        ? {
-            value: singleCashAdvance[0].identity_id,
-            label: singleCashAdvance[0].identity_name || singleCashAdvance[0].identity_id
-          }
-        : cashAdvanceValue.selectedIdentity || // Use stored selection first
-          (identityIdFromUrl && activeIdentitiesForSelect?.find(id => Number(id.value) === Number(identityIdFromUrl))) || null;
-
-    // Debug logging
-    console.log('CashAdvanceForm Debug:', {
-        identityIdFromUrl,
-        identityIdFromUrlType: typeof identityIdFromUrl,
-        activeIdentitiesForSelectLength: activeIdentitiesForSelect?.length,
-        selectedIdentity,
-        cashAdvanceValueIdentityId: cashAdvanceValue.identity_id,
-        cashAdvanceValueSelectedIdentity: cashAdvanceValue.selectedIdentity,
-        activeIdentitiesForSelect: activeIdentitiesForSelect?.slice(0, 3) // First 3 items for debugging
-    });
+    // Set selected identity based on singleCashAdvance (edit mode) or URL parameter (create mode)
+    // Use useMemo to avoid recalculating on every render
+    const selectedIdentity = React.useMemo(() => {
+        // Edit mode: use singleCashAdvance data
+        if (singleCashAdvance && singleCashAdvance[0]?.identity_id) {
+            return {
+                value: singleCashAdvance[0].identity_id,
+                label: singleCashAdvance[0].identity_name || String(singleCashAdvance[0].identity_id)
+            };
+        }
+        // Create mode with URL parameter: find in active identities
+        if (identityIdFromUrl && activeIdentitiesForSelect?.length > 0) {
+            const found = activeIdentitiesForSelect.find(id => Number(id.value) === Number(identityIdFromUrl));
+            if (found) return found;
+        }
+        // Create mode: use stored selection from user interaction
+        return cashAdvanceValue.selectedIdentity || null;
+    }, [singleCashAdvance, identityIdFromUrl, activeIdentitiesForSelect, cashAdvanceValue.selectedIdentity]);
 
     useEffect(() => {
         if (!activeIdentitiesForSelect || (Array.isArray(activeIdentitiesForSelect) && activeIdentitiesForSelect.length === 0)) {
             if (fetchActiveIdentitiesForSelect) {
-                console.log('Fetching active identities for select...');
                 fetchActiveIdentitiesForSelect();
             }
         }
     }, [activeIdentitiesForSelect, fetchActiveIdentitiesForSelect]);
 
-    // Handle initial URL parameter setup
+    // Handle URL parameter for identity_id in create mode
     useEffect(() => {
-        if (identityIdFromUrl && !singleCashAdvance) {
-            console.log('Initial URL parameter setup:', identityIdFromUrl);
-            // The useEffect below will handle setting the identity_id once identities are loaded
-        }
-    }, [identityIdFromUrl, singleCashAdvance]);
-
-    // Update identity_id when URL parameter is present and identities are loaded
-    useEffect(() => {
-        if (identityIdFromUrl && activeIdentitiesForSelect && activeIdentitiesForSelect.length > 0) {
+        if (identityIdFromUrl && !singleCashAdvance && activeIdentitiesForSelect && activeIdentitiesForSelect.length > 0) {
             const identityExists = activeIdentitiesForSelect.find(identity => Number(identity.value) === Number(identityIdFromUrl));
-            console.log('useEffect Debug:', {
-                identityIdFromUrl,
-                identityIdFromUrlType: typeof identityIdFromUrl,
-                identityExists,
-                currentIdentityId: cashAdvanceValue.identity_id,
-                shouldUpdate: identityExists && !cashAdvanceValue.identity_id
-            });
             if (identityExists && !cashAdvanceValue.identity_id) {
                 setCashAdvanceValue(prev => ({
                     ...prev,
-                    identity_id: identityIdFromUrl
+                    identity_id: identityIdFromUrl,
+                    selectedIdentity: identityExists
                 }));
-            } else if (identityIdFromUrl && !identityExists) {
+            } else if (identityIdFromUrl && !identityExists && !cashAdvanceValue.identity_id) {
                 // Identity from URL doesn't exist in active identities
-                console.warn('Identity from URL not found in active identities:', identityIdFromUrl);
                 setErrors(prev => ({
                     ...prev,
                     identity_id: getFormattedMessage("cash-advance-identity.errors.identity_not_found")
                 }));
             }
         }
-    }, [identityIdFromUrl, activeIdentitiesForSelect, cashAdvanceValue.identity_id]);
+    }, [identityIdFromUrl, activeIdentitiesForSelect, singleCashAdvance]);
 
-    // Force re-render when selectedIdentity changes (to update ReactSelect value)
-    const [renderKey, setRenderKey] = useState(0);
-
-    useEffect(() => {
-        if (activeIdentitiesForSelect && activeIdentitiesForSelect.length > 0 && identityIdFromUrl) {
-            const identityExists = activeIdentitiesForSelect.find(identity => Number(identity.value) === Number(identityIdFromUrl));
-            if (identityExists) {
-                setRenderKey(prev => prev + 1);
-            }
+    // Helper to extract the actual identity ID value from either object or primitive
+    const getIdentityIdValue = (identity) => {
+        if (!identity) return null;
+        if (typeof identity === 'object' && identity.value !== undefined) {
+            return identity.value;
         }
-    }, [activeIdentitiesForSelect, identityIdFromUrl]);
+        return identity;
+    };
 
-    // Additional useEffect to ensure form state is synchronized with selectedIdentity
-    useEffect(() => {
-        if (selectedIdentity && selectedIdentity.value && !cashAdvanceValue.identity_id) {
-            console.log('Setting form identity_id from selectedIdentity:', selectedIdentity);
-            setCashAdvanceValue(prev => ({
-                ...prev,
-                identity_id: selectedIdentity.value,
-                selectedIdentity: selectedIdentity
-            }));
-        }
-    }, [selectedIdentity, cashAdvanceValue.identity_id]);
-
-    // Debug selectedIdentity changes
-    useEffect(() => {
-        console.log('selectedIdentity changed:', selectedIdentity);
-    }, [selectedIdentity]);
     const disabled =
         singleCashAdvance &&
         moment(singleCashAdvance[0].date).toDate().toString() ===
             cashAdvanceValue.date.toString() &&
-        singleCashAdvance[0].identity_id === cashAdvanceValue.identity_id &&
+        getIdentityIdValue(singleCashAdvance[0].identity_id) === getIdentityIdValue(cashAdvanceValue.identity_id) &&
         singleCashAdvance[0].amount === cashAdvanceValue.amount &&
         (singleCashAdvance[0].notes || "") === (cashAdvanceValue.notes || "");
 
@@ -149,7 +114,8 @@ const CashAdvanceForm = (props) => {
         let formErrors = {};
         let isValid = true;
 
-        if (!cashAdvanceValue["identity_id"]) {
+        // Use helper to check if identity_id has a valid value
+        if (!getIdentityIdValue(cashAdvanceValue["identity_id"])) {
             formErrors["identity_id"] = getFormattedMessage("cash-advance-identity.input.identity_id.validate.label");
             isValid = false;
         }
@@ -163,7 +129,6 @@ const CashAdvanceForm = (props) => {
     };
 
     const onWarehouseChange = (obj) => {
-        console.log('CashAdvanceForm onWarehouseChange called:', { obj, objValue: obj?.value, objLabel: obj?.label });
         setCashAdvanceValue((inputs) => ({
             ...inputs,
             warehouse_id: obj?.value || obj
@@ -172,7 +137,6 @@ const CashAdvanceForm = (props) => {
     };
 
     const onIdentityChange = (obj) => {
-        console.log('CashAdvanceForm onIdentityChange called:', { obj, objValue: obj?.value, objLabel: obj?.label });
         // Store the full option object for ReactSelect, but also keep the value for form submission
         setCashAdvanceValue((inputs) => ({
             ...inputs,
@@ -237,7 +201,6 @@ const CashAdvanceForm = (props) => {
 
                         <div className="col-md-6 mb-3">
                             <ReactSelect
-                                key={renderKey}
                                 title={getFormattedMessage("cash-advance-identity.title")}
                                 placeholder={intl.formatMessage({ id: "cash-advance-identity.input.identity_id.placeholder.label" })}
                                 value={selectedIdentity}
@@ -296,7 +259,7 @@ const CashAdvanceForm = (props) => {
                             editDisabled={disabled}
                             link="/user/cash-advance-identities"
                             addDisabled={
-                                !cashAdvanceValue.identity_id ||
+                                !getIdentityIdValue(cashAdvanceValue.identity_id) ||
                                 !cashAdvanceValue.amount
                             }
                         />

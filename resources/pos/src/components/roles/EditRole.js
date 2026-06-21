@@ -17,6 +17,7 @@ const EditRole = (props) => {
     const mergeRolePermissions = (allPermissions, selectedPermissions) => {
         return allPermissions.map(permission => {
             const matchedPermission = selectedPermissions?.find(p => p.id === permission.id);
+            // Use selected flag from backend response, which is already correctly set
             const selectedChildPermissions = matchedPermission?.child_permissions || [];
 
             return {
@@ -24,10 +25,15 @@ const EditRole = (props) => {
                 name: permission.attributes.name,
                 attributes: {
                     ...permission.attributes,
-                    child_permissions: permission.attributes.child_permissions.map(child => ({
-                        ...child,
-                        selected: selectedChildPermissions.some(sel => sel.id === child.id && sel.selected)
-                    }))
+                    child_permissions: permission.attributes.child_permissions.map(child => {
+                        // Find matching child permission from role data by ID
+                        const matchedChild = selectedChildPermissions.find(sel => sel.id === child.id);
+                        // Use the 'selected' flag from backend data, default to false if not found
+                        return {
+                            ...child,
+                            selected: matchedChild?.selected ?? false
+                        };
+                    })
                 }
             };
         });

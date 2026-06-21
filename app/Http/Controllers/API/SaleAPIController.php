@@ -21,6 +21,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -41,51 +42,63 @@ class SaleAPIController extends AppBaseController
     {
         $perPage = getPageSize($request);
         $search = $request->filter['search'] ?? '';
-        $customer = (Customer::where('name', 'LIKE', "%$search%")->get()->count() != 0);
-        $warehouse = (Warehouse::where('name', 'LIKE', "%$search%")->get()->count() != 0);
 
-        $sales = $this->saleRepository;
-        if ($customer || $warehouse) {
-            $sales->whereHas('customer', function (Builder $q) use ($search, $customer) {
-                if ($customer) {
-                    $q->where('name', 'LIKE', "%$search%");
-                }
-            })->whereHas('warehouse', function (Builder $q) use ($search, $warehouse) {
-                if ($warehouse) {
-                    $q->where('name', 'LIKE', "%$search%");
-                }
-            });
-        }
+        $salesQuery = Sale::query()->with('customer', 'warehouse', 'saleItems');
 
         if ($request->get('start_date') && $request->get('end_date')) {
-            $sales->whereBetween('date', [$request->get('start_date'), $request->get('end_date')]);
+            $salesQuery->whereBetween('date', [$request->get('start_date'), $request->get('end_date')]);
         }
 
         if ($request->get('warehouse_id')) {
-            $sales->where('warehouse_id', $request->get('warehouse_id'));
+            $salesQuery->where('warehouse_id', $request->get('warehouse_id'));
         }
 
         if ($request->get('customer_id')) {
-            $sales->where('customer_id', $request->get('customer_id'));
+            $salesQuery->where('customer_id', $request->get('customer_id'));
         }
 
         if ($request->get('user_id')) {
-            $sales->where('user_id', $request->get('user_id'));
+            $salesQuery->where('user_id', $request->get('user_id'));
         }
 
         if ($request->get('status') && $request->get('status') != 'null') {
-            $sales->Where('status', $request->get('status'));
+            $salesQuery->where('status', $request->get('status'));
         }
 
         if ($request->get('payment_status') && $request->get('payment_status') != 'null') {
-            $sales->where('payment_status', $request->get('payment_status'));
+            $salesQuery->where('payment_status', $request->get('payment_status'));
         }
 
         if ($request->get('payment_type') && $request->get('payment_type') != 'null') {
-            $sales->where('payment_type', $request->get('payment_type'));
+            $salesQuery->where('payment_type', $request->get('payment_type'));
         }
 
-        $sales = $sales->paginate($perPage);
+        // Fix: Search by reference_code, customer, warehouse, and product names using whereIn with subquery
+        if (!empty($search)) {
+            $matchingSaleIds = DB::table('sales')
+                ->select('sales.id')
+                ->leftJoin('customers', 'sales.customer_id', '=', 'customers.id')
+                ->leftJoin('warehouses', 'sales.warehouse_id', '=', 'warehouses.id')
+                ->leftJoin('sale_items', 'sales.id', '=', 'sale_items.sale_id')
+                ->leftJoin('products', 'sale_items.product_id', '=', 'products.id')
+                ->leftJoin('main_products', 'products.main_product_id', '=', 'main_products.id')
+                ->where('sales.tenant_id', '=', currentTenantId())
+                ->where(function ($q) use ($search) {
+                    $q->where('sales.reference_code', 'LIKE', "%$search%")
+                        ->orWhere('customers.name', 'LIKE', "%$search%")
+                        ->orWhere('warehouses.name', 'LIKE', "%$search%")
+                        ->orWhere('products.name', 'LIKE', "%$search%")
+                        ->orWhere('main_products.name', 'LIKE', "%$search%");
+                })
+                ->pluck('sales.id')
+                ->unique()
+                ->values();
+
+            $salesQuery->whereIn('id', $matchingSaleIds);
+        }
+
+        $salesQuery->orderBy('id', 'desc');
+        $sales = $salesQuery->paginate($perPage);
 
         SaleResource::usingWithCollection();
 

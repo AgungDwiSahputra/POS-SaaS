@@ -74,6 +74,21 @@ const ReactDataTable = (props) => {
         onCustomerChange,
         customerLabel,
         conditionalRowStyles = [],
+        isTypeFilter = false,
+        typeOptions = [],
+        typeValue,
+        onTypeChange,
+        typeLabel,
+        isProviderFilter = false,
+        providerOptions = [],
+        providerValue,
+        onProviderChange,
+        providerLabel,
+        isUserFilter = false,
+        userOptions = [],
+        userValue,
+        onUserChange,
+        userLabel,
     } = props;
     const [perPage, setPerPages] = useState(defaultLimit);
     const [pageSize, setPageSize] = useState(Filters.OBJ.pageSize);
@@ -235,6 +250,21 @@ const ReactDataTable = (props) => {
                             customerValue={customerValue}
                             setCustomerData={onCustomerChange}
                             customerLabel={customerLabel}
+                            isTypeFilter={isTypeFilter}
+                            typeOptions={typeOptions}
+                            typeValue={typeValue}
+                            setTypeIdData={onTypeChange}
+                            typeLabel={typeLabel}
+                            isProviderFilter={isProviderFilter}
+                            providerOptions={providerOptions}
+                            providerValue={providerValue}
+                            setProviderIdData={onProviderChange}
+                            providerLabel={providerLabel}
+                            isUserFilter={isUserFilter}
+                            userOptions={userOptions}
+                            userValue={userValue}
+                            setUserIdData={onUserChange}
+                            userLabel={userLabel}
                         />
                     ) : null}
                     {AddButton}

@@ -335,6 +335,40 @@ class PrintRegisterDetailsData extends React.PureComponent {
                                 }}
                             >
                                 {getFormattedMessage(
+                                    "total.digital.sales.title"
+                                )}
+                            </td>
+                            <td
+                                style={{
+                                    fontSize: "12px",
+                                    border: "none",
+                                    padding: "8px 15px",
+                                }}
+                            >
+                                <span>
+                                    {currencySymbolHandling(
+                                        allConfigData,
+                                        currencySymbol,
+                                        closeRegisterDetails?.total_digital_sales || 0
+                                    )}
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr
+                            style={{
+                                width: "100%",
+                                borderBottom: "1px solid #DEE2E6",
+                            }}
+                        >
+                            <td
+                                style={{
+                                    fontSize: "12px",
+                                    border: "none",
+                                    padding: "8px 15px",
+                                }}
+                            >
+                                {getFormattedMessage(
                                     "register.total-refund.title"
                                 )}
                             </td>

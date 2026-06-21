@@ -37,7 +37,7 @@
             </td>
             <td>
                 <?php
-                $totalQuantity = App\Models\Managestock::where('product_id', $product->id)->sum('quantity');
+                $totalQuantity = App\Models\ManageStock::where('product_id', $product->id)->sum('quantity');
                 ?>
                 {{$totalQuantity}}
             </td>

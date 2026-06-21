@@ -12,6 +12,23 @@ import { getFormattedMessage } from "../../shared/sharedMethod";
 import { setSavingButton } from "./saveButtonAction";
 import { callFetchDataApi } from "./updateBrand";
 
+/**
+ * Fetch users list for dropdown/select components (public endpoint)
+ * Does not require manage_users permission
+ */
+export const fetchUsersList = () => async (dispatch) => {
+    try {
+        const response = await apiConfig.get(apiBaseURL.USERS_LIST);
+        dispatch({
+            type: userActionType.FETCH_USERS,
+            payload: response.data.data.data,
+        });
+    } catch (error) {
+        // Silently fail for dropdown data
+        console.error('Failed to fetch users list:', error);
+    }
+};
+
 export const fetchUsers =
     (filter = {}, isLoading = true, allUser) =>
     async (dispatch) => {

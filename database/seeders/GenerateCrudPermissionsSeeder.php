@@ -15,6 +15,8 @@ class GenerateCrudPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
+        
+        $createdPermissions = [];
         $modules = [
             'adjustments', 'transfers', 'roles', 'brands',
             'warehouses', 'units', 'product_categories', 'products',
@@ -22,7 +24,7 @@ class GenerateCrudPermissionsSeeder extends Seeder
             'expenses', 'cash_advances', 'setting', 'dashboard', 'pos_screen', 'purchase',
             'sale', 'purchase_return', 'sale_return', 'email_templates',
             'reports', 'quotations', 'sms_templates', 'sms_apis',
-            'variations',
+            'variations', 'providers', 'balance_requests', 'digital_sales',
         ];
 
         $viewOnlyModules = ['dashboard', 'pos_screen'];
@@ -51,10 +53,11 @@ class GenerateCrudPermissionsSeeder extends Seeder
                         'guard_name' => $guard,
                     ]);
                 }
+                $createdPermissions[] = $name;
             }
         }
 
-        $removeManagePermissions = ['manage_currency', 'manage_language'];
+        $removeManagePermissions = [];
 
         foreach ($removeManagePermissions as $permName) {
             $permission = Permission::where('name', $permName)->first();
@@ -101,5 +104,18 @@ class GenerateCrudPermissionsSeeder extends Seeder
                 $role->permissions()->syncWithoutDetaching($crudToAssign);
             }
         }
+
+        // // Hapus permission yang tidak ada dalam daftar yang dibuat
+        // $allPermissions = Permission::pluck('name')->toArray();
+        // $permissionsToDelete = array_diff($allPermissions, $createdPermissions);
+
+        // foreach ($permissionsToDelete as $permName) {
+        //     $permission = Permission::where('name', $permName)->first();
+        //     if ($permission) {
+        //         DB::table('role_has_permissions')->where('permission_id', $permission->id)->delete();
+        //         $permission->delete();
+        //         $this->command->info("Deleted permission: {$permName}");
+        //     }
+        // }
     }
 }

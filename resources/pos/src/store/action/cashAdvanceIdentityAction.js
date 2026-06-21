@@ -109,7 +109,7 @@ export const editCashAdvanceIdentity = (id, formValue, navigate) => {
 export const deleteCashAdvanceIdentity = (id, onDeleteModel) => {
     return (dispatch) => {
         dispatch(setLoading(true));
-        apiConfig
+        return apiConfig
             .delete(`cash-advance-identities/${id}`)
             .then((response) => {
                 dispatch({
@@ -124,9 +124,11 @@ export const deleteCashAdvanceIdentity = (id, onDeleteModel) => {
                     })
                 );
                 onDeleteModel();
+                return response;
             })
             .catch((error) => {
                 notifyAndStopLoading(dispatch, error, true);
+                throw error;
             });
     };
 };
@@ -170,22 +172,22 @@ export const fetchCashAdvanceIdentityWithHistory = (id) => {
 export const fetchActiveIdentitiesForSelect = () => {
     return (dispatch) => {
         console.log('Redux: Fetching active identities for select...');
-        apiConfig
+        return apiConfig
             .get("active-identities-for-select")
             .then((response) => {
                 console.log('Redux: Active identities fetched successfully:', {
                     dataLength: response.data?.data?.length || response.data?.length,
                     data: response.data?.data || response.data
                 });
-                
+
                 // Handle different response structures
                 let payload = response.data?.data || response.data;
-                
+
                 // If payload is an array but has no items, log warning
                 if (Array.isArray(payload) && payload.length === 0) {
                     console.warn('Redux: No active identities found');
                 }
-                
+
                 dispatch({
                     type: cashAdvanceIdentityActionType.FETCH_ACTIVE_IDENTITIES_FOR_SELECT,
                     payload: payload,
@@ -194,7 +196,7 @@ export const fetchActiveIdentitiesForSelect = () => {
             })
             .catch((error) => {
                 console.error('Redux: Error fetching active identities:', error);
-                
+
                 // Handle different error structures
                 let errorMessage = error.message;
                 if (error.response?.data?.message) {
@@ -203,8 +205,11 @@ export const fetchActiveIdentitiesForSelect = () => {
                     const errors = error.response.data.errors;
                     errorMessage = Object.values(errors).flat().join(', ');
                 }
-                
+
                 notifyAndStopLoading(dispatch, error, false);
+
+                // Re-throw the error so it can be caught by the component
+                throw error;
             });
     };
 };

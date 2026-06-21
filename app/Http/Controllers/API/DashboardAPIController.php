@@ -86,30 +86,63 @@ class DashboardAPIController extends AppBaseController
         try {
             $month = Carbon::now()->month;
             $year = Carbon::now()->year;
-            $topSellings = Product::leftJoin('sale_items', 'products.id', '=', 'sale_items.product_id')
-                ->whereMonth('sale_items.created_at', $month)
-                ->whereYear('sale_items.created_at', $year)
-                ->selectRaw('products.*, COALESCE(sum(sale_items.sub_total),0) grand_total')
-                ->selectRaw('products.*, COALESCE(sum(sale_items.quantity),0) total_quantity')
-                ->groupBy('products.id')
-                ->orderBy('total_quantity', 'desc')
-                ->latest()
+
+            // Build subquery for sold quantities (only completed sales)
+            $soldSubquery = DB::table('sale_items')
+                ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+                ->where('sales.status', Sale::COMPLETED)
+                ->whereMonth('sales.date', $month)
+                ->whereYear('sales.date', $year)
+                ->select(
+                    'sale_items.product_id',
+                    DB::raw('SUM(sale_items.quantity) as total_sold_quantity'),
+                    DB::raw('SUM(sale_items.sub_total) as total_sold_amount')
+                )
+                ->groupBy('sale_items.product_id');
+
+            // Build subquery for returned quantities
+            $returnedSubquery = DB::table('sale_return_items')
+                ->join('sales_return', 'sale_return_items.sale_return_id', '=', 'sales_return.id')
+                ->where('sales_return.status', SaleReturn::RECEIVED)
+                ->whereMonth('sales_return.date', $month)
+                ->whereYear('sales_return.date', $year)
+                ->select(
+                    'sale_return_items.product_id',
+                    DB::raw('SUM(sale_return_items.quantity) as total_returned_quantity'),
+                    DB::raw('SUM(sale_return_items.sub_total) as total_returned_amount')
+                )
+                ->groupBy('sale_return_items.product_id');
+
+            // Main query: join products with sold and returned subqueries
+            // Use CAST to ensure numeric sorting (not string sorting)
+            // Note: Using 'net_sold_quantity' instead of 'total_quantity' to avoid conflict with Product model accessor
+            $topSellings = Product::query()
+                ->leftJoinSub($soldSubquery, 'sold', function ($join) {
+                    $join->on('products.id', '=', 'sold.product_id');
+                })
+                ->leftJoinSub($returnedSubquery, 'returned', function ($join) {
+                    $join->on('products.id', '=', 'returned.product_id');
+                })
+                ->selectRaw('products.*')
+                ->selectRaw('COALESCE(sold.total_sold_quantity, 0) as sold_quantity')
+                ->selectRaw('COALESCE(returned.total_returned_quantity, 0) as returned_quantity')
+                ->selectRaw('COALESCE(sold.total_sold_quantity, 0) - COALESCE(returned.total_returned_quantity, 0) as net_sold_quantity')
+                ->selectRaw('COALESCE(sold.total_sold_amount, 0) - COALESCE(returned.total_returned_amount, 0) as net_grand_total')
+                ->having('net_sold_quantity', '>', 0)
+                ->orderByRaw('CAST(COALESCE(sold.total_sold_quantity, 0) - COALESCE(returned.total_returned_quantity, 0) AS DECIMAL(15,2)) DESC')
+                ->orderBy('products.name', 'asc')
                 ->take(5)
                 ->get();
+
             $data = [];
             foreach ($topSellings as $topSelling) {
-                try {
-                    $data[] = $topSelling->prepareTopSelling();
-                } catch (\Exception $e) {
-                    // Fallback if prepareTopSelling fails
-                    $data[] = [
-                        'name' => $topSelling->name ?? 'Unknown Product',
-                        'total_quantity' => $topSelling->total_quantity ?? 0,
-                        'grand_total' => $topSelling->grand_total ?? 0,
-                        'sale_unit' => null,
-                        'image' => $topSelling->image_url ?? null,
-                    ];
-                }
+                $data[] = [
+                    'name' => $topSelling->name,
+                    'total_quantity' => $topSelling->net_sold_quantity,
+                    'grand_total' => $topSelling->net_grand_total,
+                    'sale_unit' => isset($topSelling->getSaleUnitName()['short_name']) ? $topSelling->getSaleUnitName()['short_name'] : null,
+                    'image' => $topSelling->image_url,
+                ];
             }
 
             return $this->sendResponse($data, 'Top Selling Products Retrieved Successfully');
@@ -166,18 +199,51 @@ class DashboardAPIController extends AppBaseController
     {
         try {
             $year = Carbon::now()->year;
-            $topSellings = Product::leftJoin('sale_items', 'products.id', '=', 'sale_items.product_id')
-                ->whereYear('sale_items.created_at', $year)
-                ->selectRaw('products.*, COALESCE(sum(sale_items.sub_total),0) grand_total')
-                ->selectRaw('products.*, COALESCE(sum(sale_items.quantity),0) total_quantity')
-                ->groupBy('products.id')
-                ->orderBy('total_quantity', 'desc')
+
+            // Build subquery for sold quantities (only completed sales)
+            $soldSubquery = DB::table('sale_items')
+                ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+                ->where('sales.status', Sale::COMPLETED)
+                ->whereYear('sales.date', $year)
+                ->select(
+                    'sale_items.product_id',
+                    DB::raw('SUM(sale_items.quantity) as total_sold_quantity')
+                )
+                ->groupBy('sale_items.product_id');
+
+            // Build subquery for returned quantities
+            $returnedSubquery = DB::table('sale_return_items')
+                ->join('sales_return', 'sale_return_items.sale_return_id', '=', 'sales_return.id')
+                ->where('sales_return.status', SaleReturn::RECEIVED)
+                ->whereYear('sales_return.date', $year)
+                ->select(
+                    'sale_return_items.product_id',
+                    DB::raw('SUM(sale_return_items.quantity) as total_returned_quantity')
+                )
+                ->groupBy('sale_return_items.product_id');
+
+            // Main query: join products with sold and returned subqueries
+            // Use CAST to ensure numeric sorting (not string sorting)
+            // Note: Using 'net_sold_quantity' instead of 'total_quantity' to avoid conflict with Product model accessor
+            $topSellings = Product::query()
+                ->leftJoinSub($soldSubquery, 'sold', function ($join) {
+                    $join->on('products.id', '=', 'sold.product_id');
+                })
+                ->leftJoinSub($returnedSubquery, 'returned', function ($join) {
+                    $join->on('products.id', '=', 'returned.product_id');
+                })
+                ->selectRaw('products.*')
+                ->selectRaw('COALESCE(sold.total_sold_quantity, 0) - COALESCE(returned.total_returned_quantity, 0) as net_sold_quantity')
+                ->having('net_sold_quantity', '>', 0)
+                ->orderByRaw('CAST(COALESCE(sold.total_sold_quantity, 0) - COALESCE(returned.total_returned_quantity, 0) AS DECIMAL(15,2)) DESC')
+                ->orderBy('products.name', 'asc')
                 ->take(5)
                 ->get();
+
             $data = [];
             foreach ($topSellings as $topSelling) {
                 $data['name'][] = $topSelling->name ?? 'Unknown Product';
-                $data['total_quantity'][] = $topSelling->total_quantity ?? 0;
+                $data['total_quantity'][] = $topSelling->net_sold_quantity ?? 0;
             }
 
             return $this->sendResponse($data, 'Yearly TopSelling Products Retrieved Successfully');

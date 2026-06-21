@@ -1,7 +1,7 @@
 <?php
 
 namespace Database\Seeders;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use App\Models\Role as RoleModel;
@@ -29,10 +29,6 @@ class DefaultPermissionsSeeder extends Seeder
             [
                 'name' => 'manage_brands',
                 'display_name' => 'Manage Brands'
-            ],
-            [
-                'name' => 'manage_currency',
-                'display_name' => 'Manage Currency'
             ],
             [
                 'name' => 'manage_warehouses',
@@ -103,6 +99,10 @@ class DefaultPermissionsSeeder extends Seeder
                 'display_name' => 'Manage Sale Return'
             ],
             [
+                'name' => 'manage_digital_sales',
+                'display_name' => 'Manage Digital Sales'
+            ],
+            [
                 'name' => 'manage_email_templates',
                 'display_name' => 'Manage Email Templates'
             ],
@@ -123,26 +123,81 @@ class DefaultPermissionsSeeder extends Seeder
                 'display_name' => 'Manage Sms Apis'
             ],
             [
-                'name' => 'manage_language',
-                'display_name' => 'Manage Language'
-            ],
-            [
                 'name' => 'manage_variations',
                 'display_name' => 'Manage Variations'
+            ],
+            [
+                'name' => 'manage_providers',
+                'display_name' => 'Manage Providers'
+            ],
+            [
+                'name' => 'manage_balance_requests',
+                'display_name' => 'Manage Balance Requests'
+            ],
+            [
+                'name' => 'create_balance_requests',
+                'display_name' => 'Create Balance Requests'
+            ],
+            [
+                'name' => 'delete_balance_requests',
+                'display_name' => 'Delete Balance Requests'
+            ],
+            [
+                'name' => 'manage_print_barcode',
+                'display_name' => 'Manage Print Barcode'
+            ],
+            [
+                'name' => 'manage_store',
+                'display_name' => 'Manage Store'
             ],
         ];
 
         foreach ($permissions as $permission) {
-            $permissionExist = Permission::whereName($permission['name'])->exists();
-            if (! $permissionExist) {
-                Permission::create($permission);
+            $existingPermission = Permission::whereName($permission['name'])->first();
+
+            if (!$existingPermission) {
+                try {
+                    Permission::create($permission);
+                    $this->command->info("Created permission: {$permission['name']}");
+                } catch (\Spatie\Permission\Exceptions\PermissionAlreadyExists $e) {
+                    $this->command->line("Skipped permission: {$permission['name']} (already exists)", 'fg=gray');
+                }
+            } else {
+                // Update display_name jika berbeda
+                if ($existingPermission->display_name !== $permission['display_name']) {
+                    $existingPermission->display_name = $permission['display_name'];
+                    $existingPermission->save();
+                    $this->command->info("Updated permission: {$permission['name']}");
+                } else {
+                    $this->command->line("Skipped permission: {$permission['name']} (already exists)", 'fg=gray');
+                }
             }
         }
 
+
+        // Hapus permission yang tidak ada dalam daftar
+        $definedPermissions = array_column($permissions, 'name');
+        $allPermissions = Permission::pluck('name')->toArray();
+        $permissionsToDelete = array_diff($allPermissions, $definedPermissions);
+
+        foreach ($permissionsToDelete as $permName) {
+            $permission = Permission::where('name', $permName)->first();
+            if ($permission) {
+                DB::table('role_has_permissions')->where('permission_id', $permission->id)->delete();
+                $permission->delete();
+                $this->command->info("Deleted permission: {$permName}");
+            }
+        }
         $adminRole = RoleModel::whereName(RoleModel::ADMIN)->first();
         if ($adminRole) {
             $allPermissionNames = Permission::pluck('name')->toArray();
             $adminRole->syncPermissions($allPermissionNames);
         }
+
+        // $superAdminRole = RoleModel::whereName(RoleModel::SUPER_ADMIN)->first();
+        // if ($superAdminRole) {
+        //     $allPermissionNames = Permission::pluck('name')->toArray();
+        //     $superAdminRole->syncPermissions($allPermissionNames);
+        // }
     }
 }

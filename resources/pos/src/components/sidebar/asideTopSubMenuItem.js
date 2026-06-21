@@ -278,6 +278,10 @@ const AsideTopSubMenuItem = (props) => {
                                         location.pathname ===
                                             mainItems.registerReportPath ||
                                         location.pathname ===
+                                            mainItems.cashAdvanceReportPath ||
+                                        location.pathname ===
+                                            mainItems.digitalSalesReportPath ||
+                                        location.pathname ===
                                             mainItems.mailSettingsPath ||
                                         location.pathname ===
                                             mainItems.paymentSettingsPath ||
@@ -322,6 +326,15 @@ const AsideTopSubMenuItem = (props) => {
                                             mainItems?.subPath?.productsSubPath
                                         ) ||
                                         location.pathname.includes(
+                                            mainItems?.subPath?.digitalProductsSubPath
+                                        ) ||
+                                        location.pathname.includes(
+                                            mainItems?.subPath?.providersSubPath
+                                        ) ||
+                                        location.pathname.includes(
+                                            mainItems?.subPath?.balanceRequestsSubPath
+                                        ) ||
+                                        location.pathname.includes(
                                             mainItems?.subPath
                                                 ?.categoriesSubPath
                                         ) ||
@@ -348,6 +361,9 @@ const AsideTopSubMenuItem = (props) => {
                                             mainItems?.subPath?.salesSubPath
                                         ) ||
                                         location.pathname.includes(
+                                            mainItems?.subPath?.digitalSalesSubPath
+                                        ) ||
+                                        location.pathname.includes(
                                             mainItems?.subPath
                                                 ?.salesReturnSubPath
                                         ) ||
@@ -357,6 +373,9 @@ const AsideTopSubMenuItem = (props) => {
                                         location.pathname.includes(
                                             mainItems?.subPath
                                                 ?.expenseCategoriesSubPath
+                                        ) ||
+                                        location.pathname.includes(
+                                            mainItems?.subPath?.cashAdvancesSubPath
                                         ) ||
                                         location.pathname.includes(
                                             mainItems?.subPath

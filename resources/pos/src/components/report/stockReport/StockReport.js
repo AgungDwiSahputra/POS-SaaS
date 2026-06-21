@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import MasterLayout from "../../MasterLayout";
 import TabTitle from "../../../shared/tab-title/TabTitle";
 import {
@@ -33,6 +33,8 @@ const StockReport = (props) => {
         value: frontSetting?.value?.default_warehouse,
     });
     const [isWarehouseValue, setIsWarehouseValue] = useState(false);
+    const [activeWarehouseId, setActiveWarehouseId] = useState(null);
+    const prevWarehouseRef = useRef(null);
     const currencySymbol =
         frontSetting &&
         frontSetting.value &&
@@ -49,37 +51,39 @@ const StockReport = (props) => {
         fetchAllWarehouses();
     }, []);
 
-    // Set warehouse value when warehouses loaded and fetch initial data
+    // Combined useEffect: Set warehouse value and fetch initial data
     useEffect(() => {
-        if (warehouses && warehouses.length > 0) {
-            // Set warehouse value if not already set
-            if (!warehouseValue.value) {
-                const defaultWh = warehouses.find(
-                    (w) => w.id === Number(frontSetting?.value?.default_warehouse)
-                );
-                
-                if (defaultWh) {
-                    setWarehouseValue({
-                        label: defaultWh.attributes.name,
-                        value: defaultWh.id,
-                    });
-                } else {
-                    // Use first warehouse if no default match
-                    setWarehouseValue({
-                        label: warehouses[0].attributes.name,
-                        value: warehouses[0].id,
-                    });
-                }
-            }
+        if (!warehouses || warehouses.length === 0) return;
+
+        const defaultId = Number(frontSetting?.value?.default_warehouse);
+        const defaultWh = warehouses.find((w) => w.id === defaultId);
+        const targetWh = defaultWh || warehouses[0];
+
+        if (!targetWh) return;
+
+        const newValue = {
+            label: targetWh.attributes.name,
+            value: targetWh.id,
+        };
+
+        // Only set and fetch if this is a new warehouse
+        if (prevWarehouseRef.current !== targetWh.id) {
+            prevWarehouseRef.current = targetWh.id;
+            setWarehouseValue(newValue);
+            setActiveWarehouseId(targetWh.id);
+            stockReportAction(targetWh.id);
         }
     }, [warehouses, frontSetting?.value?.default_warehouse]);
 
-    // Fetch stock report data when warehouse value changes
+    // useEffect for manual warehouse change by user
     useEffect(() => {
-        if (warehouseValue.value) {
-            stockReportAction(warehouseValue.value);
-        }
-    }, [warehouseValue.value, stockReportAction]);
+        if (!warehouseValue.value) return;
+        if (warehouseValue.value === activeWarehouseId) return;
+
+        prevWarehouseRef.current = warehouseValue.value;
+        setActiveWarehouseId(warehouseValue.value);
+        stockReportAction(warehouseValue.value);
+    }, [warehouseValue.value]);
 
     useEffect(() => {
         if (isWarehouseValue === true) {
@@ -110,34 +114,20 @@ const StockReport = (props) => {
                 (stockReport.hpp || stockReport.product_cost || 0) *
                 (stockReport.qty || 0),
             total_assets:
-                (stockReport.product_price || stockReport.product_cost || 0) *
-                (stockReport.qty || 0),
+                stockReport.asset_value || 0,
             id: stockReport.id || '',
             currency: currencySymbol,
-            // Add image handling with error prevention
             product_image: stockReport.image_url || null,
         }));
     }, [currencySymbol, stockReports]);
 
-    // Gunakan filteredTotalAsset dari props untuk perhitungan yang akurat
+    // Fixed: Only use filteredTotalAsset from backend, handle 0 correctly
     const totalAssetsValue = useMemo(() => {
-        // Prioritaskan filteredTotalAsset dari props
-        if (filteredTotalAsset !== undefined && filteredTotalAsset !== 0) {
+        if (filteredTotalAsset !== undefined && filteredTotalAsset !== null) {
             return filteredTotalAsset;
         }
-        
-        // Fallback: hitung manual jika data tidak tersedia
-        if (!Array.isArray(stockReports) || stockReports.length === 0) {
-            return 0;
-        }
-
-        return stockReports.reduce((sum, stockReport) => {
-            const quantity = parseFloat(stockReport.qty) || 0;
-            const productPrice = parseFloat(stockReport.product_price || stockReport.product_cost || 0);
-
-            return sum + quantity * productPrice;
-        }, 0);
-    }, [stockReports, filteredTotalAsset]);
+        return 0;
+    }, [filteredTotalAsset]);
 
     // Grand total asset (non-filter) untuk informasi
     const grandTotalAssetValue = useMemo(() => {
@@ -161,7 +151,6 @@ const StockReport = (props) => {
             current_stock: '',
             product_unit: '',
             currency: currencySymbol,
-            // Tambahkan info untuk debugging
             grandTotalAsset: grandTotalAssetValue,
             filteredTotalAsset: totalAssetsValue,
         }),
@@ -189,15 +178,14 @@ const StockReport = (props) => {
     );
 
     const onChange = (filter) => {
-        // Only apply filter if warehouseValue is set
         if (warehouseValue.value) {
             stockReportAction(warehouseValue.value, filter);
         }
     };
 
     const onWarehouseChange = (obj) => {
+        if (obj.value === warehouseValue.value) return;
         setWarehouseValue(obj);
-        // Data will be fetched automatically by the useEffect that watches warehouseValue.value
     };
 
     const onExcelClick = () => {
@@ -399,38 +387,6 @@ const StockReport = (props) => {
                 )}
             </div>
             <div className="pt-md-7">
-                {/* Info Total Aset */}
-                {/* <div className="row mb-3">
-                    <div className="col-md-6">
-                        <div className="card">
-                            <div className="card-body">
-                                <h6 className="card-title">Total Aset (Non-Filter)</h6>
-                                <h4 className="text-primary">
-                                    {currencySymbolHandling(
-                                        allConfigData,
-                                        currencySymbol,
-                                        grandTotalAssetValue
-                                    )}
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-md-6">
-                        <div className="card">
-                            <div className="card-body">
-                                <h6 className="card-title">Total Aset (Filter)</h6>
-                                <h4 className="text-success">
-                                    {currencySymbolHandling(
-                                        allConfigData,
-                                        currencySymbol,
-                                        totalAssetsValue
-                                    )}
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
-                
                 <ReactDataTable
                     columns={columns}
                     items={itemsWithSummary}
@@ -459,7 +415,7 @@ const mapStateToProps = (state) => {
         totalRecord,
         warehouses,
         frontSetting,
-        stockReports: stockReports?.data || stockReports || [], // Handle both old and new structure
+        stockReports: stockReports?.data || stockReports || [],
         grandTotalAsset: stockReports?.grandTotalAsset || 0,
         filteredTotalAsset: stockReports?.filteredTotalAsset || 0,
         allConfigData,
