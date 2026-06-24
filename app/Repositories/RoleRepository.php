@@ -100,7 +100,7 @@ class RoleRepository extends BaseRepository
             }
 
             /** @var Role $role */
-            $role = Role::find($id);
+            $role = Role::withoutGlobalScope('tenant')->find($id);
             $role->update($roleData);
 
             // Sync permissions to role
