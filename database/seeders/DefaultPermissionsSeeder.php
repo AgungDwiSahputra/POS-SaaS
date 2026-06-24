@@ -192,16 +192,16 @@ class DefaultPermissionsSeeder extends Seeder
                 $this->command->info("Deleted permission: {$permName}");
             }
         }
+        $allPermissionNames = Permission::pluck('name')->toArray();
+
         $adminRole = RoleModel::whereName(RoleModel::ADMIN)->first();
         if ($adminRole) {
-            $allPermissionNames = Permission::pluck('name')->toArray();
             $adminRole->syncPermissions($allPermissionNames);
         }
 
-        // $superAdminRole = RoleModel::whereName(RoleModel::SUPER_ADMIN)->first();
-        // if ($superAdminRole) {
-        //     $allPermissionNames = Permission::pluck('name')->toArray();
-        //     $superAdminRole->syncPermissions($allPermissionNames);
-        // }
+        $superAdminRole = RoleModel::whereName(RoleModel::SUPER_ADMIN)->first();
+        if ($superAdminRole) {
+            $superAdminRole->syncPermissions($allPermissionNames);
+        }
     }
 }

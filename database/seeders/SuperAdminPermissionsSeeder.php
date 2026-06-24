@@ -23,17 +23,17 @@ class SuperAdminPermissionsSeeder extends Seeder
         }
 
         // Get all permissions
-        $allPermissions = Permission::pluck('name', 'id');
+        $allPermissions = Permission::pluck('name');
 
         if ($allPermissions->isEmpty()) {
             $this->command->warn('No permissions found in the database.');
             return;
         }
 
-        // Assign all permissions to SUPER_ADMIN role
-        $superAdminRole->givePermissionTo($allPermissions);
+        // Sync all permissions to SUPER_ADMIN role (remove stale, add new)
+        $superAdminRole->syncPermissions($allPermissions);
 
-        $this->command->info('Successfully assigned ' . $allPermissions->count() . ' permissions to SUPER_ADMIN role.');
-        $this->command->info('Permissions assigned: ' . implode(', ', $allPermissions->toArray()));
+        $this->command->info('Successfully synced ' . $allPermissions->count() . ' permissions to SUPER_ADMIN role.');
+        $this->command->info('Permissions synced: ' . implode(', ', $allPermissions->toArray()));
     }
 }
