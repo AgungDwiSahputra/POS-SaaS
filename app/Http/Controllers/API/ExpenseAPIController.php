@@ -52,7 +52,7 @@ class ExpenseAPIController extends AppBaseController
                     });
             });
         }
-        $expenses = $expenses->paginate($perPage);
+        $expenses = $expenses->orderBy('created_at', 'desc')->paginate($perPage);
         ExpenseResource::usingWithCollection();
 
         return new ExpenseCollection($expenses);
